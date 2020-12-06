@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayoutImageViewCollections"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:padding="1px">
+
+    <RelativeLayout
+        android:id="@+id/dir_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:ignore="UselessParent">
+
+        <ImageView
+            android:id="@+id/dir_thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/image_in_gridView"
+            android:scaleType="centerInside" />
+
+        <ImageView
+            android:id="@+id/dir_shadow_holder"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_alignStart="@+id/dir_bottom_holder"
+            android:layout_alignEnd="@+id/dir_bottom_holder"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/gradient_background"
+            android:contentDescription="@string/gradient_view_image" />
+
+        <LinearLayout
+            android:id="@+id/dir_bottom_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/dir_thumbnail"
+            android:layout_alignEnd="@+id/dir_thumbnail"
+            android:layout_alignParentBottom="true"
+            android:gravity="bottom"
+            android:orientation="vertical"
+            android:paddingLeft="8dp"
+            android:paddingTop="4dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/dir_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:paddingBottom="4dp"
+                android:shadowColor="#424242"
+                android:shadowRadius="4"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </RelativeLayout>
+</FrameLayout>

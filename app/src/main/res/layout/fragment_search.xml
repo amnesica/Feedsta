@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/inputTagToolbar"
+        android:theme="@style/MyToolbar">
+
+        <EditText
+            android:id="@+id/inputTag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp"
+            android:hint="@string/hint_inputField_search"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:textColor="?attr/colorTextSearch"
+            android:textSize="20sp"
+            android:autofillHints="Search" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ProgressBar
+        style="@style/Widget.AppCompat.ProgressBar"
+        android:id="@+id/progressBarSearch"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/relLayTextNoResults"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textNoResults"
+            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <ListView
+        android:layout_below="@id/inputTagToolbar"
+        android:id="@+id/listAccountsAndHashtags"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@null"
+        android:dividerHeight="0dp" />
+</RelativeLayout>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relLayoutSearchAccount"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/accountOrHashtagProfilePic"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp" />
+
+    <RelativeLayout
+        android:id="@+id/linLayUserFullName"
+        android:layout_width="303dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_toEndOf="@+id/accountOrHashtagProfilePic"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textUsernameOrHashtagName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?attr/black"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageVerifiedAccount"
+            android:visibility="invisible"
+            android:background="?attr/verifiedImageSearch"
+            android:layout_toEndOf="@id/textUsernameOrHashtagName"
+            android:layout_marginStart="5dp"
+            android:contentDescription="@string/verified_profile_image" />
+
+        <TextView
+            android:layout_below="@id/textUsernameOrHashtagName"
+            android:id="@+id/textFullNameOrResultSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?attr/black"
+            android:textSize="15sp" />
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/imageRemoveAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:theme="@style/MyOverflowRemoveButton"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:contentDescription="@string/remove_account_button"
+        tools:ignore="RtlSymmetry" />
+</RelativeLayout>
