@@ -2,7 +2,7 @@
 <img src="/static/logo/Logo_Feedsta_final_small.png" height="150" title="Feedsta Logo">
 </p>
 
-<h1 align="center">Feesta - Viewer for Instagram</h1>
+<h1 align="center">Feedsta - Viewer for Instagram</h1>
 
 ![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=2.1.4&x2=0)
 
@@ -42,7 +42,9 @@ It allows people to follow their favorite (public) profiles on Instagram and vie
 
 ---
 
-**PLEASE NOTE**: Private profiles and stories can **NOT** be displayed at all.
+**PLEASE NOTE**:
+
+Private profiles and stories can **NOT** be displayed at all.
 
 At the moment, Instagram prevents displaying more than 24 comments!
 
