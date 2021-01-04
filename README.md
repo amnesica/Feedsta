@@ -1,8 +1,10 @@
-# Feedsta - Viewer for Instagram
+<p align="center">
+<img src="/static/logo/Logo_Feedsta_final_small.png" height="150" title="Feedsta Logo">
+</p>
+
+<h1 align="center">Feesta - Viewer for Instagram</h1>
 
 ![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=2.1.4&x2=0)
-
-<img alt="Logo" src="/static/logo/Logo_Feedsta_final_small.png"/>
 
 It allows people to follow their favorite (public) profiles on Instagram and view their posts without having Instagram and being registered there.
 
@@ -40,7 +42,11 @@ It allows people to follow their favorite (public) profiles on Instagram and vie
 
 ---
 
-**PLEASE NOTE**: Private profiles and stories can **NOT** be displayed at all. At the moment, Instagram prevents displaying more than 24 comments!
+**PLEASE NOTE**: Private profiles and stories can **NOT** be displayed at all.
+
+At the moment, Instagram prevents displaying more than 24 comments!
+
+If you use this app too much, you make too many requests to Instagram and Instagram may temporarily block you for it. Then none or only a few posts can be updated or displayed and profiles cannot be shown. At this moment, please just wait for some time before using this app again. Unfortunately, there is nothing I can do about it
 
 ---
 
