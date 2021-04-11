@@ -1264,15 +1264,14 @@ public class PostFragment extends Fragment implements FragmentCallback {
     private void closeFullscreenDialog() {
         try {
             requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            ((ViewGroup) playerView.getParent()).removeView(playerView);
+            mainMediaFrameLayout.addView(playerView);
+            exoPlayerFullscreen = false;
+            fullScreenDialog.dismiss();
+            fullScreenIcon.setImageDrawable(ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_24));
         } catch (Exception e) {
             Log.d("PostFragment", Log.getStackTraceString(e));
         }
-
-        ((ViewGroup) playerView.getParent()).removeView(playerView);
-        mainMediaFrameLayout.addView(playerView);
-        exoPlayerFullscreen = false;
-        fullScreenDialog.dismiss();
-        fullScreenIcon.setImageDrawable(ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_24));
     }
 
     /**
@@ -1495,16 +1494,19 @@ public class PostFragment extends Fragment implements FragmentCallback {
                                 fragment.requireActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (FragmentHelper.getThemeIsDarkTheme(fragment.requireContext())) {
-                                            fragment.imageButtonDownload.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
-                                        } else {
-                                            fragment.imageButtonDownload.setBackgroundResource(R.drawable.ic_file_download_black_24dp);
+                                        try {
+                                            if (FragmentHelper.getThemeIsDarkTheme(fragment.requireContext())) {
+                                                fragment.imageButtonDownload.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
+                                            } else {
+                                                fragment.imageButtonDownload.setBackgroundResource(R.drawable.ic_file_download_black_24dp);
+                                            }
+                                        } catch (Exception e) {
+                                            Log.d("PostFragment", Log.getStackTraceString(e));
                                         }
                                     }
                                 });
                                 FragmentHelper.showToast(fragment.getResources().getString(R.string.image_saved), fragment.requireActivity(), fragment.requireContext());
                             } catch (Exception e) {
-                                Log.d("PostFragment", Log.getStackTraceString(e));
                                 throw new Exception();
                             }
                         } else {

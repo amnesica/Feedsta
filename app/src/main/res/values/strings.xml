@@ -12,7 +12,7 @@
     <string name="toolbar_title_settings">Settings</string>
 
     <!--Errors-->
-    <string name="something_went_wrong">Something has gone wrong.\n\nPossible reasons:\n- Instagram blocked you temporarily (this can happen if you tried to update posts too quickly in a row or if are following over 150 accounts)\n- you tried to access a post or an account which is not available anymore\n- you tried to access a restricted profile\n- the application has lost the internet connection\n\nPlease try again later or change the network (e.g. switch to mobile data).</string>
+    <string name="something_went_wrong">Something has gone wrong.\n\nPossible reasons:\n- Instagram blocked you temporarily (this can happen if you made too many requests to Instagram). As a result none or only a few posts can be updated or displayed and profiles cannot be shown\n- you tried to access a post or an account which is not available anymore\n- you tried to access a restricted profile\n- the application has lost the internet connection\n\nPlease try again later or change the network (e.g. switch to mobile data or Wifi).</string>
     <string name="no_internet_connection">No internet connection.</string>
     <string name="rate_limited">Looks like you\'ve been searching too much on Instagram and now Instagram won\'t answer.\nPlease try again later.</string>
     <string name="updating_account_urls_failed">Updating the accounts failed.\nPlease try again later.</string>

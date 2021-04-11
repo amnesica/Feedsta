@@ -265,22 +265,26 @@ public class FeedFragment extends Fragment {
      * Stops all running async tasks and their network handlers and resets swipe
      */
     private void stopAllAsyncTasks() {
-        if (GetPostsFromAccountList != null && !GetPostsFromAccountList.isEmpty()) {
-            for (GetPostsFromAccount thread : GetPostsFromAccountList) {
-                if (thread != null) {
-                    thread.cancel(true);
+        try {
+            if (GetPostsFromAccountList != null && !GetPostsFromAccountList.isEmpty()) {
+                for (GetPostsFromAccount thread : GetPostsFromAccountList) {
+                    if (thread != null) {
+                        thread.cancel(true);
+                    }
                 }
+                GetPostsFromAccountList.clear();
             }
-            GetPostsFromAccountList.clear();
-        }
 
-        if (networkHandlersList != null && !networkHandlersList.isEmpty()) {
-            for (NetworkHandler sh : networkHandlersList) {
-                if(sh != null){
-                    sh.closeConnectionsAndBuffers();
+            if (networkHandlersList != null && !networkHandlersList.isEmpty()) {
+                for (NetworkHandler sh : networkHandlersList) {
+                    if (sh != null) {
+                        sh.closeConnectionsAndBuffers();
+                    }
                 }
+                networkHandlersList.clear();
             }
-            networkHandlersList.clear();
+        } catch (Exception e) {
+            Log.d("FeedFragment", Log.getStackTraceString(e));
         }
 
         if (swipe != null) {

@@ -64,7 +64,7 @@ public class NetworkHandler {
                 response = convertStreamToString(in);
             }
         } catch (Exception e) {
-            if(className != null){
+            if (className != null) {
                 Log.d("NetworkHandler by " + className + ": response was " + response, Log.getStackTraceString(e));
             }
         } finally {
@@ -77,15 +77,15 @@ public class NetworkHandler {
      * Closes the InputStream and the HttpURLConnection
      */
     public void closeConnectionsAndBuffers() {
-        if (in != null) {
-            try {
+        try {
+            if (in != null) {
                 in.close();
-            } catch (IOException e) {
-                Log.d("NetworkHandler", Log.getStackTraceString(e));
             }
-        }
-        if (conn != null) {
-            conn.disconnect();
+            if (conn != null) {
+                conn.disconnect();
+            }
+        } catch (Exception e) {
+            Log.d("NetworkHandler", Log.getStackTraceString(e));
         }
     }
 
