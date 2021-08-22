@@ -1,4 +1,4 @@
-#built application files
+# built application files
 *.apk
 *.ap_
 *.aab
@@ -34,7 +34,7 @@ build/
 captures/
 output.json 
     
-#NDK
+# NDK
 obj/
 .externalNativeBuild
 
@@ -54,3 +54,6 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 lint/reports/
+
+# specific files
+API.md
