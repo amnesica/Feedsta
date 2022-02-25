@@ -83,18 +83,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // convert old/deprecated storage representation if necessary
-        if (conversionIsNecessary()) {
-            try {
-                convertOldFiles();
-            } catch (IOException | ClassNotFoundException | ClassCastException e) {
-                showAlertDialogInternalProblem();
-
-                // stop app
-                return;
-            }
-        }
-
         // set theme (dark or light)
         setThemeBasedOnNightMode();
 
@@ -180,42 +168,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Show alert dialog when converting throws exception -> reinstall required
-     */
-    private void showAlertDialogInternalProblem() {
-        // alert dialog
-        AlertDialog.Builder alertDialogBuilder;
-
-        // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(MainActivity.this,
-                R.style.Theme_AppCompat_Light_Dialog)
-                .setTitle(R.string.dialog_converting_problem_title)
-                .setMessage(R.string.dialog_converting_gone_wrong)
-                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        // exit app
-                        finish();
-                    }
-                });
-
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
-
-        // get color for button texts
-        TypedValue typedValue = new TypedValue();
-        Resources.Theme theme = getTheme();
-        theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-        @ColorInt final int color = typedValue.data;
-
-        // create alertDialog
-        AlertDialog alertDialog = finalAlertDialogBuilder.create();
-        alertDialog.setCanceledOnTouchOutside(true);
-        alertDialog.show();
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
-        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
-    }
-
-    /**
      * Go to HashtagFragment with shortcode from deep link intent
      *
      * @param name name of hashtag
@@ -252,80 +204,6 @@ public class MainActivity extends AppCompatActivity {
 
         // add fragment to container
         FragmentHelper.addFragmentToContainer(profileFragment, fm);
-    }
-
-    /**
-     * convert old files with old/deprecated storage representation
-     */
-    private void convertOldFiles() throws IOException, ClassNotFoundException, ClassCastException {
-        boolean convertSuccessful;
-        convertSuccessful = StorageHelper.convertOldStorageRepresentation(MainActivity.this);
-
-        if (convertSuccessful) {
-            setConvertingSuccessfulInSharedPreferences();
-        }
-    }
-
-    /**
-     * Set the boolean in SharedPreferences that converting was successful (for next startup)
-     */
-    private void setConvertingSuccessfulInSharedPreferences() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (preferences != null) {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("conversion_successful", true);
-            editor.apply();
-        }
-    }
-
-    /**
-     * Check if conversion has been done before or if old files with old/deprecated storage representation exist
-     */
-    private boolean conversionIsNecessary() {
-        boolean bConvertingHasBeenDoneBefore = false;
-        boolean bConversionCheckTookPlace = false;
-
-        // get booleans from sharedPreferences to check if conversion has been done before or if
-        //  lists are already in new shape
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (preferences != null) {
-            bConvertingHasBeenDoneBefore = preferences.getBoolean("conversion_successful", false);
-            bConversionCheckTookPlace = preferences.getBoolean("conversion_check_took_place", false);
-        }
-
-        if (bConversionCheckTookPlace) {
-            return false;
-        }
-
-        if (bConvertingHasBeenDoneBefore) {
-            return false;
-        } else {
-            // if old files exist -> conversion needs to be done
-            if (StorageHelper.checkIfFileExists(StorageHelper.filename_accounts, getApplicationContext()) ||
-                    StorageHelper.checkIfFileExists(StorageHelper.filename_bookmarks, getApplicationContext()) ||
-                    StorageHelper.checkIfFileExists(StorageHelper.filename_posts, getApplicationContext())) {
-                return true;
-            }
-        }
-
-        // conversionCheckTookPlace -> check does not have to be repeated again!
-        setConversionCheckTookPlace();
-
-        return false;
-    }
-
-    /**
-     * Set boolean in SharedPreferences that the check if a conversion of posts and
-     * accounts is necessary took place before and therefore does not have to be
-     * repeated again
-     */
-    private void setConversionCheckTookPlace() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (preferences != null) {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("conversion_check_took_place", true);
-            editor.apply();
-        }
     }
 
     /**

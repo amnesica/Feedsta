@@ -46,8 +46,6 @@ public class StorageHelper {
 
     // filename for file storing posts in feed
     public static final String filename_posts = "feed_posts.txt";
-    // filename for file storing posts (when converting to new representation)
-    public static final String filename_posts_updated = "feed_posts_updated.txt";
 
     /**
      * Save video in internal storage
@@ -234,9 +232,8 @@ public class StorageHelper {
                     // delete file
                     deleteSpecificFile(context, filename);
 
-                    // write account in internal storage - no backup required
-                    // (backup only necessary when conversion takes place)
-                    removed = storeAccountStorageListInInternalStorage(readAccounts, context, false);
+                    // write account in internal storage
+                    removed = storeAccountStorageListInInternalStorage(readAccounts, context);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
@@ -290,9 +287,8 @@ public class StorageHelper {
                     // delete file
                     deleteSpecificFile(context, filename);
 
-                    // write account in internal storage - no backup required
-                    // (backup only necessary when conversion takes place)
-                    removed = storePostStorageListInInternalStorage(readPosts, context, filename, false);
+                    // write account in internal storage
+                    removed = storePostStorageListInInternalStorage(readPosts, context, filename);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
@@ -876,111 +872,14 @@ public class StorageHelper {
     }
 
     /**
-     * Converts old files with old/deprecated storage representation
-     * hint: filename_accounts_updated and filename_bookmarks_updated are not converted!
+     * Stores a list of AccountStorage in internal storage
      *
-     * @throws IOException somethings wrong
-     */
-    public static boolean convertOldStorageRepresentation(Context context) throws IOException, ClassNotFoundException, ClassCastException {
-        boolean convertAccountsSuccessful = false;
-        boolean convertBookmarksSuccessful = false;
-        boolean convertPostsSuccessful = false;
-
-        if (checkIfFileExists(StorageHelper.filename_accounts, context)) {
-            convertAccountsSuccessful = convertOldAccountsToNewRep(context);
-        }
-
-        if (checkIfFileExists(StorageHelper.filename_bookmarks, context)) {
-            convertBookmarksSuccessful = convertOldPostsToNewRep(context, filename_bookmarks);
-        }
-
-        if (checkIfFileExists(StorageHelper.filename_posts, context)) {
-            convertPostsSuccessful = convertOldPostsToNewRep(context, filename_posts);
-        }
-
-        return convertAccountsSuccessful && convertBookmarksSuccessful && convertPostsSuccessful;
-    }
-
-    /**
-     * Converts old account representation to ArrayList<AccountStorage> old account representation
-     * is renamed to filename_accounts_old_date
-     * @param context Context
-     * @return boolean
-     * @throws IOException IOException
-     * @throws ClassNotFoundException ClassNotFoundException
-     * @throws ClassCastException ClassCastException
-     */
-    private static boolean convertOldAccountsToNewRep(Context context) throws IOException, ClassNotFoundException, ClassCastException {
-        Account readAccount;
-        ArrayList<Account> readAccounts = new ArrayList<>();
-        FileInputStream fis = null;
-
-        try {
-            fis = context.openFileInput(filename_accounts);
-            ObjectInputStream oi = new ObjectInputStream(fis);
-            boolean isExist = true;
-
-            while (isExist) {
-                if (fis.available() != 0) {
-                    // read old account and save to arrayList
-                    readAccount = (Account) oi.readObject();
-                    if (readAccount != null) {
-                        readAccounts.add(readAccount);
-                    }
-                } else {
-                    isExist = false;
-                    fis.close();
-                }
-            }
-            oi.close();
-        } finally {
-            // close all streams even when exception was called
-            try {
-                assert fis != null;
-                fis.close();
-            } catch (IOException e) {
-                Log.d("StorageHelper", Log.getStackTraceString(e));
-            }
-        }
-
-        // arrayList with new storage representation
-        ArrayList<AccountStorage> listNewAccountStorageRep = new ArrayList<>();
-
-        // convert all readAccounts to AccountStorage and save in new arrayList
-        if (!readAccounts.isEmpty()) {
-            for (Account account : readAccounts) {
-                // String id, String imageProfilePicUrl, String username, String fullName, Boolean is_private
-                listNewAccountStorageRep.add(new AccountStorage(account.getId(),
-                        account.getImageProfilePicUrl(),
-                        account.getUsername(),
-                        account.getFullName(),
-                        account.getIs_private()));
-            }
-        }
-
-        // if size is the same store the new representation in storage
-        if (readAccounts.size() == listNewAccountStorageRep.size()) {
-            try {
-                boolean successful = storeAccountStorageListInInternalStorage(listNewAccountStorageRep, context, true);
-                if (successful) {
-                    return true;
-                }
-            } catch (IOException e) {
-                throw new IOException();
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Stores a list of AccountStorage in internal storage. If required a backup is done before
      * @param listNewAccountStorageRep ArrayList<AccountStorage>
-     * @param context Context
-     * @param backupRequired Boolean
+     * @param context                  Context
      * @return boolean
      * @throws IOException IOException
      */
-    private static boolean storeAccountStorageListInInternalStorage(ArrayList<AccountStorage> listNewAccountStorageRep, Context context, Boolean backupRequired) throws IOException {
+    private static boolean storeAccountStorageListInInternalStorage(ArrayList<AccountStorage> listNewAccountStorageRep, Context context) throws IOException {
         byte[] bytesToWrite;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bos);
@@ -991,134 +890,37 @@ public class StorageHelper {
         bytesToWrite = bos.toByteArray();
         bos.close();
 
-        if (backupRequired) {
-            // backup necessary for conversion
-            // store byte[] bytesToWrite in file
-            // filename for temporary new account list -> will be renamed in filename_accounts after successful converting
-            File file = new File(context.getFilesDir(), filename_accounts_updated);
-            try (FileOutputStream fos = new FileOutputStream(file)) {
-                if (bytesToWrite != null) {
-                    fos.write(bytesToWrite);
-                    fos.close();
-
-                    // rename new file to "filename_accounts"
-                    renameSpecificFileTo(context, filename_accounts, filename_accounts_updated);
-
-                    return true;
-                }
-            } catch (IOException e) {
-                throw new IOException();
+        // writes directly to filename_accounts
+        File file = new File(context.getFilesDir(), filename_accounts);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            if (bytesToWrite != null) {
+                fos.write(bytesToWrite);
+                fos.close();
+                return true;
             }
-        } else {
-            // writes directly to filename_accounts
-            File file = new File(context.getFilesDir(), filename_accounts);
-            try (FileOutputStream fos = new FileOutputStream(file)) {
-                if (bytesToWrite != null) {
-                    fos.write(bytesToWrite);
-                    fos.close();
-                    return true;
-                }
-            } catch (IOException e) {
-                throw new IOException();
-            }
+        } catch (IOException e) {
+            throw new IOException();
         }
 
         return false;
     }
 
     /**
-     * Converts old bookmark representation to ArrayList<PostStorage>
-     * old bookmarks representation is renamed to filename_bookmarks_old_date
-     * @param context Context
-     * @param filename String
-     * @return boolean
-     * @throws IOException IOException
-     * @throws ClassNotFoundException ClassNotFoundException
-     * @throws ClassCastException ClassCastException
-     */
-    private static boolean convertOldPostsToNewRep(Context context, String filename) throws IOException, ClassNotFoundException, ClassCastException {
-        Post readPost;
-        ArrayList<Post> readPosts = new ArrayList<>();
-        FileInputStream fis = null;
-
-        try {
-            fis = context.openFileInput(filename);
-            ObjectInputStream oi = new ObjectInputStream(fis);
-            boolean isExist = true;
-
-            while (isExist) {
-                if (fis.available() != 0) {
-                    // read old bookmark and save to arrayList
-                    readPost = (Post) oi.readObject();
-                    if (readPost != null) {
-                        readPosts.add(readPost);
-                    }
-                } else {
-                    isExist = false;
-                    fis.close();
-                }
-            }
-            oi.close();
-        } finally {
-            // close all streams even when exception was called
-            try {
-                assert fis != null;
-                fis.close();
-            } catch (IOException e) {
-                Log.d("StorageHelper", Log.getStackTraceString(e));
-            }
-        }
-
-        // arrayList with new storage representation
-        ArrayList<PostStorage> listNewPostStorageRep = new ArrayList<>();
-
-        // convert all readPosts to PostStorage and save in new arrayList
-        if (!readPosts.isEmpty()) {
-            for (Post post : readPosts) {
-                // String id, String shortcode, Date takenAtDate, Boolean is_video, String imageUrlThumbnail, Boolean is_sideCar
-                listNewPostStorageRep.add(new PostStorage(post.getId(),
-                        post.getShortcode(),
-                        post.getTakenAtDate(),
-                        post.getIs_video(),
-                        post.getImageUrlThumbnail(),
-                        post.getIs_sideCar(),
-                        post.getCategory()));
-            }
-        }
-
-        // if size is the same store the new representation in storage
-        if (readPosts.size() == listNewPostStorageRep.size()) {
-            try {
-                boolean successful = storePostStorageListInInternalStorage(listNewPostStorageRep, context, filename, true);
-                if (successful) {
-                    return true;
-                }
-            } catch (IOException e) {
-                throw new IOException();
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Stores a list of PostStorage in internal storage. If required a backup is done before
+     * Stores a list of PostStorage in internal storage
+     *
      * @param listNewPostStorageRep ArrayList<PostStorage>
-     * @param context Context
-     * @param filenamePara String
-     * @param backupRequired Boolean
+     * @param context               Context
+     * @param filenamePara          String
      * @return boolean
      * @throws IOException IOException
      */
-    private static boolean storePostStorageListInInternalStorage(ArrayList<PostStorage> listNewPostStorageRep, Context context, String filenamePara, Boolean backupRequired) throws IOException {
-        // filename for temporary new account list -> will be renamed in filename_accounts after successful converting
-        String filename = null;
+    private static boolean storePostStorageListInInternalStorage(ArrayList<PostStorage> listNewPostStorageRep, Context context, String filenamePara) throws IOException {
+        // filename for temporary new post list (bookmarks or posts) -> will be renamed in filename_posts after successful converting
         String newFilename = null;
         if (filenamePara.equals(filename_bookmarks)) {
-            filename = filename_bookmarks_updated;
             newFilename = filename_bookmarks;
         }
         if (filenamePara.equals(filename_posts)) {
-            filename = filename_posts_updated;
             newFilename = filename_posts;
         }
 
@@ -1132,38 +934,19 @@ public class StorageHelper {
         bytesToWrite = bos.toByteArray();
         bos.close();
 
-        if (backupRequired) {
-            // backup necessary for conversion
-            // store byte[] bytesToWrite in file
-            assert filename != null;
-            File file = new File(context.getFilesDir(), filename);
-            try (FileOutputStream fos = new FileOutputStream(file)) {
-                if (bytesToWrite != null) {
-                    fos.write(bytesToWrite);
-                    fos.close();
-
-                    // rename new file to new filename (order is right - the names are just weird though)
-                    renameSpecificFileTo(context, newFilename, filename);
-
-                    return true;
-                }
-            } catch (IOException e) {
-                throw new IOException();
+        // writes directly to filename_posts or filename_bookmarks (no renaming -> newFilename used here)
+        assert newFilename != null;
+        File file = new File(context.getFilesDir(), newFilename);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            if (bytesToWrite != null) {
+                fos.write(bytesToWrite);
+                fos.close();
+                return true;
             }
-        } else {
-            // writes directly to filename_posts or filename_bookmarks (no renaming -> newFilename used here)
-            assert newFilename != null;
-            File file = new File(context.getFilesDir(), newFilename);
-            try (FileOutputStream fos = new FileOutputStream(file)) {
-                if (bytesToWrite != null) {
-                    fos.write(bytesToWrite);
-                    fos.close();
-                    return true;
-                }
-            } catch (IOException e) {
-                throw new IOException();
-            }
+        } catch (IOException e) {
+            throw new IOException();
         }
+
         return false;
     }
 
