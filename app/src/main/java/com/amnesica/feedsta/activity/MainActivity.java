@@ -31,11 +31,9 @@ import com.amnesica.feedsta.fragments.ProfileFragment;
 import com.amnesica.feedsta.fragments.SearchFragment;
 import com.amnesica.feedsta.fragments.SettingsHolderFragment;
 import com.amnesica.feedsta.helper.FragmentHelper;
-import com.amnesica.feedsta.helper.StorageHelper;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
@@ -164,6 +162,85 @@ public class MainActivity extends AppCompatActivity {
                     goToHashtagFragment(name);
                 }
             }
+        }
+
+        // show usage note on startup if it was not already shown
+        if (!usageNoteWasShown()) {
+            showUsageNote();
+        }
+    }
+
+    /**
+     * Shows usage note as dialog
+     */
+    private void showUsageNote() {
+        // alert dialog
+        AlertDialog.Builder alertDialogBuilder;
+
+        // create alertDialog
+        alertDialogBuilder = new AlertDialog.Builder(MainActivity.this)
+                .setTitle(R.string.dialog_usage_note_title)
+                .setMessage(R.string.dialog_usage_note_message)
+                .setPositiveButton(R.string.dialog_usage_note_yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // save information that dialog was shown in shared preferences
+                        setUsageNoteWasShown();
+                    }
+                })
+                .setNegativeButton(R.string.dialog_usage_note_exit_app, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+
+                        // save information that dialog was shown in shared preferences
+                        setUsageNoteWasShown();
+
+                        // exit app
+                        finish();
+                    }
+                });
+
+        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+
+        // get color for button texts
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = getTheme();
+        theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
+        @ColorInt final int color = typedValue.data;
+
+        // create alertDialog
+        AlertDialog alertDialog = finalAlertDialogBuilder.create();
+        alertDialog.setCancelable(false);
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
+        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
+    }
+
+    /**
+     * Checks if usage note was already shown to user
+     *
+     * @return boolean
+     */
+    private boolean usageNoteWasShown() {
+        boolean usageNoteWasShown = false;
+
+        // get boolean from sharedPreferences to check if usage not was already shown
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (preferences != null) {
+            usageNoteWasShown = preferences.getBoolean("usageNoteWasShown", false);
+        }
+
+        return usageNoteWasShown;
+    }
+
+    /**
+     * Sets the boolean in SharedPreferences that usage note was already shown to true
+     */
+    private void setUsageNoteWasShown() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (preferences != null) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("usageNoteWasShown", true);
+            editor.apply();
         }
     }
 

@@ -136,8 +136,6 @@
     <string name="accounts_removed_successful">Updating accounts successful</string>
     <string name="menu_copy_account_link">Copy link to account</string>
     <string name="menu_copy_hashtag_link">Copy link to hashtag</string>
-    <string name="dialog_converting_gone_wrong">I\'m sorry, but something\'s gone wrong. Please reinstall the app to continue using it. I apologize for the inconvenience.</string>
-    <string name="dialog_converting_problem_title">Internal Problem</string>
     <string name="copy_hashtag_second_part">\n\nThis link was shared with Feedsta - Viewer for Instagram https://play.google.com/store/apps/details?id=com.amnesica.feedsta</string>
     <string name="copy_account_second_part">\n\nThis link was shared with Feedsta - Viewer for Instagram https://play.google.com/store/apps/details?id=com.amnesica.feedsta</string>
     <string name="copy_post_second_part">\n\nThis link was shared with Feedsta - Viewer for Instagram https://play.google.com/store/apps/details?id=com.amnesica.feedsta</string>
@@ -230,4 +228,8 @@
     <string name="page_error_label">This page was not found.</string>
     <string name="batch_download_successful">Download successful</string>
     <string name="batch_download_failed">Download of least one post failed, try again later</string>
+    <string name="dialog_usage_note_title">Usage note - Please read!</string>
+    <string name="dialog_usage_note_message">Thanks for installing Feedsta!\n\nThis app allows you to follow your favorite public profiles on Instagram and view their posts without having Instagram and being registered there. Please understand that private profiles and stories in general cannot be seen!\n\nIf you\'re using the app Instagram might block you temporarily. This can happen if you make too many requests to Instagram. As a result none or only a few posts can be updated or displayed and profiles cannot be shown. In this case you might want to wait a while and try again later or change the network (e.g. switch to mobile data or Wifi). Unfortunately, there is nothing I can do about it.\n\nI hope you still like this app. If you want you can leave a 5-star rating in the Play Store.\n\nHave fun!</string>
+    <string name="dialog_usage_note_yes">Yes, I\'ve read the note</string>
+    <string name="dialog_usage_note_exit_app">No, let\'s stop here</string>
 </resources>
