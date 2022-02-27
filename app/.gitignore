@@ -1,1 +1,4 @@
 /build
+
+# Debug configuration file
+debug.properties
