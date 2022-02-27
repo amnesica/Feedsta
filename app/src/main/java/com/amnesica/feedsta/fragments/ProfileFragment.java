@@ -720,10 +720,10 @@ public class ProfileFragment extends Fragment {
 
                         //Make url for account posts (hint: url.endCursor is null at first page fetch)
                         if (fragment.url == null || (fragment.url.endCursor == null && fragment.bFirstFetch)) {
-                            urlAddress = "https://instagram.com/" + fragment.account.getUsername() + "/?__a=1";
+                            urlAddress = "https://www.instagram.com/" + fragment.account.getUsername() + "/?__a=1";
                             fragment.bFirstFetch = false;
                         } else if (fragment.url.hasNextPage != null && fragment.url.hasNextPage && fragment.account.getId() != null) {
-                            urlAddress = "https://instagram.com/graphql/query/?query_id=" + query_id + "&id=" + fragment.account.getId() + "&first=" + fragment.url.edgesTotalOfPage + "&after=" + fragment.url.endCursor;
+                            urlAddress = "https://www.instagram.com/graphql/query/?query_id=" + query_id + "&id=" + fragment.account.getId() + "&first=" + fragment.url.edgesTotalOfPage + "&after=" + fragment.url.endCursor;
                             fragment.addNextPageToPlaceholder = true;
                         } else if (fragment.url.hasNextPage != null && !fragment.url.hasNextPage) {
                             //no more pages or posts
@@ -769,7 +769,7 @@ public class ProfileFragment extends Fragment {
                             JSONObject edge_owner_to_timeline_media;
 
                             //get general information on first fetch
-                            if (!url.url.startsWith("https://instagram.com/graphql/query/?query_id=")) {
+                            if (!url.url.startsWith("https://www.instagram.com/graphql/query/?query_id=")) {
                                 //get fullName (case: its an commenter account)
                                 fragment.account.setFullName(jsonObj.
                                         getJSONObject("graphql").
@@ -922,7 +922,7 @@ public class ProfileFragment extends Fragment {
                                 }
 
                                 int likes;
-                                if (!url.url.startsWith("https://instagram.com/graphql/query/?query_id=")) {
+                                if (!url.url.startsWith("https://www.instagram.com/graphql/query/?query_id=")) {
                                     likes = node.getJSONObject("edge_liked_by").getInt("count"); //graphql
                                 } else {
                                     likes = node.getJSONObject("edge_media_preview_like").getInt("count"); //data

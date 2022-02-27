@@ -792,10 +792,10 @@ public class FeedFragment extends Fragment {
 
                         // make url for account posts (hint: url.endCursor is null at first page fetch)
                         if (url == null || (url.endCursor == null && bFirstFetch)) {
-                            urlAddress = "https://instagram.com/graphql/query/?query_id=" + query_id + "&id=" + account.getId() + "&first=" + fetchBorderPerPage + "&after=";
+                            urlAddress = "https://www.instagram.com/graphql/query/?query_id=" + query_id + "&id=" + account.getId() + "&first=" + fetchBorderPerPage + "&after=";
                             bFirstFetch = false;
                         } else if (url.hasNextPage != null && url.hasNextPage) {
-                            urlAddress = "https://instagram.com/graphql/query/?query_id=" + query_id + "&id=" + account.getId() + "&first=" + fetchBorderPerPage + "&after=" + url.endCursor;
+                            urlAddress = "https://www.instagram.com/graphql/query/?query_id=" + query_id + "&id=" + account.getId() + "&first=" + fetchBorderPerPage + "&after=" + url.endCursor;
                         }
                         url = new URL(urlAddress, account.getUsername(), FeedObject.ACCOUNT);
                     } else {
