@@ -1,5 +1,7 @@
 package com.amnesica.feedsta.helper;
 
+import static android.view.View.GONE;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -40,8 +42,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-
-import static android.view.View.GONE;
 
 /**
  * Helper class for fragments with various methods
@@ -180,12 +180,63 @@ public class FragmentHelper {
     }
 
     /**
-     * Notifies the user that there is a problem and shows a dialog
+     * Notifies the user that no account or not all but some accounts could be queried and
+     * shows a dialog. Method handles the NOT_ALL_ACCOUNTS_COULD_BE_QUERIED error
+     *
+     * @param fragment              Fragment
+     * @param actualFetchedAccounts int
+     * @param amountAccountsToFetch int
+     */
+    public static void notifyUserOfIncompleteFetchProblem(final Fragment fragment, int actualFetchedAccounts, int amountAccountsToFetch) {
+        final Enum<Error> error = Error.NOT_ALL_ACCOUNTS_COULD_BE_QUERIED;
+
+        if (!mapErrorWasShown.containsKey(error.toString())) {
+
+            // put fragment into map to eliminate error duplicates
+            mapErrorWasShown.put(error.toString(), true);
+
+            // text for dialog
+            String alertText = null;
+
+            // text for label at snackbar's left
+            String textViewLabel = null;
+
+            // label for action of snackbar
+            String textViewLabelAction = null;
+
+            // fixing "Fragment not attached to a context"
+            if (fragment != null && fragment.getContext() != null) {
+                if (actualFetchedAccounts > 0) {
+                    // not all accounts cound be queried
+                    textViewLabel = fragment.requireContext().getResources().getString(R.string.not_all_accounts_could_be_queried) + " " +
+                            "(" + actualFetchedAccounts + "/" + amountAccountsToFetch + ")";
+                    // get proper response
+                    alertText = fragment.requireContext().getResources().getString(R.string.not_all_accounts_could_be_queried_more_info);
+                } else {
+                    // nothing could be querid
+                    textViewLabel = fragment.requireContext().getResources().getString(R.string.no_account_could_be_queried) + " " +
+                            "(" + actualFetchedAccounts + "/" + amountAccountsToFetch + ")";
+                    // get proper response
+                    alertText = fragment.requireContext().getResources().getString(R.string.no_account_could_be_queried_more_info);
+                }
+
+                textViewLabelAction = fragment.requireContext().getResources().getString(R.string.more_info);
+
+                // show alert as custom snackBar
+                showCustomSnackBarForAlert(fragment, alertText, error.toString(), textViewLabel, textViewLabelAction);
+            }
+        }
+    }
+
+    /**
+     * Notifies the user that there is a problem and shows a dialog.
+     * Hint: NOT_ALL_ACCOUNTS_COULD_BE_QUERIED is supposed to be handled
+     * in notifyUserOfIncompleteFetchProblem()!
      *
      * @param fragment calling fragment
      * @param error    error
      */
-    public static void notifyUserOfProblem(final Fragment fragment, final Enum error) {
+    public static void notifyUserOfProblem(final Fragment fragment, final Enum<Error> error) {
         if (!mapErrorWasShown.containsKey(error.toString())) {
 
             // put fragment into map to eliminate error duplicates
@@ -208,25 +259,17 @@ public class FragmentHelper {
                     alertText = fragment.requireContext().getResources().getString(R.string.no_internet_connection);
                     textViewLabel = fragment.requireContext().getResources().getString(R.string.no_internet_connection);
                     textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
-
                 } else if (errorMessage.equals(Error.UPDATING_BOOKMARKS_CATEGORY_FAILED.toString())) {
                     alertText = fragment.requireContext().getResources().getString(R.string.updating_bookmarked_post_category_failed);
                     textViewLabel = fragment.requireContext().getResources().getString(R.string.updating_bookmarked_post_category_failed_label);
                     textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
-
                 } else if (errorMessage.equals(Error.SOMETHINGS_WRONG.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(R.string.something_went_wrong);
+                    alertText = fragment.requireContext().getResources().getString(R.string.something_went_wrong_more_info);
                     textViewLabel = fragment.requireContext().getResources().getString(R.string.something_has_gone_wrong);
                     textViewLabelAction = fragment.requireContext().getResources().getString(R.string.more_info);
-
                 } else if (errorMessage.equals(Error.POST_NOT_AVAILABLE_ANYMORE.toString())) {
                     alertText = fragment.requireContext().getResources().getString(R.string.post_not_available_anymore);
                     textViewLabel = fragment.requireContext().getResources().getString(R.string.post_not_available_anymore_label);
-                    textViewLabelAction = fragment.requireContext().getResources().getString(R.string.more_info);
-
-                } else if (errorMessage.equals(Error.NOT_ALL_ACCOUNTS_COULD_BE_QUERIED.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(R.string.something_went_wrong);
-                    textViewLabel = fragment.requireContext().getResources().getString(R.string.not_all_accounts_could_be_queried);
                     textViewLabelAction = fragment.requireContext().getResources().getString(R.string.more_info);
                 }
 

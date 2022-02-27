@@ -12,12 +12,16 @@
     <string name="toolbar_title_settings">Settings</string>
 
     <!--Errors-->
-    <string name="something_went_wrong">Something has gone wrong.\n\nPossible reasons:\n- Instagram blocked you temporarily (this can happen if you made too many requests to Instagram). As a result none or only a few posts can be updated or displayed and profiles cannot be shown\n- you tried to access a post or an account which is not available anymore\n- you tried to access a restricted profile\n- the application has lost the internet connection\n\nPlease try again later or change the network (e.g. switch to mobile data or Wifi).</string>
+    <string name="something_went_wrong_more_info">Something has gone wrong.\n\nPossible reasons:\n- Instagram blocked you temporarily (this can happen if you made too many requests to Instagram). As a result none or only a few posts can be updated or displayed and profiles cannot be shown\n- you tried to access a post or an account which is not available anymore\n- you tried to access a restricted profile\n- the application has lost the internet connection\n\nPlease try again later or change the network (e.g. switch to mobile data or wifi).</string>
     <string name="no_internet_connection">No internet connection.</string>
     <string name="rate_limited">Looks like you\'ve been searching too much on Instagram and now Instagram won\'t answer.\nPlease try again later.</string>
     <string name="updating_account_urls_failed">Updating the accounts failed.\nPlease try again later.</string>
     <string name="updating_bookmarked_post_urls_failed">Updating the bookmarked posts failed.\nPlease try again later.</string>
     <string name="post_not_available_anymore">This post might not be available anymore. Do you want to go back?</string>
+    <string name="not_all_accounts_could_be_queried">Not all accounts could be queried.</string>
+    <string name="not_all_accounts_could_be_queried_more_info">Not all accounts could be queried.\n\nPossible reasons:\n- Instagram blocked you temporarily (this can happen if you made too many requests to Instagram). As a result none or only a few posts can be updated or displayed and profiles cannot be shown\n- you tried to access a post or an account which is not available anymore\n- you tried to access a restricted profile\n- the application has lost the internet connection\n\nPlease try again later or change the network (e.g. switch to mobile data or wifi).</string>
+    <string name="no_account_could_be_queried">No account could be queried.</string>
+    <string name="no_account_could_be_queried_more_info">No account could be queried.\n\nPossible reasons:\n- Instagram blocked you temporarily (this can happen if you made too many requests to Instagram). As a result none or only a few posts can be updated or displayed and profiles cannot be shown\n- you tried to access a post or an account which is not available anymore\n- you tried to access a restricted profile\n- the application has lost the internet connection\n\nPlease try again later or change the network (e.g. switch to mobile data or wifi).</string>
 
     <!-- Misc -->
     <string name="button_follow">FOLLOW</string>
@@ -222,7 +226,6 @@
     <string name="operation_cannot_be_applied_to_coll_all_cancelled">This operation cannot be applied to collection \"All\". Operation cancelled</string>
     <string name="select_at_least_one_coll">At least one collection needs to be selected</string>
     <string name="operation_can_only_be_applied_to_bookmarks_with_coll">This operation can only be applied to bookmarks with a collection. Operation cancelled</string>
-    <string name="not_all_accounts_could_be_queried">Not all accounts could be queried.</string>
     <string name="post_not_available_anymore_label">Post is not available.</string>
     <string name="updating_bookmarked_post_category_failed_label">Updating the post failed.</string>
     <string name="page_error_label">This page was not found.</string>

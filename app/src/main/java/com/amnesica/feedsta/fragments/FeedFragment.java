@@ -1,5 +1,10 @@
 package com.amnesica.feedsta.fragments;
 
+import static android.view.View.GONE;
+import static com.amnesica.feedsta.helper.FeedHelper.counterPostBorder;
+import static com.amnesica.feedsta.helper.FeedHelper.fetchBorderPerPage;
+import static com.amnesica.feedsta.helper.StaticIdentifier.query_id;
+
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -41,14 +46,10 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.RejectedExecutionException;
-
-import static android.view.View.GONE;
-import static com.amnesica.feedsta.helper.FeedHelper.counterPostBorder;
-import static com.amnesica.feedsta.helper.FeedHelper.fetchBorderPerPage;
-import static com.amnesica.feedsta.helper.StaticIdentifier.query_id;
 
 /**
  * Fragment displays the feed based on the followed accounts
@@ -93,6 +94,12 @@ public class FeedFragment extends Fragment {
 
     // list of handler to reset them properly
     private ArrayList<NetworkHandler> networkHandlersList;
+
+    // counter for overall amount of accounts to fetch
+    private int counterAmountAccountsToFetch = 0;
+
+    // hashmap to store fetched accounts
+    private final HashMap<String, Boolean> fetchedAccountsMap = new HashMap<>();
 
     public FeedFragment() {
         //  Required empty public constructor
@@ -460,6 +467,12 @@ public class FeedFragment extends Fragment {
                             Log.d("FeedFragment", Log.getStackTraceString(e));
                         }
 
+                        // save size of account list to fetch
+                        fragment.counterAmountAccountsToFetch = fragment.accounts.size();
+
+                        // randomize order of accounts to even fetch some accounts if rate limit appears
+                        Collections.shuffle(fragment.accounts);
+
                         // start new threads for all accounts parallel with THREAD_POOL_EXECUTOR
                         for (Account account : fragment.accounts) {
                             GetPostsFromAccount getPostsFromAccount = new GetPostsFromAccount(fragment, account);
@@ -545,13 +558,13 @@ public class FeedFragment extends Fragment {
                                     new StorePostsInStorage(fragment).execute();
 
                                     // show snackbar alert when not all but some accounts could be queried
-                                    if (fragment.bSomethingWentWrong) {
-                                        FragmentHelper.notifyUserOfProblem(fragment, Error.NOT_ALL_ACCOUNTS_COULD_BE_QUERIED);
+                                    if (fragment.bSomethingWentWrong && fragment.fetchedAccountsMap != null && fragment.fetchedAccountsMap.keySet().size() < fragment.counterAmountAccountsToFetch) {
+                                        FragmentHelper.notifyUserOfIncompleteFetchProblem(fragment, fragment.fetchedAccountsMap.keySet().size(), fragment.counterAmountAccountsToFetch);
                                     }
                                 } else {
                                     // show alert that nothing could be queried and something went wrong
                                     if (fragment.bSomethingWentWrong) {
-                                        FragmentHelper.notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
+                                        FragmentHelper.notifyUserOfIncompleteFetchProblem(fragment, 0, fragment.counterAmountAccountsToFetch);
                                     }
                                 }
 
@@ -566,6 +579,7 @@ public class FeedFragment extends Fragment {
 
                                 // set boolean bStoredPosts to false, because new ones where fetched
                                 fragment.bStoredPosts = false;
+
                             } else {
                                 if (fragment.accounts == null) {
                                     // delete stored posts
@@ -696,6 +710,7 @@ public class FeedFragment extends Fragment {
         NetworkHandler sh;
         private URL url;
         private int counterPost = 0;
+        private boolean successfulFetchedPostsOfAccount = true;
 
         // constructor
         GetPostsFromAccount(FeedFragment context, Account account) {
@@ -720,6 +735,10 @@ public class FeedFragment extends Fragment {
                     // add handler to handlersList
                     if (fragment != null) {
                         fragment.networkHandlersList.add(sh);
+
+                        // put account name in map for fetched accounts to
+                        // determine if fetching was successful
+                        fragment.fetchedAccountsMap.put(account.getUsername(), true);
                     }
                 } catch (Exception e) {
                     Log.d("FeedFragment", Log.getStackTraceString(e));
@@ -741,11 +760,20 @@ public class FeedFragment extends Fragment {
 
                     // prevent url.hasNextPage is null
                 } while (url.hasNextPage != null && url.hasNextPage && counterPost < counterPostBorder);
+
+                // if fetching was not successful remove account name from map
+                if (!successfulFetchedPostsOfAccount && url.tag != null && fragment != null) {
+                    fragment.fetchedAccountsMap.remove(account.getUsername());
+                }
             } else {
                 // get reference from fragment
                 final FeedFragment fragment = fragmentReference.get();
                 if (fragment != null) {
                     fragment.bSomethingWentWrong = true;
+                    successfulFetchedPostsOfAccount = false;
+
+                    // if fetching was not successful remove account name from map
+                    fragment.fetchedAccountsMap.remove(account.getUsername());
                 }
             }
             return null;
@@ -772,6 +800,7 @@ public class FeedFragment extends Fragment {
                         url = new URL(urlAddress, account.getUsername(), FeedObject.ACCOUNT);
                     } else {
                         fragment.bSomethingWentWrong = true;
+                        successfulFetchedPostsOfAccount = false;
                     }
                 }
             }
@@ -798,6 +827,7 @@ public class FeedFragment extends Fragment {
                             jsonStr = sh.makeServiceCall(url.url, FeedFragment.class.getSimpleName());
                         } else {
                             fragment.bSomethingWentWrong = true;
+                            successfulFetchedPostsOfAccount = false;
                             return;
                         }
 
@@ -807,6 +837,7 @@ public class FeedFragment extends Fragment {
                                 if (!FragmentHelper.checkIfJsonStrIsValid(jsonStr, fragment)) {
                                     // stop fetching at this point
                                     fragment.bSomethingWentWrong = true;
+                                    successfulFetchedPostsOfAccount = false;
                                     return;
                                 }
                                 // file overall as json object
@@ -839,10 +870,12 @@ public class FeedFragment extends Fragment {
 
                             } catch (JSONException | IllegalStateException e) {
                                 fragment.bSomethingWentWrong = true;
+                                successfulFetchedPostsOfAccount = false;
                                 Log.d("FeedFragment", Log.getStackTraceString(e));
                             }
                         } else {
                             fragment.bSomethingWentWrong = true;
+                            successfulFetchedPostsOfAccount = false;
                         }
                     }
                 }
@@ -858,6 +891,7 @@ public class FeedFragment extends Fragment {
          */
         private void fetchEdgeData(JSONArray edges, int startIndex, int endIndex) {
             if (!isCancelled()) {
+
                 // get reference from fragment
                 final FeedFragment fragment = fragmentReference.get();
                 if (fragment != null) {
@@ -894,6 +928,7 @@ public class FeedFragment extends Fragment {
                         }
                     } catch (JSONException | IllegalStateException | ArrayIndexOutOfBoundsException e) {
                         fragment.bSomethingWentWrong = true;
+                        successfulFetchedPostsOfAccount = false;
                     }
                 }
             }
