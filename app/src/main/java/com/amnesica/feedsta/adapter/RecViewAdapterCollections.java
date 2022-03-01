@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.util.Base64;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -300,18 +301,30 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
     // replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        String url = listCollectionsBookmarked.get(position).getThumbnailUrl();
+        Collection collection = listCollectionsBookmarked.get(position);
         holder.textViewDirName.setText(listCollectionsBookmarked.get(position).getName());
 
-        // load image into view
-        Glide.with(context)
-                .load(url)
-                .placeholder(R.drawable.placeholder_image)
-                .error(R.drawable.placeholder_image_post_error)
-                .dontAnimate()
-                .centerCrop()
-                .into(holder.imageViewDir);
-
+        // load base64 encoded image into view
+        if (collection.getImageThumbnail() != null) {
+            // load image into view
+            Glide.with(context)
+                    .asBitmap()
+                    .load(Base64.decode(collection.getImageThumbnail(), Base64.DEFAULT))
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image_post_error)
+                    .dontAnimate()
+                    .centerCrop()
+                    .into(holder.imageViewDir);
+        } else {
+            // load image with url into view
+            Glide.with(context)
+                    .load(collection.getThumbnailUrl())
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image_post_error)
+                    .dontAnimate()
+                    .centerCrop()
+                    .into(holder.imageViewDir);
+        }
         holder.update(listCollectionsBookmarked.get(position));
     }
 

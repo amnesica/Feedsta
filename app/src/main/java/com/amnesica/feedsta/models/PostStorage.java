@@ -20,9 +20,10 @@ public class PostStorage implements Serializable {
     private String imageUrlThumbnail;
     private Boolean is_sideCar;
     private String category;
+    private String imageThumbnail;
 
     // constructor
-    public PostStorage(String id, String shortcode, Date takenAtDate, Boolean is_video, String imageUrlThumbnail, Boolean is_sideCar, String category) {
+    public PostStorage(String id, String shortcode, Date takenAtDate, Boolean is_video, String imageUrlThumbnail, Boolean is_sideCar, String category, String imageThumbnail) {
         this.id = id;
         this.shortcode = shortcode;
         this.takenAtDate = takenAtDate;
@@ -30,6 +31,7 @@ public class PostStorage implements Serializable {
         this.imageUrlThumbnail = imageUrlThumbnail;
         this.is_sideCar = is_sideCar;
         this.category = category;
+        this.imageThumbnail = imageThumbnail;
     }
 
     public static long getSerialVersionUID() {
@@ -92,22 +94,31 @@ public class PostStorage implements Serializable {
         this.category = category;
     }
 
+    public String getImageThumbnail() {
+        return imageThumbnail;
+    }
+
+    public void setImageThumbnail(String imageThumbnail) {
+        this.imageThumbnail = imageThumbnail;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PostStorage)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         PostStorage that = (PostStorage) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(shortcode, that.shortcode) &&
                 Objects.equals(takenAtDate, that.takenAtDate) &&
                 Objects.equals(is_video, that.is_video) &&
                 Objects.equals(imageUrlThumbnail, that.imageUrlThumbnail) &&
+                Objects.equals(imageThumbnail, that.imageThumbnail) &&
                 Objects.equals(is_sideCar, that.is_sideCar) &&
                 Objects.equals(category, that.category);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, shortcode, takenAtDate, is_video, imageUrlThumbnail, is_sideCar, category);
+        return Objects.hash(id, shortcode, takenAtDate, is_video, imageUrlThumbnail, imageThumbnail, is_sideCar, category);
     }
 }

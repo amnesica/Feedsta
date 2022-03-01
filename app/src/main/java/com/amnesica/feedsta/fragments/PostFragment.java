@@ -1,5 +1,13 @@
 package com.amnesica.feedsta.fragments;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static androidx.core.content.ContextCompat.getSystemService;
+import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT;
+import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
+import static com.amnesica.feedsta.helper.StaticIdentifier.permsWriteOnly;
+import static com.amnesica.feedsta.helper.StaticIdentifier.query_hash;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -75,7 +83,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
@@ -86,14 +93,6 @@ import java.util.HashMap;
 import java.util.Objects;
 
 import javax.net.ssl.HttpsURLConnection;
-
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-import static androidx.core.content.ContextCompat.getSystemService;
-import static androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT;
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsWriteOnly;
-import static com.amnesica.feedsta.helper.StaticIdentifier.query_hash;
 
 /**
  * Fragment for displaying a post
@@ -193,6 +192,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                         false,
                         "",
                         false,
+                        null,
                         null);
                 postIsFromDeepLink = true;
             } else {
@@ -616,11 +616,18 @@ public class PostFragment extends Fragment implements FragmentCallback {
      */
     private void bookmarkPost() {
         if (getContext() != null) {
+
+            // download error when trying to download thumbnail
+            boolean bDownloadError = false;
+
             if (!StorageHelper.checkIfAccountOrPostIsInFile(post, StorageHelper.filename_bookmarks, getContext())) {
                 try {
                     bBookmarked = StorageHelper.storePostInInternalStorage(post, requireContext(), StorageHelper.filename_bookmarks);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Log.d("PostFragment", Log.getStackTraceString(e));
+
+                    // handle failed bookmark with note to user
+                    bDownloadError = true;
                 }
             } else {
                 // post is already bookmarked and needs to be deleted
@@ -633,7 +640,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
             }
 
             // set button background resource
-            if (bBookmarked) {
+            if (bBookmarked && !bDownloadError) {
                 // saved
                 if (FragmentHelper.getThemeIsDarkTheme(getContext())) {
                     buttonBookmark.setBackgroundResource(R.drawable.ic_bookmark_white_24dp);
@@ -652,8 +659,14 @@ public class PostFragment extends Fragment implements FragmentCallback {
                     buttonBookmark.setBackgroundResource(R.drawable.ic_bookmark_border_black_24dp);
                 }
 
-                // show snackBar that bookmark was removed
-                showCustomSnackBarWithSpecificText(getResources().getString(R.string.post_removed_from_bookmarks));
+                if (!bDownloadError) {
+                    // show snackBar that bookmark was removed
+                    showCustomSnackBarWithSpecificText(getResources().getString(R.string.post_removed_from_bookmarks));
+                } else {
+                    // show snackBar that bookmark could not get saved because of download
+                    // error when downloading thumbnail
+                    showCustomSnackBarWithSpecificText(getResources().getString(R.string.post_was_not_saved));
+                }
             }
         }
     }

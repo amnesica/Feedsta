@@ -1,5 +1,8 @@
 package com.amnesica.feedsta.fragments;
 
+import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
+import static com.amnesica.feedsta.helper.StaticIdentifier.permsWriteOnly;
+
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -7,6 +10,7 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -42,14 +46,15 @@ import com.amnesica.feedsta.views.BtmSheetDialogAddCollection;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsWriteOnly;
 
 /**
  * Fragment for displaying all collections of all bookmarked posts
@@ -527,8 +532,13 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
     }
 
     /**
-     * Updates the thumbnail url of bookmarked posts because they change over time
+     * Updates the thumbnail url of bookmarked posts because they change over time.
+     * Hint/Explanation: With the new approach of storing the thumbnail image as a string,
+     * this functionality is deprecated and is not necessary for future installations.
+     * However, this functionality is needed for existing installations and existing
+     * bookmarks (legacy functionality)
      */
+    @Deprecated
     private static class UpdateThumbnailURL extends AsyncTask<Void, Integer, Void> {
         private final WeakReference<CollectionsFragment> fragmentReference;
         NetworkHandler sh;
@@ -582,6 +592,9 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
                                         fragment.listPostsUpdatedBookmarked = new ArrayList<>();
                                     }
 
+                                    // get new thumbnail as string with new url
+                                    String newImageThumbnail = getBase64EncodedImage(bookmarkedPost.getImageUrlThumbnail());
+
                                     // copy old bookmark and insert new one in listPostsUpdatedBookmarked
                                     fragment.listPostsUpdatedBookmarked.add(
                                             new Post(bookmarkedPost.getId(),
@@ -590,9 +603,10 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
                                                     bookmarkedPost.getIs_video(),
                                                     newThumbnailUrl,
                                                     bookmarkedPost.getIs_sideCar(),
-                                                    bookmarkedPost.getCategory()));
+                                                    bookmarkedPost.getCategory(),
+                                                    newImageThumbnail));
 
-                                    // publish progress -> not real progress here -> Savings missing here
+                                    // publish progress -> not real progress here -> Saving is missing here
                                     publishProgress(editedItems += 1);
 
                                 } else {
@@ -601,8 +615,12 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
                                     // add failed post to list
                                     fragment.listPostFailedRefresh.add(bookmarkedPost);
                                 }
-                            } catch (JSONException e) {
+                            } catch (Exception e) {
                                 fragment.somethingWentWrong = true;
+
+                                // add failed post to list (error when trying to download new thumbnail as string)
+                                fragment.listPostFailedRefresh.add(bookmarkedPost);
+
                                 Log.d("CollectionsFragment", Log.getStackTraceString(e));
                             }
                         }
@@ -656,7 +674,13 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
             }
         }
 
-        // get new url for thumbnail of bookmarked post
+        /**
+         * Get new url for thumbnail of bookmarked post
+         *
+         * @param url String
+         * @return String
+         * @throws JSONException JSONException
+         */
         private String getNewThumbnailUrl(String url) throws JSONException {
             String newThumbnailUrl = null;
             if (!isCancelled()) {
@@ -683,6 +707,33 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
                 }
             }
             return newThumbnailUrl;
+        }
+
+        /**
+         * Returns a base64 encoded string of an image from url.
+         * Hint: Method exists in StorageHelper as well, but
+         * cannot be used here because this would be an async task
+         * call inside an async task call, hence the "duplicated"
+         * method!
+         *
+         * @param url String
+         * @return String
+         * @throws Exception Exception
+         */
+        private String getBase64EncodedImage(String url) throws Exception {
+            if (url == null) return null;
+
+            URL imageUrl = new URL(url);
+            URLConnection ucon = imageUrl.openConnection();
+            InputStream is = ucon.getInputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int read = 0;
+            while ((read = is.read(buffer, 0, buffer.length)) != -1) {
+                baos.write(buffer, 0, read);
+            }
+            baos.flush();
+            return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
         }
 
         private void showProgressDialog() {

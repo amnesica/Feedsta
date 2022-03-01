@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.Base64;
 import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
@@ -26,6 +28,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 /**
@@ -350,9 +354,9 @@ public class StorageHelper {
      * @param context  context
      * @param filename filename
      * @return true, if storing was successful
-     * @throws IOException IOException
+     * @throws Exception Exception
      */
-    public static Boolean storePostListInInternalStorage(ArrayList<Post> posts, Context context, String filename) throws IOException {
+    public static Boolean storePostListInInternalStorage(ArrayList<Post> posts, Context context, String filename) throws Exception {
         // file with path
         File file = new File(context.getFilesDir(), filename);
         byte[] bytesToWrite;
@@ -367,7 +371,8 @@ public class StorageHelper {
                     post.getIs_video(),
                     post.getImageUrlThumbnail(),
                     post.getIs_sideCar(),
-                    post.getCategory()));
+                    post.getCategory(),
+                    post.getImageThumbnail()));
         }
 
         ObjectOutputStream out;
@@ -460,9 +465,9 @@ public class StorageHelper {
      * @param context     context
      * @param filename    filename (bookmarked_posts or posts)
      * @return true if storing was successful
-     * @throws IOException IOException
+     * @throws Exception Exception
      */
-    public static Boolean storePostInInternalStorage(Post postToStore, Context context, String filename) throws IOException {
+    public static Boolean storePostInInternalStorage(final Post postToStore, Context context, String filename) throws Exception {
         ArrayList<PostStorage> readPosts = null;
 
         File file = new File(context.getFilesDir(), filename);
@@ -487,6 +492,10 @@ public class StorageHelper {
 
         // if this boolean is false, bytesToWrite is null -> nothing is stored!
         if (bPostShouldBeStored && readPosts != null) {
+
+            // get image as Base64 encoded string
+            String imageThumbnail = getBase64EncodedImage(postToStore.getImageUrlThumbnail());
+
             // add post to list in PostStorage representation
             readPosts.add(new PostStorage(postToStore.getId(),
                     postToStore.getShortcode(),
@@ -494,7 +503,8 @@ public class StorageHelper {
                     postToStore.getIs_video(),
                     postToStore.getImageUrlThumbnail(),
                     postToStore.getIs_sideCar(),
-                    postToStore.getCategory()));
+                    postToStore.getCategory(),
+                    imageThumbnail));
 
             ObjectOutputStream out;
             out = new ObjectOutputStream(bos);
@@ -751,7 +761,7 @@ public class StorageHelper {
                 }
             }
 
-            // convert AccountStorage accounts to normal Accounts
+            // convert PostStorage posts to normal Posts
             if (readPosts != null && listPosts != null) {
                 for (PostStorage postStorage : readPosts) {
                     listPosts.add(new Post(postStorage.getId(),
@@ -760,7 +770,8 @@ public class StorageHelper {
                             postStorage.getIs_video(),
                             postStorage.getImageUrlThumbnail(),
                             postStorage.getIs_sideCar(),
-                            postStorage.getCategory()));
+                            postStorage.getCategory(),
+                            postStorage.getImageThumbnail()));
                 }
 
                 // for normal behaviour in feedFragment to display text
@@ -1045,5 +1056,47 @@ public class StorageHelper {
         }
 
         return successful;
+    }
+
+    /**
+     * Returns a base64 encoded string of an image from url
+     *
+     * @param url String
+     * @return String
+     */
+    public static String getBase64EncodedImage(final String url) throws Exception {
+        class GetImageFromUrlAsString extends AsyncTask<Void, Void, String> {
+            protected String doInBackground(Void... arg0) {
+                if (url == null) return null;
+
+                try {
+                    URL imageUrl = new URL(url);
+                    URLConnection ucon = imageUrl.openConnection();
+                    InputStream is = ucon.getInputStream();
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int read = 0;
+                    while ((read = is.read(buffer, 0, buffer.length)) != -1) {
+                        baos.write(buffer, 0, read);
+                    }
+                    baos.flush();
+                    return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+                } catch (Exception e) {
+                    Log.d("StorageHelper.GetImageFromUrlAsString", Log.getStackTraceString(e));
+                }
+                return null;
+            }
+        }
+
+        // Fix needed: waiting for async task (blocking UI thread at the moment)
+        try {
+            String imageAsString = new GetImageFromUrlAsString().execute().get();
+            if (imageAsString == null) {
+                throw new Exception("GetImageFromUrlAsString when bookmarking post failed: imageAsString is null");
+            }
+            return imageAsString;
+        } catch (Exception e) {
+            throw new Exception("GetImageFromUrlAsString when bookmarking post failed");
+        }
     }
 }

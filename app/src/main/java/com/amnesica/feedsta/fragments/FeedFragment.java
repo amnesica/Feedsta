@@ -41,7 +41,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -914,6 +913,7 @@ public class FeedFragment extends Fragment {
                                     edge.getJSONObject("node").getBoolean("is_video"),
                                     edge.getJSONObject("node").getString("thumbnail_src"),
                                     is_sidecar,
+                                    null,
                                     null);
 
                             if (fragment.fetchedPosts == null) {
@@ -974,7 +974,7 @@ public class FeedFragment extends Fragment {
                         // store posts in storage in proper storage representation
                         StorageHelper.storePostListInInternalStorage(fragment.postsToStore, fragment.requireContext(), StorageHelper.filename_posts);
 
-                    } catch (IllegalStateException | IOException e) {
+                    } catch (Exception e) {
                         Log.d("FeedFragment", Log.getStackTraceString(e));
                     }
                 }

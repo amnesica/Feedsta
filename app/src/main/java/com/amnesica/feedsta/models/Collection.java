@@ -8,11 +8,13 @@ public class Collection {
     private String name;
     private String thumbnailUrl;
     private Boolean isChecked = false;
+    private String imageThumbnail;
 
     // constructor
-    public Collection(String name, String thumbnailUrl) {
+    public Collection(String name, String thumbnailUrl, String imageThumbnail) {
         this.name = name;
         this.thumbnailUrl = thumbnailUrl;
+        this.imageThumbnail = imageThumbnail;
     }
 
     public String getName() {
@@ -40,5 +42,13 @@ public class Collection {
 
     public void toggleChecked() {
         isChecked = !isChecked;
+    }
+
+    public String getImageThumbnail() {
+        return imageThumbnail;
+    }
+
+    public void setImageThumbnail(String imageThumbnail) {
+        this.imageThumbnail = imageThumbnail;
     }
 }

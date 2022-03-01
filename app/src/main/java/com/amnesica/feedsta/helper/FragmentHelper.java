@@ -598,15 +598,19 @@ public class FragmentHelper {
 
         // first create collection "All"
         if (listAllPostsBookmarked != null && !listAllPostsBookmarked.isEmpty()) {
-            listCollectionsBookmarked.add(new Collection("All", listAllPostsBookmarked.get(0).getImageUrlThumbnail()));
+
+            // add first bookmark as thumbnail
+            listCollectionsBookmarked.add(new Collection("All", listAllPostsBookmarked.get(0).getImageUrlThumbnail(),
+                    listAllPostsBookmarked.get(0).getImageThumbnail()));
 
             // then create all categories from all bookmarks category
-            if (listAllPostsBookmarked != null && !listAllPostsBookmarked.isEmpty()) {
+            if (!listAllPostsBookmarked.isEmpty()) {
                 for (Post post : listAllPostsBookmarked) {
                     if (post.getCategory() != null && !listCategories.contains(post.getCategory())) {
 
                         // create new collection
-                        listCollectionsBookmarked.add(new Collection(post.getCategory(), post.getImageUrlThumbnail()));
+                        listCollectionsBookmarked.add(new Collection(post.getCategory(), post.getImageUrlThumbnail(),
+                                post.getImageThumbnail()));
 
                         // add category to
                         listCategories.add(post.getCategory());

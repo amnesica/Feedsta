@@ -235,4 +235,5 @@
     <string name="dialog_usage_note_message">Thanks for installing Feedsta!\n\nThis app allows you to follow your favorite public profiles on Instagram and view their posts without having Instagram and being registered there. Please understand that private profiles and stories in general cannot be seen!\n\nIf you\'re using the app Instagram might block you temporarily. This can happen if you make too many requests to Instagram. As a result none or only a few posts can be updated or displayed and profiles cannot be shown. In this case you might want to wait a while and try again later or change the network (e.g. switch to mobile data or Wifi). Unfortunately, there is nothing I can do about it.\n\nI hope you still like this app. If you want you can leave a 5-star rating in the Play Store.\n\nHave fun!</string>
     <string name="dialog_usage_note_yes">Yes, I\'ve read the note</string>
     <string name="dialog_usage_note_exit_app">No, let\'s stop here</string>
+    <string name="post_was_not_saved">Post could not be saved</string>
 </resources>

@@ -30,6 +30,7 @@ public class Post implements Serializable {
     private Boolean isChecked = false;
     private String category;
     private int height;
+    private String imageThumbnail;
 
     // constructor (empty)
     public Post() {
@@ -71,7 +72,8 @@ public class Post implements Serializable {
                 boolean is_video,
                 String imageUrlThumbnail,
                 Boolean is_sideCar,
-                String category) {
+                String category,
+                String imageThumbnail) {
         this.id = id;
         this.shortcode = shortcode;
         this.takenAtDate = takenAtDate;
@@ -79,6 +81,7 @@ public class Post implements Serializable {
         this.imageUrlThumbnail = imageUrlThumbnail;
         this.is_sideCar = is_sideCar;
         this.category = category;
+        this.imageThumbnail = imageThumbnail;
     }
 
     public static long getSerialVersionUID() {
@@ -89,7 +92,7 @@ public class Post implements Serializable {
     // hint: do not change!
     @Deprecated
     public Post getStorageRep() {
-        return new Post(id, shortcode, takenAtDate, is_video, imageUrlThumbnail, is_sideCar, category);
+        return new Post(id, shortcode, takenAtDate, is_video, imageUrlThumbnail, is_sideCar, category, imageThumbnail);
     }
 
     public HashMap<Integer, ArrayList<String>> getSidecarUrls() {
@@ -245,5 +248,13 @@ public class Post implements Serializable {
 
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public String getImageThumbnail() {
+        return imageThumbnail;
+    }
+
+    public void setImageThumbnail(String imageThumbnail) {
+        this.imageThumbnail = imageThumbnail;
     }
 }
