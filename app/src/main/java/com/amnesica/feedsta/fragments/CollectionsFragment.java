@@ -10,7 +10,6 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -46,11 +45,7 @@ import com.amnesica.feedsta.views.BtmSheetDialogAddCollection;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -593,7 +588,7 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
                                     }
 
                                     // get new thumbnail as string with new url
-                                    String newImageThumbnail = getBase64EncodedImage(bookmarkedPost.getImageUrlThumbnail());
+                                    String newImageThumbnail = FragmentHelper.getBase64EncodedImage(newThumbnailUrl);
 
                                     // copy old bookmark and insert new one in listPostsUpdatedBookmarked
                                     fragment.listPostsUpdatedBookmarked.add(
@@ -707,33 +702,6 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
                 }
             }
             return newThumbnailUrl;
-        }
-
-        /**
-         * Returns a base64 encoded string of an image from url.
-         * Hint: Method exists in StorageHelper as well, but
-         * cannot be used here because this would be an async task
-         * call inside an async task call, hence the "duplicated"
-         * method!
-         *
-         * @param url String
-         * @return String
-         * @throws Exception Exception
-         */
-        private String getBase64EncodedImage(String url) throws Exception {
-            if (url == null) return null;
-
-            URL imageUrl = new URL(url);
-            URLConnection ucon = imageUrl.openConnection();
-            InputStream is = ucon.getInputStream();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int read = 0;
-            while ((read = is.read(buffer, 0, buffer.length)) != -1) {
-                baos.write(buffer, 0, read);
-            }
-            baos.flush();
-            return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
         }
 
         private void showProgressDialog() {
