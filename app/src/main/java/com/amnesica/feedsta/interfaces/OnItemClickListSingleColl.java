@@ -1,6 +1,6 @@
 package com.amnesica.feedsta.interfaces;
 
-import com.amnesica.feedsta.Post;
+import com.amnesica.feedsta.models.Post;
 
 import java.util.List;
 

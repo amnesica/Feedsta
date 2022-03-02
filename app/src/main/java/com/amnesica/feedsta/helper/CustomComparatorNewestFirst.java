@@ -1,6 +1,6 @@
 package com.amnesica.feedsta.helper;
 
-import com.amnesica.feedsta.Post;
+import com.amnesica.feedsta.models.Post;
 
 import java.util.Comparator;
 

@@ -19,12 +19,12 @@ import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.amnesica.feedsta.Account;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.fragments.FullscreenProfileImageFragment;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.StorageHelper;
 import com.amnesica.feedsta.interfaces.AdapterCallback;
+import com.amnesica.feedsta.models.Account;
 import com.amnesica.feedsta.models.Hashtag;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;

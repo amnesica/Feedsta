@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
-import com.amnesica.feedsta.Post;
+import com.amnesica.feedsta.models.Post;
 
 import java.util.ArrayList;
 import java.util.HashMap;

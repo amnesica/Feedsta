@@ -12,8 +12,8 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.amnesica.feedsta.Post;
 import com.amnesica.feedsta.R;
+import com.amnesica.feedsta.models.Post;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;

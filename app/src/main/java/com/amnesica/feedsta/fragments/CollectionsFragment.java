@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.amnesica.feedsta.Post;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.RecViewAdapterCollections;
 import com.amnesica.feedsta.asynctasks.BatchDownloadPosts;
@@ -40,6 +39,7 @@ import com.amnesica.feedsta.interfaces.FragmentCallback;
 import com.amnesica.feedsta.interfaces.FragmentRefreshCallback;
 import com.amnesica.feedsta.interfaces.OnItemClickListenerColl;
 import com.amnesica.feedsta.models.Collection;
+import com.amnesica.feedsta.models.Post;
 import com.amnesica.feedsta.views.BtmSheetDialogAddCollection;
 
 import org.json.JSONException;

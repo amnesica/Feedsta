@@ -27,7 +27,6 @@ import android.widget.TextView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
-import com.amnesica.feedsta.Post;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.GridViewAdapterPost;
 import com.amnesica.feedsta.helper.EndlessScrollListener;
@@ -37,6 +36,7 @@ import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
 import com.amnesica.feedsta.models.Hashtag;
+import com.amnesica.feedsta.models.Post;
 import com.amnesica.feedsta.models.URL;
 import com.bumptech.glide.Glide;
 

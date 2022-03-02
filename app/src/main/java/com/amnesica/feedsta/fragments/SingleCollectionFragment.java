@@ -19,7 +19,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.amnesica.feedsta.Post;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.RecViewAdapterSingleCollection;
 import com.amnesica.feedsta.asynctasks.BatchDownloadPosts;
@@ -30,6 +29,7 @@ import com.amnesica.feedsta.helper.StorageHelper;
 import com.amnesica.feedsta.interfaces.FragmentCallback;
 import com.amnesica.feedsta.interfaces.FragmentRefreshCallback;
 import com.amnesica.feedsta.interfaces.OnItemClickListSingleColl;
+import com.amnesica.feedsta.models.Post;
 import com.amnesica.feedsta.views.BtmSheetDialogAddCollection;
 import com.amnesica.feedsta.views.BtmSheetDialogSelectCollection;
 

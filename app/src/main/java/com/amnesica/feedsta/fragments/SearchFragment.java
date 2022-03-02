@@ -22,12 +22,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.amnesica.feedsta.Account;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.ListAdapterSearch;
 import com.amnesica.feedsta.helper.Error;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.NetworkHandler;
+import com.amnesica.feedsta.models.Account;
 import com.amnesica.feedsta.models.Hashtag;
 import com.amnesica.feedsta.models.URL;
 

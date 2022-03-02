@@ -24,8 +24,6 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.amnesica.feedsta.Account;
-import com.amnesica.feedsta.Post;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.GridViewAdapterFeed;
 import com.amnesica.feedsta.helper.CustomComparatorNewestFirst;
@@ -35,6 +33,8 @@ import com.amnesica.feedsta.helper.FeedObject;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
+import com.amnesica.feedsta.models.Account;
+import com.amnesica.feedsta.models.Post;
 import com.amnesica.feedsta.models.URL;
 
 import org.json.JSONArray;

@@ -28,10 +28,10 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 
-import com.amnesica.feedsta.Post;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.fragments.FeedFragment;
 import com.amnesica.feedsta.models.Collection;
+import com.amnesica.feedsta.models.Post;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Predicate;

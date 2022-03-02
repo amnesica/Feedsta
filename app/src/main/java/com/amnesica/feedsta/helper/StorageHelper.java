@@ -11,9 +11,9 @@ import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import com.amnesica.feedsta.Account;
-import com.amnesica.feedsta.Post;
+import com.amnesica.feedsta.models.Account;
 import com.amnesica.feedsta.models.AccountStorage;
+import com.amnesica.feedsta.models.Post;
 import com.amnesica.feedsta.models.PostStorage;
 
 import org.apache.commons.io.FileUtils;

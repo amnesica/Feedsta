@@ -6,11 +6,11 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
-import com.amnesica.feedsta.Post;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.helper.EditBookmarksType;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.interfaces.FragmentRefreshCallback;
+import com.amnesica.feedsta.models.Post;
 
 import java.lang.ref.WeakReference;
 import java.util.List;

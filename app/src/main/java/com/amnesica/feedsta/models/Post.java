@@ -1,4 +1,4 @@
-package com.amnesica.feedsta;
+package com.amnesica.feedsta.models;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -86,13 +86,6 @@ public class Post implements Serializable {
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
-    }
-
-    // Minimal representation of account to store in internal storage
-    // hint: do not change!
-    @Deprecated
-    public Post getStorageRep() {
-        return new Post(id, shortcode, takenAtDate, is_video, imageUrlThumbnail, is_sideCar, category, imageThumbnail);
     }
 
     public HashMap<Integer, ArrayList<String>> getSidecarUrls() {

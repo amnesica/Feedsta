@@ -47,8 +47,6 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 import androidx.viewpager.widget.ViewPager;
 
-import com.amnesica.feedsta.Account;
-import com.amnesica.feedsta.Post;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.ListAdapterComment;
 import com.amnesica.feedsta.adapter.StatePagerAdapterSideCar;
@@ -59,7 +57,9 @@ import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
 import com.amnesica.feedsta.interfaces.FragmentCallback;
+import com.amnesica.feedsta.models.Account;
 import com.amnesica.feedsta.models.Comment;
+import com.amnesica.feedsta.models.Post;
 import com.amnesica.feedsta.models.URL;
 import com.amnesica.feedsta.views.BtmSheetDialogAddCollection;
 import com.amnesica.feedsta.views.BtmSheetDialogSelectCollection;
