@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.Base64;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 /**
  * Adapter for displaying a list of accounts
  */
-@SuppressWarnings({"CanBeFinal", "NullableProblems", "deprecation"})
+@SuppressWarnings({"CanBeFinal", "deprecation"})
 public class ListAdapterSearch extends ArrayAdapter<Object> {
 
     private final Context context;
@@ -71,21 +72,44 @@ public class ListAdapterSearch extends ArrayAdapter<Object> {
             // put account profile picture into CircularImageView
             final ImageView imageView = convertView.findViewById(R.id.accountOrHashtagProfilePic);
             assert account != null;
-            Glide.with(convertView)
-                    .load(account.getImageProfilePicUrl())
-                    .error(R.drawable.placeholder_image_post_error)
-                    .dontAnimate()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .into(imageView);
+
+            // load base64 encoded image into view
+            if (account.getImageThumbnail() != null) {
+                // load image into view
+                Glide.with(convertView)
+                        .asBitmap()
+                        .load(Base64.decode(account.getImageThumbnail(), Base64.DEFAULT))
+                        .error(R.drawable.placeholder_image_post_error)
+                        .dontAnimate()
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .into(imageView);
+            } else {
+                // load image with url into view
+                Glide.with(convertView)
+                        .load(account.getImageProfilePicUrl())
+                        .error(R.drawable.placeholder_image_post_error)
+                        .dontAnimate()
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .into(imageView);
+            }
 
             // OnClickListener on profile picture for showing profile picture fullscreen
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (!isImageFitToScreen) {
-                        // new fullscreenImageFragment
-                        FullscreenProfileImageFragment fullscreenProfileImageFragment = FullscreenProfileImageFragment.newInstance(account.getImageProfilePicUrl());
+
+                        FullscreenProfileImageFragment fullscreenProfileImageFragment = null;
+
+                        if (account.getImageThumbnail() != null) {
+                            // new fullscreenImageFragment with image profile as string
+                            fullscreenProfileImageFragment = FullscreenProfileImageFragment.newInstance(account.getImageThumbnail());
+                        } else {
+                            // new fullscreenImageFragment with image profile pic as url
+                            fullscreenProfileImageFragment = FullscreenProfileImageFragment.newInstance(account.getImageProfilePicUrl());
+                        }
 
                         // add fullscreenImageFragment to FragmentManager
                         FragmentHelper.addFragmentToContainer(fullscreenProfileImageFragment, ((AppCompatActivity) context).getSupportFragmentManager());
@@ -151,7 +175,7 @@ public class ListAdapterSearch extends ArrayAdapter<Object> {
                         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
-                                if (StorageHelper.checkIfAccountOrPostIsInFile(account, StorageHelper.filename_accounts, context)) { // old: StorageHelper.checkIfDataIsInFile(account.getStorageRep(), StorageHelper.filename_accounts, context)
+                                if (StorageHelper.checkIfAccountOrPostIsInFile(account, StorageHelper.filename_accounts, context)) {
 
                                     // final confirmation before removing
                                     adapterCallback.removeAccountFromStorage(account);

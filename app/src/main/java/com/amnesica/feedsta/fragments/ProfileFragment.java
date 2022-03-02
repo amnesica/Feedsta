@@ -1,5 +1,11 @@
 package com.amnesica.feedsta.fragments;
 
+import static android.view.View.GONE;
+import static androidx.core.content.ContextCompat.getSystemService;
+import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
+import static com.amnesica.feedsta.helper.StaticIdentifier.permsWriteOnly;
+import static com.amnesica.feedsta.helper.StaticIdentifier.query_id;
+
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.ClipData;
@@ -56,7 +62,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
@@ -65,12 +70,6 @@ import java.util.Date;
 import java.util.Objects;
 
 import in.srain.cube.views.GridViewWithHeaderAndFooter;
-
-import static android.view.View.GONE;
-import static androidx.core.content.ContextCompat.getSystemService;
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsWriteOnly;
-import static com.amnesica.feedsta.helper.StaticIdentifier.query_id;
 
 /**
  * Fragment for displaying a profile
@@ -141,7 +140,8 @@ public class ProfileFragment extends Fragment {
                         username,
                         "",
                         false,
-                        "");
+                        "",
+                        null);
             } else {
                 account = (Account) getArguments().getSerializable("account");
             }
@@ -243,6 +243,7 @@ public class ProfileFragment extends Fragment {
     /**
      * Creates a specific string to copy to clipboard.
      * Adds advertising string or returns just the url
+     *
      * @return String
      */
     private CharSequence createUrlForCopyAccount() {
@@ -458,47 +459,51 @@ public class ProfileFragment extends Fragment {
         });
 
         // setup buttonFollow onClickListener
-        setButtonFollowOnClickListener();
-    }
-
-    /**
-     * Sets buttonFollow onClickListener
-     */
-    private void setButtonFollowOnClickListener() {
         buttonFollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (StorageHelper.checkIfAccountOrPostIsInFile(account, StorageHelper.filename_accounts, requireContext())) { // old: StorageHelper.checkIfDataIsInFile(account.getStorageRep(), StorageHelper.filename_accounts, getContext())
-
-                    // remove account from list
-                    Boolean removed = StorageHelper.removeAccountFromInternalStorage(account, requireContext());
-
-                    // update button
-                    if (removed) {
-                        followButtonToFollow();
-                    } else {
-                        followButtonToUnfollow();
-                    }
-                } else { // add account to list
-                    // insert account in internal storage on device
-                    boolean saved = false;
-                    if (getContext() != null) {
-                        try {
-                            saved = StorageHelper.storeAccountInInternalStorage(account, requireContext());
-                        } catch (IOException e) {
-                            Log.d("ProfileFragment", Log.getStackTraceString(e));
-                        }
-                    }
-
-                    // update button
-                    if (saved) {
-                        followButtonToUnfollow();
-                    } else {
-                        followButtonToFollow();
-                    }
-                }
+                followAccount();
             }
         });
+    }
+
+    /**
+     * Saves an account in internal storage in its proper representation (StorageRep)
+     */
+    private void followAccount() {
+        if (getContext() != null) {
+
+            if (!StorageHelper.checkIfAccountOrPostIsInFile(account, StorageHelper.filename_accounts, requireContext())) {
+                // insert account in internal storage on device
+                boolean saved = false;
+
+                try {
+                    saved = StorageHelper.storeAccountInInternalStorage(account, requireContext());
+                } catch (Exception e) {
+                    Log.d("ProfileFragment", Log.getStackTraceString(e));
+
+                    // handle failed storing of account with note to user
+                    FragmentHelper.notifyUserOfProblem(this, Error.ACCOUNT_COULD_NOT_BE_FOLLOWED);
+                }
+
+                // update button
+                if (saved) {
+                    followButtonToUnfollow();
+                } else {
+                    followButtonToFollow();
+                }
+            } else {
+                // remove account from list
+                Boolean removed = StorageHelper.removeAccountFromInternalStorage(account, requireContext());
+
+                // update button
+                if (removed) {
+                    followButtonToFollow();
+                } else {
+                    followButtonToUnfollow();
+                }
+            }
+        }
     }
 
     /**
@@ -523,8 +528,16 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (!isImageFitToScreen) {
-                    // new fullscreenFragment
-                    FullscreenProfileImageFragment fullscreenProfileImageFragment = FullscreenProfileImageFragment.newInstance(account.getImageProfilePicUrl());
+                    // new fullscreenImageFragment
+                    FullscreenProfileImageFragment fullscreenProfileImageFragment;
+
+                    if (account.getImageThumbnail() != null) {
+                        // new fullscreenImageFragment with image profile as string
+                        fullscreenProfileImageFragment = FullscreenProfileImageFragment.newInstance(account.getImageThumbnail());
+                    } else {
+                        // new fullscreenImageFragment with image profile pic as url
+                        fullscreenProfileImageFragment = FullscreenProfileImageFragment.newInstance(account.getImageProfilePicUrl());
+                    }
 
                     // add fragment to container
                     FragmentHelper.addFragmentToContainer(fullscreenProfileImageFragment, requireActivity().getSupportFragmentManager());
@@ -738,6 +751,7 @@ public class ProfileFragment extends Fragment {
 
         /**
          * Fetches data from a page of an url and sets information to account
+         *
          * @param url URL
          */
         private void fetchPageDataOfUrl(URL url) {
@@ -880,6 +894,7 @@ public class ProfileFragment extends Fragment {
 
         /**
          * Fetches data from an edge of an url and creates new posts
+         *
          * @param url URL
          */
         private void fetchEdgeData(URL url, JSONArray edges, int startIndex, int endIndex) {
@@ -899,10 +914,7 @@ public class ProfileFragment extends Fragment {
 
                                 //check if post is sidecar
                                 String __typename = node.getString("__typename");
-                                boolean is_sidecar = false;
-                                if (__typename.equals("GraphSidecar")) {
-                                    is_sidecar = true;
-                                }
+                                boolean is_sidecar = __typename.equals("GraphSidecar");
 
                                 //get ownerId
                                 String ownerId = node.getJSONObject("owner").getString("id");

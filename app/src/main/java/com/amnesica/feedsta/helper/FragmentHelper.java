@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -36,8 +37,12 @@ import com.annimon.stream.Stream;
 import com.annimon.stream.function.Predicate;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -271,6 +276,10 @@ public class FragmentHelper {
                     alertText = fragment.requireContext().getResources().getString(R.string.post_not_available_anymore);
                     textViewLabel = fragment.requireContext().getResources().getString(R.string.post_not_available_anymore_label);
                     textViewLabelAction = fragment.requireContext().getResources().getString(R.string.more_info);
+                } else if (errorMessage.equals(Error.ACCOUNT_COULD_NOT_BE_FOLLOWED.toString())) {
+                    alertText = fragment.requireContext().getResources().getString(R.string.account_could_not_be_followed);
+                    textViewLabel = fragment.requireContext().getResources().getString(R.string.account_could_not_be_followed);
+                    textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
                 }
 
                 // show alert as custom snackBar
@@ -348,10 +357,10 @@ public class FragmentHelper {
                 });
             }
 
-
             // set action with action "OK" and no dialog afterwards
             if (error.equals(Error.NO_INTERNET_CONNECTION.toString()) ||
-                    error.equals(Error.UPDATING_BOOKMARKS_CATEGORY_FAILED.toString())) {
+                    error.equals(Error.UPDATING_BOOKMARKS_CATEGORY_FAILED.toString()) ||
+                    error.equals(Error.ACCOUNT_COULD_NOT_BE_FOLLOWED.toString())) {
                 if (fragment.isAdded()) {
                     fragment.requireActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -762,5 +771,32 @@ public class FragmentHelper {
                 }
             });
         }
+    }
+
+    /**
+     * Returns a base64 encoded string of an image from url.
+     * Hint: Method exists in StorageHelper as well, but
+     * cannot be used here because this would be an async task
+     * call inside an async task call, hence the "duplicated"
+     * method!
+     *
+     * @param url String
+     * @return String
+     * @throws Exception Exception
+     */
+    public static String getBase64EncodedImage(String url) throws Exception {
+        if (url == null) return null;
+
+        URL imageUrl = new URL(url);
+        URLConnection ucon = imageUrl.openConnection();
+        InputStream is = ucon.getInputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int read = 0;
+        while ((read = is.read(buffer, 0, buffer.length)) != -1) {
+            baos.write(buffer, 0, read);
+        }
+        baos.flush();
+        return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
     }
 }

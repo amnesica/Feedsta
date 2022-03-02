@@ -43,7 +43,7 @@ import java.util.Collections;
  */
 @SuppressWarnings("deprecation")
 public class FollowingFragment extends Fragment implements AdapterCallback {
-    
+
     // view stuff
     private ListView listViewFollowedAccounts;
     private TextView textNoAccounts;
@@ -91,6 +91,7 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
 
     /**
      * Sets up the listView of followed accounts and sets the OnClickListener to go to a specific profile
+     *
      * @param lvFollowedAccounts ListView
      */
     private void setupListViewWithAdapterAndOnClickListener(ListView lvFollowedAccounts) {
@@ -218,6 +219,7 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
 
     /**
      * Removes an account from storage
+     *
      * @param account Account
      */
     @Override
@@ -291,6 +293,7 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
     /**
      * Checks internet connection first and updates the thumbnail urls of the followed accounts
      * if bLoadUpdatedUrls is true. Shows dialog that this is a long running operation
+     *
      * @param bLoadUpdatedUrls boolean, if urls of thumbnails of accounts should be refreshed
      */
     private void checkInternetConnectionAndUpdateThumbnailUrl(boolean bLoadUpdatedUrls) {
@@ -351,6 +354,7 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
     /**
      * Shows a dialog to confirm override of accounts in storage after refresh could not refresh
      * some accounts
+     *
      * @param fragment FollowingFragment
      */
     private void showConfirmationDialogAndOverrideAccountsRefresh(final FollowingFragment fragment) {
@@ -503,8 +507,13 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
     }
 
     /**
-     * Updates the thumbnail url of followed accounts because they change over time
+     * Updates the thumbnail url of followed accounts because they change over time.
+     * Hint/Explanation: With the new approach of storing the thumbnail image as a string,
+     * this functionality is deprecated and is not necessary for future installations.
+     * However, this functionality is needed for existing installations and existing
+     * bookmarks (legacy functionality)
      */
+    @Deprecated
     private static class UpdateThumbnailURL extends AsyncTask<Void, Integer, Void> {
         private final WeakReference<FollowingFragment> fragmentReference;
         NetworkHandler sh;
@@ -567,6 +576,10 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
                                         // set new url
                                         followedAccountUpdated.setImageProfilePicUrl(newThumbnailUrl);
 
+                                        // get and set new thumbnail as string with new url
+                                        String newImageThumbnail = FragmentHelper.getBase64EncodedImage(newThumbnailUrl);
+                                        followedAccountUpdated.setImageThumbnail(newImageThumbnail);
+
                                         // publish progress -> not real progress here -> Savings missing here
                                         publishProgress(editedItems += 1);
                                     } else {
@@ -575,8 +588,12 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
                                         // add failed account to list
                                         fragment.listAccountFailedRefresh.add(followedAccountUpdated);
                                     }
-                                } catch (JSONException e) {
+                                } catch (Exception e) {
                                     fragment.somethingWentWrong = true;
+
+                                    // add failed account to list
+                                    fragment.listAccountFailedRefresh.add(followedAccountUpdated);
+
                                     Log.d("FollowingFragment", Log.getStackTraceString(e));
                                 }
                             }
@@ -637,6 +654,7 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
 
         /**
          * Gets new url for thumbnail of followed account
+         *
          * @param url url to fetch from
          * @return new url of thumbnail as String
          * @throws JSONException JSONException

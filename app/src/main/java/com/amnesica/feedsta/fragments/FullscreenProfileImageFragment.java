@@ -1,6 +1,7 @@
 package com.amnesica.feedsta.fragments;
 
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,12 +40,23 @@ public class FullscreenProfileImageFragment extends Fragment {
         // get image view
         final ImageView imageProfilePicFullscreen = v.findViewById(R.id.imageProfilePicFullscreen);
 
-        // load image with glide
-        Glide.with(this)
-                .load(profileImageUrl)
-                .error(R.drawable.placeholder_image_post_error)
-                .dontAnimate()
-                .into(imageProfilePicFullscreen);
+        // load image with url or from base64 encoded string glide
+        if (!profileImageUrl.startsWith("https://instagram")) {
+            // load image into view
+            Glide.with(this)
+                    .asBitmap()
+                    .load(Base64.decode(profileImageUrl, Base64.DEFAULT))
+                    .error(R.drawable.placeholder_image_post_error)
+                    .dontAnimate()
+                    .into(imageProfilePicFullscreen);
+        } else {
+            // load image with url into view (url starts with "https://instagram")
+            Glide.with(this)
+                    .load(profileImageUrl)
+                    .error(R.drawable.placeholder_image_post_error)
+                    .dontAnimate()
+                    .into(imageProfilePicFullscreen);
+        }
 
         // set onClickListener for closing fragment
         imageProfilePicFullscreen.setOnClickListener(new View.OnClickListener() {

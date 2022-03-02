@@ -17,14 +17,16 @@ public class AccountStorage implements Serializable {
     private String username;
     private String fullName;
     private Boolean is_private;
+    private String imageThumbnail;
 
     // constructor
-    public AccountStorage(String id, String imageProfilePicUrl, String username, String fullName, Boolean is_private) {
+    public AccountStorage(String id, String imageProfilePicUrl, String username, String fullName, Boolean is_private, String imageThumbnail) {
         this.id = id;
         this.imageProfilePicUrl = imageProfilePicUrl;
         this.username = username;
         this.fullName = fullName;
         this.is_private = is_private;
+        this.imageThumbnail = imageThumbnail;
     }
 
     public String getId() {
@@ -67,20 +69,24 @@ public class AccountStorage implements Serializable {
         this.is_private = is_private;
     }
 
+    public String getImageThumbnail() {
+        return imageThumbnail;
+    }
+
+    public void setImageThumbnail(String imageThumbnail) {
+        this.imageThumbnail = imageThumbnail;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AccountStorage that = (AccountStorage) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(imageProfilePicUrl, that.imageProfilePicUrl) &&
-                Objects.equals(username, that.username) &&
-                Objects.equals(fullName, that.fullName) &&
-                Objects.equals(is_private, that.is_private);
+        return Objects.equals(id, that.id) && Objects.equals(imageProfilePicUrl, that.imageProfilePicUrl) && Objects.equals(username, that.username) && Objects.equals(fullName, that.fullName) && Objects.equals(is_private, that.is_private) && Objects.equals(imageThumbnail, that.imageThumbnail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, imageProfilePicUrl, username, fullName, is_private);
+        return Objects.hash(id, imageProfilePicUrl, username, fullName, is_private, imageThumbnail);
     }
 }

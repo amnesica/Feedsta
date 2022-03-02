@@ -1,5 +1,7 @@
 package com.amnesica.feedsta.fragments;
 
+import static android.view.View.GONE;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -35,8 +37,6 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-
-import static android.view.View.GONE;
 
 /**
  * Fragment for searching accounts
@@ -379,6 +379,7 @@ public class SearchFragment extends Fragment {
 
         /**
          * Fetch account data from JSONObject
+         *
          * @param jsonObj JSONObject
          */
         private void fetchDataOfUrlForAccount(JSONObject jsonObj) {
@@ -405,6 +406,7 @@ public class SearchFragment extends Fragment {
 
         /**
          * Fetch hashtag data from JSONObject
+         *
          * @param jsonObj JSONObject
          */
         private void fetchDataOfUrlForHashtag(JSONObject jsonObj) {
@@ -455,7 +457,8 @@ public class SearchFragment extends Fragment {
                                     user.getString("username"),
                                     user.getString("full_name"),
                                     user.getBoolean("is_private"),
-                                    user.getString("pk")); //pk is id
+                                    user.getString("pk"), //pk is id
+                                    null);
 
                             //add verified status here
                             account.setIs_verified(user.getBoolean("is_verified"));

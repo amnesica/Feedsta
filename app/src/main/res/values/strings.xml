@@ -236,4 +236,5 @@
     <string name="dialog_usage_note_yes">Yes, I\'ve read the note</string>
     <string name="dialog_usage_note_exit_app">No, let\'s stop here</string>
     <string name="post_was_not_saved">Post could not be saved</string>
+    <string name="account_could_not_be_followed">Account could not be followed.</string>
 </resources>

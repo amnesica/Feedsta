@@ -405,7 +405,8 @@ public class PostFragment extends Fragment implements FragmentCallback {
                                 commentToGoTo.getUsername(),
                                 "",
                                 false,
-                                commentToGoTo.getId());
+                                commentToGoTo.getId(),
+                                null);
                         // go to profile
                         goToProfileFragment(account);
                     }
@@ -482,7 +483,8 @@ public class PostFragment extends Fragment implements FragmentCallback {
                         post.getUsername(),
                         "",
                         false,
-                        post.getOwnerId());
+                        post.getOwnerId(),
+                        null);
 
                 goToProfileFragment(accountToGoTo);
             }
@@ -532,6 +534,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
     /**
      * Creates a specific string to copy to clipboard.
      * Adds advertising string or returns just the url
+     *
      * @return String
      */
     private String createUrlForCopyPost() {
@@ -821,6 +824,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
     /**
      * Shows a custom snackbar on the bottom of the post
+     *
      * @param specificText String to display
      */
     @SuppressLint("SetTextI18n")
@@ -1328,6 +1332,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
     /**
      * Sets a new category (collection) to a post
+     *
      * @param category String
      * @param editMode EditBookmarksType
      */
@@ -1819,9 +1824,10 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
         /**
          * Fetches comments from a post
-         * @param edges JSONArray
+         *
+         * @param edges      JSONArray
          * @param startIndex int
-         * @param endIndex int
+         * @param endIndex   int
          */
         private void fetchEdgeDataComments(JSONArray edges, int startIndex, int endIndex) {
             if (!isCancelled()) {

@@ -21,21 +21,23 @@ public class Account implements Serializable {
     private String external_url;
     private int itemCount;
     private Boolean is_verified = false;
+    private String imageThumbnail;
 
     // constructor
-    public Account(String imageProfilePicUrl, String username, String fullName, Boolean is_private, String id) {
+    public Account(String imageProfilePicUrl, String username, String fullName, Boolean is_private, String id, String imageThumbnail) {
         this.imageProfilePicUrl = imageProfilePicUrl;
         this.username = username;
         this.fullName = fullName;
         this.is_private = is_private;
         this.id = id;
+        this.imageThumbnail = imageThumbnail;
     }
 
     // Minimal representation of account to store in internal storage
     // hint: do not change!
     @Deprecated
     public Account getStorageRep() {
-        return new Account(imageProfilePicUrl, username, fullName, is_private, id);
+        return new Account(imageProfilePicUrl, username, fullName, is_private, id, imageThumbnail);
     }
 
     public String getId() {
@@ -124,5 +126,13 @@ public class Account implements Serializable {
 
     public void setIs_verified(Boolean is_verified) {
         this.is_verified = is_verified;
+    }
+
+    public String getImageThumbnail() {
+        return imageThumbnail;
+    }
+
+    public void setImageThumbnail(String imageThumbnail) {
+        this.imageThumbnail = imageThumbnail;
     }
 }

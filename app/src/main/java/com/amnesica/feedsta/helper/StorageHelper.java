@@ -309,9 +309,9 @@ public class StorageHelper {
      * @param context  context
      * @param filename filename
      * @return true, if storing was successful
-     * @throws IOException IOException
+     * @throws Exception Exception
      */
-    public static Boolean storeAccountListInInternalStorage(ArrayList<Account> accounts, Context context, String filename) throws IOException {
+    public static Boolean storeAccountListInInternalStorage(ArrayList<Account> accounts, Context context, String filename) throws Exception {
         File file = new File(context.getFilesDir(), filename);
         byte[] bytesToWrite;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -323,7 +323,8 @@ public class StorageHelper {
                     account.getImageProfilePicUrl(),
                     account.getUsername(),
                     account.getFullName(),
-                    account.getIs_private()));
+                    account.getIs_private(),
+                    account.getImageThumbnail()));
         }
 
         ObjectOutputStream out;
@@ -398,13 +399,14 @@ public class StorageHelper {
 
     /**
      * Stores an account in AccountStorage representation in internal storage
+     * and adds the thumbnail image as string (network call)
      *
      * @param accountToStore account to be stored
      * @param context        context
      * @return true if storing was successful
      * @throws IOException IOException
      */
-    public static Boolean storeAccountInInternalStorage(Account accountToStore, Context context) throws IOException {
+    public static Boolean storeAccountInInternalStorage(Account accountToStore, Context context) throws Exception {
         String filename = filename_accounts;
         ArrayList<AccountStorage> readAccounts = null;
 
@@ -430,12 +432,17 @@ public class StorageHelper {
 
         // if this boolean is false, bytesToWrite is null -> nothing is stored!
         if (bAccountShouldBeStored && readAccounts != null) {
+
+            // get image as Base64 encoded string
+            String imageThumbnail = getBase64EncodedImage(accountToStore.getImageProfilePicUrl());
+
             // add account to list in AccountStorage representation
             readAccounts.add(new AccountStorage(accountToStore.getId(),
                     accountToStore.getImageProfilePicUrl(),
                     accountToStore.getUsername(),
                     accountToStore.getFullName(),
-                    accountToStore.getIs_private()));
+                    accountToStore.getIs_private(),
+                    imageThumbnail));
 
             ObjectOutputStream out;
             out = new ObjectOutputStream(bos);
@@ -459,7 +466,8 @@ public class StorageHelper {
 
     /**
      * Stores an post in PostStorage representation in internal storage
-     * (adds to list and does not edit specific post!!)
+     * (adds to list and does not edit specific post!!). Adds the
+     * thumbnail image as string (network call)
      *
      * @param postToStore post to be stored
      * @param context     context
@@ -627,7 +635,8 @@ public class StorageHelper {
                             accountStorage.getUsername(),
                             accountStorage.getFullName(),
                             accountStorage.getIs_private(),
-                            accountStorage.getId()));
+                            accountStorage.getId(),
+                            accountStorage.getImageThumbnail()));
                 }
 
                 // for normal behaviour in feedFragment to display text

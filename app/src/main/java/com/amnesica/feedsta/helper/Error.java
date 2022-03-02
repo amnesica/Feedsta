@@ -9,4 +9,5 @@ public enum Error {
     UPDATING_BOOKMARKS_CATEGORY_FAILED,         // something went wrong when trying to update category of bookmarked post
     POST_NOT_AVAILABLE_ANYMORE,                 // post is not available anymore, invoked when post is null and is set to adapter
     NOT_ALL_ACCOUNTS_COULD_BE_QUERIED,          // when updating the feed and not all accounts could be queried
+    ACCOUNT_COULD_NOT_BE_FOLLOWED               // account could not get followed, e.g. when saving thumbnail image failed during process
 }
