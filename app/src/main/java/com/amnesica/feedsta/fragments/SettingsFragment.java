@@ -1,5 +1,8 @@
 package com.amnesica.feedsta.fragments;
 
+import static com.amnesica.feedsta.helper.StaticIdentifier.permsReadAndWrite;
+import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,9 +26,6 @@ import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.StorageHelper;
 
 import java.io.File;
-
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsReadAndWrite;
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
 
 /**
  * Fragment for the settings

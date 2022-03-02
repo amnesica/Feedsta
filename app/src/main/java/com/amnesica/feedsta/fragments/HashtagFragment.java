@@ -1,5 +1,8 @@
 package com.amnesica.feedsta.fragments;
 
+import static android.view.View.GONE;
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -48,9 +51,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import in.srain.cube.views.GridViewWithHeaderAndFooter;
-
-import static android.view.View.GONE;
-import static androidx.core.content.ContextCompat.getSystemService;
 
 /**
  * Fragment for displaying posts of an hashtag in a gridView
@@ -189,6 +189,7 @@ public class HashtagFragment extends Fragment {
     /**
      * Creates a specific string to copy to clipboard.
      * Adds advertising string or returns just the url
+     *
      * @return String
      */
     private CharSequence createUrlForCopyHashtag() {
@@ -552,10 +553,7 @@ public class HashtagFragment extends Fragment {
                                 JSONObject node = edge.getJSONObject("node");
 
                                 // check if post is sidecar
-                                boolean is_sidecar = false;
-                                if (node.getString("__typename").equals("GraphSidecar")) {
-                                    is_sidecar = true;
-                                }
+                                boolean is_sidecar = node.getString("__typename").equals("GraphSidecar");
 
                                 // get caption of post
                                 JSONArray edgesCaption = node

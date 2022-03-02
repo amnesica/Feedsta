@@ -1,5 +1,7 @@
 package com.amnesica.feedsta.adapter;
 
+import static android.view.View.GONE;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -18,8 +20,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
-
-import static android.view.View.GONE;
 
 /**
  * Adapter for displaying comments in PostFragment

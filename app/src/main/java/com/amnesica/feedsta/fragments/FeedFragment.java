@@ -900,10 +900,7 @@ public class FeedFragment extends Fragment {
                             JSONObject edge = edges.getJSONObject(i);
 
                             // check if post is sidecar
-                            boolean is_sidecar = false;
-                            if (edge.getJSONObject("node").getString("__typename").equals("GraphSidecar")) {
-                                is_sidecar = true;
-                            }
+                            boolean is_sidecar = edge.getJSONObject("node").getString("__typename").equals("GraphSidecar");
 
                             // create post with minimal information (initialize post)
                             Post post = new Post(

@@ -1,5 +1,7 @@
 package com.amnesica.feedsta.adapter;
 
+import static android.view.View.VISIBLE;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -34,8 +36,6 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
-
-import static android.view.View.VISIBLE;
 
 /**
  * Displays a video in a sideCar

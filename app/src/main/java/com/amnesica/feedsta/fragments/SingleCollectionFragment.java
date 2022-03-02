@@ -1,5 +1,8 @@
 package com.amnesica.feedsta.fragments;
 
+import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
+import static com.amnesica.feedsta.helper.StaticIdentifier.permsWriteOnly;
+
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -34,9 +37,6 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsWriteOnly;
 
 /**
  * Fragment for displaying bookmarked posts in a collection
@@ -269,6 +269,7 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
 
     /**
      * Moves bookmarks to other collection (other category)
+     *
      * @param category name of new collection
      * @param editMode EditBookmarksType
      */
