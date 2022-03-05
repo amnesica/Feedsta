@@ -25,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -449,6 +450,9 @@ public class PostFragment extends Fragment implements FragmentCallback {
         imagePost = header.findViewById(R.id.singleImagePost);
         buttonBookmark = header.findViewById(R.id.buttonBookmark);
         viewPager = header.findViewById(R.id.viewpagerPost);
+
+        // make links highlighted and clickable in textView
+        textCaption.setMovementMethod(LinkMovementMethod.getInstance());
 
         // on click listener to show post image fullscreen to zoom into image
         imagePost.setOnClickListener(new View.OnClickListener() {
@@ -2024,8 +2028,11 @@ public class PostFragment extends Fragment implements FragmentCallback {
                     // set Likes
                     fragment.textLikes.setText(fragment.getResources().getString(R.string.likes, fragment.post.getLikes()));
 
-                    // set caption
-                    fragment.textCaption.setText(fragment.post.getCaption());
+                    // set caption (with clickable links)
+                    if (fragment.post.getCaption() != null) {
+                        fragment.textCaption.setText(FragmentHelper.
+                                createSpannableStringWithClickableLinks(fragment.post.getCaption(), fragment));
+                    }
 
                     // set username or ownerId
                     if (fragment.post.getUsername() == null && fragment.post.getOwnerId() != null) {

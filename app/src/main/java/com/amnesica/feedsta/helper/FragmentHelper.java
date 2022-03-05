@@ -1,5 +1,6 @@
 package com.amnesica.feedsta.helper;
 
+import static android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
 import static android.view.View.GONE;
 
 import android.app.Activity;
@@ -11,6 +12,10 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Handler;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.TextPaint;
+import android.text.style.ClickableSpan;
 import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
@@ -20,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -30,6 +36,7 @@ import androidx.preference.PreferenceManager;
 
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.fragments.FeedFragment;
+import com.amnesica.feedsta.fragments.ProfileFragment;
 import com.amnesica.feedsta.models.Collection;
 import com.amnesica.feedsta.models.Post;
 import com.annimon.stream.Collectors;
@@ -47,6 +54,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Helper class for fragments with various methods
@@ -798,5 +807,74 @@ public class FragmentHelper {
         }
         baos.flush();
         return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+    }
+
+    /**
+     * Creates an SpannableStringBuilder with clickable links. A link is generated for every word
+     * which contains an "@" character (link to account via ProfileFragment). If something went
+     * wrong the input text is returned
+     *
+     * @param text     String
+     * @param fragment Fragment
+     * @return SpannableStringBuilder
+     */
+    public static SpannableStringBuilder createSpannableStringWithClickableLinks(String text, final Fragment fragment) {
+        if (text == null) return null;
+
+        SpannableStringBuilder ssb = new SpannableStringBuilder();
+        final Pattern pattern = Pattern.compile("(@([a-z0-9._]*))");
+
+        try {
+            // replace every word with "@" with clickable link
+            for (String word : text.split(" ")) {
+                if (word.contains("@")) {
+
+                    int indexStartAccountName = 0;
+                    int indexEndAccountName = 0;
+
+                    Matcher matcher = pattern.matcher(word);
+                    while (matcher.find()) {
+                        indexStartAccountName = matcher.start();
+                        indexEndAccountName = matcher.end();
+                    }
+
+                    // +1 because "@" should be omitted
+                    final String accountName = word.substring(indexStartAccountName + 1, indexEndAccountName);
+                    SpannableString spannableString = new SpannableString(word);
+
+                    ClickableSpan clickableSpan = new ClickableSpan() {
+                        @Override
+                        public void updateDrawState(@NonNull TextPaint ds) {
+                            super.updateDrawState(ds);
+                            // underline text
+                            ds.setUnderlineText(true);
+                        }
+
+                        @Override
+                        public void onClick(@NonNull View view) {
+                            view.invalidate();
+                            // new profileFragment
+                            ProfileFragment profileFragment = ProfileFragment.newInstance(accountName);
+
+                            // add fragment to container
+                            FragmentHelper.addFragmentToContainer(profileFragment, fragment.requireActivity().getSupportFragmentManager());
+                        }
+                    };
+
+                    spannableString.setSpan(clickableSpan, indexStartAccountName, indexEndAccountName, SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.append(spannableString);
+                } else {
+                    // insert normal word without link
+                    ssb.append(word);
+                }
+                ssb.append(" ");
+            }
+            return ssb;
+        } catch (Exception e) {
+            Log.d("FragmentHelper", Log.getStackTraceString(e));
+
+            // return text if something went wrong
+            return new SpannableStringBuilder(text);
+        }
     }
 }
