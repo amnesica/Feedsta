@@ -21,30 +21,13 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:id="@+id/textNoAccountsToFollow"
+        android:id="@+id/textFeedHint"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
-        android:text="@string/no_followed_accounts"
         android:textStyle="bold"
-        android:visibility="gone"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/feed_loading"
-        android:paddingTop="70dp"
-        android:layout_centerInParent="true"
-        android:id="@+id/textFeedLoading"
-        android:visibility="gone"/>
-
-    <ProgressBar
-        style="@style/Widget.AppCompat.ProgressBar"
-        android:id="@+id/progressBarFeed"
         android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        android:layout_margin="25dp" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"

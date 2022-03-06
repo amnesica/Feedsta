@@ -36,7 +36,7 @@
     <string name="video_saved">Video saved</string>
     <string name="image_saved">Image saved</string>
     <string name="likes">%1$s likes</string>
-    <string name="no_followed_accounts">Oops, looks like you\'re not following accounts yet.\nClick on the search icon to follow accounts\n and see their posts here. :-)</string>
+    <string name="no_followed_accounts">Oops, looks like you\'re not following accounts yet. Click on the search icon to follow accounts and see their posts here.</string>
     <string name="feed_loading">Feed is loading …</string>
     <string name="image_fullscreen">fullscreen image</string>
     <string name="private_account">Looks like this account is private.\nPosts can therefore not be displayed.</string>
@@ -237,4 +237,5 @@
     <string name="dialog_usage_note_exit_app">No, let\'s stop here</string>
     <string name="post_was_not_saved">Post could not be saved</string>
     <string name="account_could_not_be_followed">Account could not be followed.</string>
+    <string name="no_stored_posts_but_followed_accounts">Seems like there are no posts yet. Refresh to fetch posts from your followed accounts.</string>
 </resources>
