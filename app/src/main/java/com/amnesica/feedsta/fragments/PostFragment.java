@@ -598,7 +598,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
             // no comments on post
             try {
                 ListAdapterComment adapter = new ListAdapterComment(
-                        getContext(), R.layout.list_item_comment, new ArrayList<Comment>());
+                        getContext(), R.layout.list_item_comment, new ArrayList<Comment>(), this);
                 listComments.setAdapter(adapter);
             } catch (NullPointerException e) {
                 Log.d("PostFragment", Log.getStackTraceString(e));
@@ -1982,7 +1982,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
                             try {
                                 ListAdapterComment adapter = new ListAdapterComment(
-                                        fragment.getContext(), R.layout.list_item_comment, fragment.comments);
+                                        fragment.getContext(), R.layout.list_item_comment, fragment.comments, fragment);
                                 fragment.listComments.setAdapter(adapter);
                             } catch (NullPointerException e) {
                                 Log.d("PostFragment", Log.getStackTraceString(e));
@@ -1998,7 +1998,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                     } catch (NullPointerException e) {
                         try {
                             ListAdapterComment adapter = new ListAdapterComment(
-                                    fragment.getContext(), R.layout.list_item_comment, new ArrayList<Comment>());
+                                    fragment.getContext(), R.layout.list_item_comment, new ArrayList<Comment>(), fragment);
                             fragment.listComments.setAdapter(adapter);
                         } catch (NullPointerException ee) {
                             Log.d("PostFragment", Log.getStackTraceString(e));
@@ -2266,7 +2266,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
                             try {
                                 ListAdapterComment adapter = new ListAdapterComment(
-                                        fragment.getContext(), R.layout.list_item_comment, fragment.comments);
+                                        fragment.getContext(), R.layout.list_item_comment, fragment.comments, fragment);
                                 fragment.listComments.setAdapter(adapter);
                             } catch (NullPointerException e) {
                                 Log.d("PostFragment", Log.getStackTraceString(e));

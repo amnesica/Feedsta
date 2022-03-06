@@ -36,6 +36,7 @@ import androidx.preference.PreferenceManager;
 
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.fragments.FeedFragment;
+import com.amnesica.feedsta.fragments.HashtagFragment;
 import com.amnesica.feedsta.fragments.ProfileFragment;
 import com.amnesica.feedsta.models.Collection;
 import com.amnesica.feedsta.models.Post;
@@ -810,9 +811,9 @@ public class FragmentHelper {
     }
 
     /**
-     * Creates an SpannableStringBuilder with clickable links. A link is generated for every word
-     * which contains an "@" character (link to account via ProfileFragment). If something went
-     * wrong the input text is returned
+     * Creates an SpannableStringBuilder with clickable links to accounts and hashtags. A link
+     * is generated for every word which contains an "@" or "#" character. If
+     * something went wrong the input text is returned
      *
      * @param text     String
      * @param fragment Fragment
@@ -822,17 +823,18 @@ public class FragmentHelper {
         if (text == null) return null;
 
         SpannableStringBuilder ssb = new SpannableStringBuilder();
-        final Pattern pattern = Pattern.compile("(@([a-z0-9._]*))");
+        final Pattern patternAccount = Pattern.compile("(@([a-z0-9._]*))");
+        final Pattern patternHashtag = Pattern.compile("(#([A-Za-z0-9_]*))");
 
         try {
-            // replace every word with "@" with clickable link
+            // replace every word containing "@" or "#" with clickable link
             for (String word : text.split(" ")) {
                 if (word.contains("@")) {
-
+                    // add link to account
                     int indexStartAccountName = 0;
                     int indexEndAccountName = 0;
 
-                    Matcher matcher = pattern.matcher(word);
+                    Matcher matcher = patternAccount.matcher(word);
                     while (matcher.find()) {
                         indexStartAccountName = matcher.start();
                         indexEndAccountName = matcher.end();
@@ -862,6 +864,42 @@ public class FragmentHelper {
                     };
 
                     spannableString.setSpan(clickableSpan, indexStartAccountName, indexEndAccountName, SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.append(spannableString);
+                } else if (word.contains("#")) {
+                    // add link to hashtag
+                    int indexStartHashtagName = 0;
+                    int indexEndHashtagName = 0;
+
+                    Matcher matcher = patternHashtag.matcher(word);
+                    while (matcher.find()) {
+                        indexStartHashtagName = matcher.start();
+                        indexEndHashtagName = matcher.end();
+                    }
+
+                    // +1 because "#" should be omitted
+                    final String hashtagName = word.substring(indexStartHashtagName + 1, indexEndHashtagName);
+                    SpannableString spannableString = new SpannableString(word);
+
+                    ClickableSpan clickableSpan = new ClickableSpan() {
+                        @Override
+                        public void updateDrawState(@NonNull TextPaint ds) {
+                            super.updateDrawState(ds);
+                            // underline text
+                            ds.setUnderlineText(true);
+                        }
+
+                        @Override
+                        public void onClick(@NonNull View view) {
+                            view.invalidate();
+                            // new hashtagFragment
+                            HashtagFragment hashtagFragment = HashtagFragment.newInstance(hashtagName);
+
+                            // add fragment to container
+                            FragmentHelper.addFragmentToContainer(hashtagFragment, fragment.requireActivity().getSupportFragmentManager());
+                        }
+                    };
+
+                    spannableString.setSpan(clickableSpan, indexStartHashtagName, indexEndHashtagName, SPAN_EXCLUSIVE_EXCLUSIVE);
                     ssb.append(spannableString);
                 } else {
                     // insert normal word without link

@@ -13,7 +13,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.fragment.app.Fragment;
+
 import com.amnesica.feedsta.R;
+import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.models.Comment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -27,8 +30,11 @@ import java.util.ArrayList;
 @SuppressWarnings("NullableProblems")
 public class ListAdapterComment extends ArrayAdapter<Comment> {
 
-    public ListAdapterComment(Context context, int resource, ArrayList<Comment> comments) {
+    final Fragment fragment;
+
+    public ListAdapterComment(Context context, int resource, ArrayList<Comment> comments, Fragment fragment) {
         super(context, resource, comments);
+        this.fragment = fragment;
     }
 
     @SuppressLint("InflateParams")
@@ -73,7 +79,9 @@ public class ListAdapterComment extends ArrayAdapter<Comment> {
 
                 // set comment
                 if (comment.getText() != null) {
-                    textComment.setText(comment.getText());
+                    // make links clickable if necessary
+                    textComment.setText(FragmentHelper.createSpannableStringWithClickableLinks(
+                            comment.getText(), fragment));
                 } else {
                     textComment.setVisibility(GONE);
                 }
