@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // set theme (dark or light)
-        setThemeBasedOnNightMode();
+        setAppTheme();
 
         setContentView(R.layout.activity_main);
 
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // show usage note on startup if it was not already shown
-        if (!usageNoteWasShown()) {
+        if (!getBooleanFromSharedPreferences(getResources().getString(R.string.usage_note_was_shown), false)) {
             showUsageNote();
         }
     }
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.dialog_usage_note_yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         // save information that dialog was shown in shared preferences
-                        setUsageNoteWasShown();
+                        setBooleanInSharedPreferences(getResources().getString(R.string.usage_note_was_shown), true);
                     }
                 })
                 .setNegativeButton(R.string.dialog_usage_note_exit_app, new DialogInterface.OnClickListener() {
@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                         dialog.dismiss();
 
                         // save information that dialog was shown in shared preferences
-                        setUsageNoteWasShown();
+                        setBooleanInSharedPreferences(getResources().getString(R.string.usage_note_was_shown), true);
 
                         // exit app
                         finish();
@@ -216,30 +216,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Checks if usage note was already shown to user
+     * Gets the boolean value in SharedPreferences. If value does not exist in SharedPreferences
+     * fallbackResult will be returned as result
      *
+     * @param value String
      * @return boolean
      */
-    private boolean usageNoteWasShown() {
-        boolean usageNoteWasShown = false;
+    private boolean getBooleanFromSharedPreferences(final String value, final boolean fallbackResult) {
+        boolean result = false;
 
-        // get boolean from sharedPreferences to check if usage not was already shown
+        // get boolean from sharedPreferences
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (preferences != null) {
-            usageNoteWasShown = preferences.getBoolean("usageNoteWasShown", false);
+        if (preferences != null && value != null) {
+            result = preferences.getBoolean(value, fallbackResult);
         }
 
-        return usageNoteWasShown;
+        return result;
     }
 
     /**
-     * Sets the boolean in SharedPreferences that usage note was already shown to true
+     * Sets the boolean value in SharedPreferences
+     *
+     * @param value String
      */
-    private void setUsageNoteWasShown() {
+    private void setBooleanInSharedPreferences(final String value, final boolean result) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (preferences != null) {
+        if (preferences != null && value != null) {
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("usageNoteWasShown", true);
+            editor.putBoolean(value, result);
             editor.apply();
         }
     }
@@ -284,39 +288,44 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * if system is in night mode use DarkTheme otherwise use the app settings
+     * Set theme of the app (light or dark). If on first start of the app after install the system
+     * is in night/dark mode the app is also set to dark mode. On every app start afterwards the
+     * value stored in SharedPreference is used
      */
-    private void setThemeBasedOnNightMode() {
+    private void setAppTheme() {
+        if (getBooleanFromSharedPreferences(getResources().getString(R.string.first_start_of_app), true)) {
+            // on first app start set theme after system mode (light or dark)
+            setThemeBasedOnSystemMode();
+
+            // set value firstStartOfApp in SharedPreferences to false
+            setBooleanInSharedPreferences(getResources().getString(R.string.first_start_of_app), false);
+        } else {
+            // on subsequent start set theme after value in SharedPreferences
+            setThemeBasedOnValueInSharedPreferences();
+        }
+    }
+
+    /**
+     * If system is in night mode use DarkTheme and set value "darkMode" in SharedPreferences
+     */
+    private void setThemeBasedOnSystemMode() {
         // check if system is in android night mode -> DarkTheme
         int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
 
         if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
             //  Night mode is active, we're using dark theme
             setTheme(R.style.DarkTheme);
-            setThemeInAppSettingsToDark();
 
-        } else {
-            //  Night mode is not active, use the settings in app
-            setThemeBasedOnAppSettings();
+            // set value darkMode in SharedPreferences to true
+            setBooleanInSharedPreferences(getResources().getString(R.string.dark_mode), true);
         }
     }
 
     /**
-     * Sets the boolean of darkMode in sharedPreferences to true
+     * Gets the value of "darkMode" in SharedPreferences and sets the theme to DarkTheme or
+     * LightTheme based on this value
      */
-    private void setThemeInAppSettingsToDark() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (preferences != null) {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean("darkMode", true);
-            editor.apply();
-        }
-    }
-
-    /**
-     * look in app settings to set theme to DarkTheme or LightTheme
-     */
-    private void setThemeBasedOnAppSettings() {
+    private void setThemeBasedOnValueInSharedPreferences() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (preferences != null) {
             boolean bDarkMode;

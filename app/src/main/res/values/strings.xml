@@ -238,4 +238,6 @@
     <string name="post_was_not_saved">Post could not be saved</string>
     <string name="account_could_not_be_followed">Account could not be followed.</string>
     <string name="no_stored_posts_but_followed_accounts">Seems like there are no posts yet. Refresh to fetch posts from your followed accounts.</string>
+    <string name="first_start_of_app">firstStartOfApp</string>
+    <string name="usage_note_was_shown">usageNoteWasShown</string>
 </resources>
