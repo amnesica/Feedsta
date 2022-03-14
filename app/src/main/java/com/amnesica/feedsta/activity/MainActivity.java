@@ -40,7 +40,6 @@ import java.util.List;
 /**
  * MainActivity holds three main fragments and the BottomNavigationView
  */
-@SuppressWarnings("deprecation")
 public class MainActivity extends AppCompatActivity {
 
     // three main fragments
@@ -53,29 +52,29 @@ public class MainActivity extends AppCompatActivity {
     private final Fragment infoFragment = new AboutFragment();
     private final Fragment settingsHolderFragment = new SettingsHolderFragment();
 
-    // fragment manager and active fragment
+    // fragment manager
     private final FragmentManager fm = getSupportFragmentManager();
 
     /**
      * Setup navigation of BottomNavigationView
      */
-    private final BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+    private final BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
 
-        @SuppressLint("NonConstantResourceId")
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_feed:
-                    return FragmentHelper.loadAndShowFragment(feedFragment, fm);
-                case R.id.navigation_search:
-                    return FragmentHelper.loadAndShowFragment(searchFragment, fm);
-                case R.id.navigation_collections:
-                    return FragmentHelper.loadAndShowFragment(bookmarksFragment, fm);
-            }
-            return false;
-        }
-    };
+                @SuppressLint("NonConstantResourceId")
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.navigation_feed:
+                            return FragmentHelper.loadAndShowFragment(feedFragment, fm);
+                        case R.id.navigation_search:
+                            return FragmentHelper.loadAndShowFragment(searchFragment, fm);
+                        case R.id.navigation_collections:
+                            return FragmentHelper.loadAndShowFragment(bookmarksFragment, fm);
+                    }
+                    return false;
+                }
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,29 +100,22 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            fm.beginTransaction()
-                    .add(R.id.main_container, infoFragment, infoFragment.getClass().getSimpleName())
-                    .hide(infoFragment)
+            fm.beginTransaction().add(R.id.main_container, infoFragment,
+                                      infoFragment.getClass().getSimpleName()).hide(infoFragment).commit();
+            fm.beginTransaction().add(R.id.main_container, followingFragment,
+                                      followingFragment.getClass().getSimpleName()).hide(followingFragment)
                     .commit();
-            fm.beginTransaction()
-                    .add(R.id.main_container, followingFragment, followingFragment.getClass().getSimpleName())
-                    .hide(followingFragment)
+            fm.beginTransaction().add(R.id.main_container, settingsHolderFragment,
+                                      settingsHolderFragment.getClass().getSimpleName()).hide(
+                    settingsHolderFragment).commit();
+            fm.beginTransaction().add(R.id.main_container, bookmarksFragment,
+                                      bookmarksFragment.getClass().getSimpleName()).hide(bookmarksFragment)
                     .commit();
-            fm.beginTransaction()
-                    .add(R.id.main_container, settingsHolderFragment, settingsHolderFragment.getClass().getSimpleName())
-                    .hide(settingsHolderFragment)
+            fm.beginTransaction().add(R.id.main_container, searchFragment,
+                                      searchFragment.getClass().getSimpleName()).hide(searchFragment)
                     .commit();
-            fm.beginTransaction()
-                    .add(R.id.main_container, bookmarksFragment, bookmarksFragment.getClass().getSimpleName())
-                    .hide(bookmarksFragment)
-                    .commit();
-            fm.beginTransaction()
-                    .add(R.id.main_container, searchFragment, searchFragment.getClass().getSimpleName())
-                    .hide(searchFragment)
-                    .commit();
-            fm.beginTransaction()
-                    .add(R.id.main_container, feedFragment, feedFragment.getClass().getSimpleName())
-                    .commit();
+            fm.beginTransaction().add(R.id.main_container, feedFragment,
+                                      feedFragment.getClass().getSimpleName()).commit();
 
             // do all pending transactions do be able to get fragments with "fm.getFragments."
             fm.executePendingTransactions();
@@ -134,9 +126,8 @@ public class MainActivity extends AppCompatActivity {
         if (uri != null) {
             List<String> params = uri.getPathSegments();
 
-            if (params != null && params.size() >= 1 && params.get(0) != null &&
-                    !params.get(0).isEmpty() && (params.size() == 2) &&
-                    params.get(0).equals("p")) {
+            if (params != null && params.size() >= 1 && params.get(0) != null && !params.get(0).isEmpty() &&
+                (params.size() == 2) && params.get(0).equals("p")) {
 
                 // link is for post
                 String postShortcode = params.get(1);
@@ -145,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             } else if (params != null && params.size() >= 1 && params.get(params.size() - 1) != null &&
-                    !params.get(params.size() - 1).isEmpty() && !(params.size() > 1)) {
+                       !params.get(params.size() - 1).isEmpty() && !(params.size() > 1)) {
 
                 // link is for account
                 String username = params.get(params.size() - 1);
@@ -153,8 +144,8 @@ public class MainActivity extends AppCompatActivity {
                     goToProfileFragment(username);
                 }
 
-            } else if (params != null && params.size() == 3 && params.get(0).equals("explore") &&
-                    params.get(1).equals("tags") && !params.get(2).isEmpty()) {
+            } else if (params != null && params.size() == 3 && params.get(0).equals("explore") && params.get(
+                    1).equals("tags") && !params.get(2).isEmpty()) {
 
                 // link is for hashtag
                 String name = params.get(2);
@@ -165,7 +156,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // show usage note on startup if it was not already shown
-        if (!getBooleanFromSharedPreferences(getResources().getString(R.string.usage_note_was_shown), false)) {
+        if (!getBooleanFromSharedPreferences(getResources().getString(R.string.usage_note_was_shown),
+                                             false)) {
             showUsageNote();
         }
     }
@@ -178,26 +170,28 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder alertDialogBuilder;
 
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(MainActivity.this)
-                .setTitle(R.string.dialog_usage_note_title)
-                .setMessage(R.string.dialog_usage_note_message)
+        alertDialogBuilder = new AlertDialog.Builder(MainActivity.this).setTitle(
+                R.string.dialog_usage_note_title).setMessage(R.string.dialog_usage_note_message)
                 .setPositiveButton(R.string.dialog_usage_note_yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         // save information that dialog was shown in shared preferences
-                        setBooleanInSharedPreferences(getResources().getString(R.string.usage_note_was_shown), true);
+                        setBooleanInSharedPreferences(getResources().getString(R.string.usage_note_was_shown),
+                                                      true);
                     }
-                })
-                .setNegativeButton(R.string.dialog_usage_note_exit_app, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
+                }).setNegativeButton(R.string.dialog_usage_note_exit_app,
+                                     new DialogInterface.OnClickListener() {
+                                         public void onClick(DialogInterface dialog, int which) {
+                                             dialog.dismiss();
 
-                        // save information that dialog was shown in shared preferences
-                        setBooleanInSharedPreferences(getResources().getString(R.string.usage_note_was_shown), true);
+                                             // save information that dialog was shown in shared preferences
+                                             setBooleanInSharedPreferences(
+                                                     getResources().getString(R.string.usage_note_was_shown),
+                                                     true);
 
-                        // exit app
-                        finish();
-                    }
-                });
+                                             // exit app
+                                             finish();
+                                         }
+                                     });
 
         final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
 
@@ -288,9 +282,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Set theme of the app (light or dark). If on first start of the app after install the system
-     * is in night/dark mode the app is also set to dark mode. On every app start afterwards the
-     * value stored in SharedPreference is used
+     * Set theme of the app (light or dark). If on first start of the app after install the system is in
+     * night/dark mode the app is also set to dark mode. On every app start afterwards the value stored in
+     * SharedPreference is used
      */
     private void setAppTheme() {
         if (getBooleanFromSharedPreferences(getResources().getString(R.string.first_start_of_app), true)) {
@@ -322,8 +316,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Gets the value of "darkMode" in SharedPreferences and sets the theme to DarkTheme or
-     * LightTheme based on this value
+     * Gets the value of "darkMode" in SharedPreferences and sets the theme to DarkTheme or LightTheme based
+     * on this value
      */
     private void setThemeBasedOnValueInSharedPreferences() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -353,7 +347,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             //  if there is a fragment and the back stack of this fragment is not empty,
             //  then emulate 'onBackPressed' behaviour, because in default, it is not working
-            //  source: https://stackoverflow.com/questions/13418436/android-4-2-back-stack-behaviour-with-nested-fragments
+            //  source: https://stackoverflow.com/questions/13418436/android-4-2-back-stack-
+            //  behaviour-with-nested-fragments
             FragmentManager fm = getSupportFragmentManager();
 
             // check if backStack is empty, then show exit dialog
@@ -361,18 +356,19 @@ public class MainActivity extends AppCompatActivity {
             if (fm.getBackStackEntryCount() == 0) {
                 AlertDialog.Builder alertDialogBuilder;
                 // create alertDialog
-                alertDialogBuilder = new AlertDialog.Builder(this)
-                        .setTitle(getResources().getString(R.string.title_closing_application_dialog))
-                        .setMessage(getResources().getString(R.string.message_closing_application_dialog))
-                        .setPositiveButton(R.string.positive_button_closing_application_dialog, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                // finish task (do not remove from recent apps list)
-                                finish();
-                            }
-                        })
-                        .setNegativeButton(R.string.negative_button_closing_application_dialog, null);
+                alertDialogBuilder = new AlertDialog.Builder(this).setTitle(
+                        getResources().getString(R.string.title_closing_application_dialog)).setMessage(
+                        getResources().getString(R.string.message_closing_application_dialog))
+                        .setPositiveButton(R.string.positive_button_closing_application_dialog,
+                                           new DialogInterface.OnClickListener() {
+                                               @Override
+                                               public void onClick(DialogInterface dialog, int which) {
+                                                   dialog.dismiss();
+                                                   // finish task (do not remove from recent apps list)
+                                                   finish();
+                                               }
+                                           }).setNegativeButton(
+                                R.string.negative_button_closing_application_dialog, null);
 
                 final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
 

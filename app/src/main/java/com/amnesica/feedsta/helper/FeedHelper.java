@@ -1,7 +1,7 @@
 package com.amnesica.feedsta.helper;
 
 /**
- * Helper for setting important values on a single endpoint
+ * Helper for setting important values for feed
  */
 public class FeedHelper {
     // amount of posts to be fetched from a single account in feed

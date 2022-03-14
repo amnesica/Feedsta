@@ -17,10 +17,9 @@ import com.amnesica.feedsta.helper.FragmentHelper;
 import java.lang.ref.WeakReference;
 
 /**
- * Fragment is the main container for the settings fragment and displays the toolbar.
- * hint: otherwise toolbar cannot be shown
+ * Fragment is the main container for the settings fragment and holds the toolbar. Hint: otherwise toolbar
+ * cannot be shown!
  */
-@SuppressWarnings("deprecation")
 public class SettingsHolderFragment extends Fragment {
 
     public SettingsHolderFragment() {
@@ -29,29 +28,31 @@ public class SettingsHolderFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
 
         // inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_settings_holder, container, false);
+        View view = inflater.inflate(R.layout.fragment_settings_holder, container, false);
 
-        // setup toolbar
-        Toolbar toolbar = v.findViewById(R.id.toolbar);
-        setupToolbar(toolbar);
+        setupToolbar(view);
 
         // set prefs content as the main content
         assert getFragmentManager() != null;
         getFragmentManager().beginTransaction().replace(R.id.pref_content, new SettingsFragment()).commit();
 
-        return v;
+        return view;
     }
 
 
     /**
-     * Sets up the toolbar with NavigationOnClickListener and MenuItemClickListener
+     * Sets up the toolbar with menu
      *
-     * @param toolbar toolbar
+     * @param view View
      */
-    private void setupToolbar(Toolbar toolbar) {
+    private void setupToolbar(View view) {
+        if (view == null) return;
+
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitle(getResources().getString(R.string.toolbar_title_settings));
         FragmentHelper.setupToolbarWithBackButton(toolbar, new WeakReference<>(SettingsHolderFragment.this));
         toolbar.inflateMenu(R.menu.menu_main);
@@ -59,13 +60,17 @@ public class SettingsHolderFragment extends Fragment {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.menu_action_followed_accounts) {
-                    FragmentHelper.loadAndShowFragment(requireActivity().getSupportFragmentManager().findFragmentByTag(FollowingFragment.class.getSimpleName()),
-                            requireActivity().getSupportFragmentManager());
+                    FragmentHelper.loadAndShowFragment(requireActivity().getSupportFragmentManager()
+                                                               .findFragmentByTag(FollowingFragment.class
+                                                                                          .getSimpleName()),
+                                                       requireActivity().getSupportFragmentManager());
                 } else if (item.getItemId() == R.id.menu_action_statistics_dialog) {
                     FragmentHelper.showStatisticsDialog(SettingsHolderFragment.this);
                 } else if (item.getItemId() == R.id.menu_info) {
-                    FragmentHelper.loadAndShowFragment(requireActivity().getSupportFragmentManager().findFragmentByTag(AboutFragment.class.getSimpleName()),
-                            requireActivity().getSupportFragmentManager());
+                    FragmentHelper.loadAndShowFragment(requireActivity().getSupportFragmentManager()
+                                                               .findFragmentByTag(
+                                                                       AboutFragment.class.getSimpleName()),
+                                                       requireActivity().getSupportFragmentManager());
                 } else if (item.getItemId() == R.id.menu_exit) {
                     requireActivity().finish();
                 }

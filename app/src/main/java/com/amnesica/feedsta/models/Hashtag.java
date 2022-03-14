@@ -5,7 +5,6 @@ import java.io.Serializable;
 /**
  * Represents a hashtag
  */
-@SuppressWarnings({"CanBeFinal"})
 public class Hashtag implements Serializable {
 
     // serialVersionUID (hint: same as computed! - use the one from the exception message)
@@ -18,7 +17,8 @@ public class Hashtag implements Serializable {
     private String search_result_subtitle;
 
     // constructor
-    public Hashtag(String name, int id, int media_count, String profile_pic_url, String search_result_subtitle) {
+    public Hashtag(String name, int id, int media_count, String profile_pic_url,
+                   String search_result_subtitle) {
         this.name = name;
         this.id = id;
         this.media_count = media_count;

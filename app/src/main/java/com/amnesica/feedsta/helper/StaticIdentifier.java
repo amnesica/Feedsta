@@ -12,7 +12,8 @@ public class StaticIdentifier {
 
     // permissions stuff
     public static final String[] permsWriteOnly = {"android.permission.WRITE_EXTERNAL_STORAGE"};
-    public static final String[] permsReadAndWrite = {"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE"};
+    public static final String[] permsReadAndWrite =
+            {"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE"};
     public static final int permsRequestCode = 200;
 
     // site to send get request to check internet availability

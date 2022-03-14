@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Minimal representation of account to store in internal storage
- * hint: do changes very carefully!
+ * Minimal representation of account to store in internal storage. Hint: do changes very carefully!
  */
 public class AccountStorage implements Serializable {
 
@@ -20,7 +19,8 @@ public class AccountStorage implements Serializable {
     private String imageThumbnail;
 
     // constructor
-    public AccountStorage(String id, String imageProfilePicUrl, String username, String fullName, Boolean is_private, String imageThumbnail) {
+    public AccountStorage(String id, String imageProfilePicUrl, String username, String fullName,
+                          Boolean is_private, String imageThumbnail) {
         this.id = id;
         this.imageProfilePicUrl = imageProfilePicUrl;
         this.username = username;
@@ -82,7 +82,10 @@ public class AccountStorage implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AccountStorage that = (AccountStorage) o;
-        return Objects.equals(id, that.id) && Objects.equals(imageProfilePicUrl, that.imageProfilePicUrl) && Objects.equals(username, that.username) && Objects.equals(fullName, that.fullName) && Objects.equals(is_private, that.is_private) && Objects.equals(imageThumbnail, that.imageThumbnail);
+        return Objects.equals(id, that.id) && Objects.equals(imageProfilePicUrl, that.imageProfilePicUrl) &&
+               Objects.equals(username, that.username) && Objects.equals(fullName, that.fullName) &&
+               Objects.equals(is_private, that.is_private) && Objects.equals(imageThumbnail,
+                                                                             that.imageThumbnail);
     }
 
     @Override

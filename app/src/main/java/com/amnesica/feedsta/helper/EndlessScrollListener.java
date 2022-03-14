@@ -6,7 +6,6 @@ import android.widget.GridView;
 /**
  * Helper for scrolling through gridViews
  */
-@SuppressWarnings("CanBeFinal")
 public class EndlessScrollListener implements AbsListView.OnScrollListener {
     private final GridView gridView;
     private final RefreshList refreshList;

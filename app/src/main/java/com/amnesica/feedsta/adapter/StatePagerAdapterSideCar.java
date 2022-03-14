@@ -1,6 +1,5 @@
 package com.amnesica.feedsta.adapter;
 
-import android.annotation.SuppressLint;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ViewGroup;
@@ -17,9 +16,8 @@ import java.util.HashMap;
 import java.util.Objects;
 
 /**
- * Adapter for displaying a sideCar with multiple images and/or videos
+ * Adapter for displaying a sidecar with multiple images and/or videos
  */
-@SuppressWarnings({"CanBeFinal"})
 public class StatePagerAdapterSideCar extends FragmentStatePagerAdapter {
 
     private final HashMap<Integer, ArrayList<String>> sidecarUrls;
@@ -55,7 +53,6 @@ public class StatePagerAdapterSideCar extends FragmentStatePagerAdapter {
         return fragmentToShow;
     }
 
-    @SuppressLint("LongLogTag")
     @Override
     public int getCount() {
         int getCount = 0;
@@ -67,15 +64,16 @@ public class StatePagerAdapterSideCar extends FragmentStatePagerAdapter {
         return getCount;
     }
 
+    @NonNull
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public Object instantiateItem(@NonNull ViewGroup container, int position) {
         Fragment fragment = (Fragment) super.instantiateItem(container, position);
         registeredFragments.put(position, fragment);
         return fragment;
     }
 
     @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
+    public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
         registeredFragments.remove(position);
         super.destroyItem(container, position, object);
     }

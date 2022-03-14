@@ -18,7 +18,7 @@ import com.github.piasy.biv.view.BigImageView;
 import java.io.File;
 
 /**
- * Fragment to show an image of a post fullscreen
+ * Fragment to show an image of a post fullscreen (used in PostFragment and PostImageFragment)
  */
 public class FullscreenImagePostFragment extends Fragment {
 
@@ -31,14 +31,13 @@ public class FullscreenImagePostFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         // load image with glide
         BigImageViewer.initialize(GlideImageLoader.with(requireContext()));
 
         // inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_fullscreen_post_image, container, false);
+        View view = inflater.inflate(R.layout.fragment_fullscreen_post_image, container, false);
 
         // to retrieve object in fragment
         String imageUrl = null;
@@ -47,7 +46,7 @@ public class FullscreenImagePostFragment extends Fragment {
         }
 
         // get image view
-        final BigImageView imagePostFullscreen = v.findViewById(R.id.imagePostFullscreen);
+        final BigImageView imagePostFullscreen = view.findViewById(R.id.imagePostFullscreen);
 
         // show image
         imagePostFullscreen.showImage(Uri.parse(imageUrl));
@@ -90,6 +89,6 @@ public class FullscreenImagePostFragment extends Fragment {
             }
         });
 
-        return v;
+        return view;
     }
 }

@@ -6,21 +6,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Interface used by CollectionsFragment to communicate with adapter
+ * Interface used by CollectionsFragment to communicate with adapter RecViewAdapterCollections
  */
 public interface OnItemClickListenerColl {
-    // simple click on collection to go to SingleCollectionFragment
+    /**
+     * Simple click on collection to go to SingleCollectionFragment
+     *
+     * @param position int
+     */
     void onItemClick(int position);
 
-    // remove all bookmarks of collection from storage
+    /**
+     * Remove all bookmarks of collection from storage
+     *
+     * @param listCollectionsToRemove ArrayList<Collection>
+     */
     void removeBookmarksOfCollectionFromStorage(ArrayList<Collection> listCollectionsToRemove);
 
-    // rename category in all bookmarks of category
+    /**
+     * Rename category in all bookmarks of category
+     *
+     * @param listCollectionsToRename List<Collection>
+     */
     void renameCategory(List<Collection> listCollectionsToRename);
 
-    // download all bookmarks in selected collections
+    /**
+     * Download all bookmarks in selected collections
+     *
+     * @param selectedCollections ArrayList<Collection>
+     */
     void downloadSelectedCollections(ArrayList<Collection> selectedCollections);
 
-    // reset category in all bookmarks of selected collection
+    /**
+     * Reset category in all bookmarks of selected collection
+     *
+     * @param listCollectionsToReset List<Collection>
+     */
     void resetCollectionInAllSelectedBookmarksOfCategory(List<Collection> listCollectionsToReset);
 }

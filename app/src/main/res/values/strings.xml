@@ -240,4 +240,9 @@
     <string name="no_stored_posts_but_followed_accounts">Seems like there are no posts yet. Refresh to fetch posts from your followed accounts.</string>
     <string name="first_start_of_app">firstStartOfApp</string>
     <string name="usage_note_was_shown">usageNoteWasShown</string>
+    <string name="removing_bookmarks_from_collection_failed">Removing bookmarks from this collection failed</string>
+    <string name="removing_bookmarks_from_selected_collections_failed">Removing bookmarks from selected collections failed</string>
+    <string name="successfully_removed_bookmarks_from_this_collection">Successfully removed bookmarks from this collection</string>
+    <string name="successfully_removed_bookmarks_from_selected_collections">Successfully removed bookmarks from selected collections</string>
+    <string name="click_here_to_rate_the_app">Click here to rate the app</string>
 </resources>

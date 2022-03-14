@@ -57,7 +57,6 @@ import java.util.concurrent.RejectedExecutionException;
 public class FeedFragment extends Fragment {
 
     // view stuff
-    private View view;
     private GridView gridView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView textFeedHint;
@@ -104,14 +103,12 @@ public class FeedFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         // inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_feed, container, false);
+        View view = inflater.inflate(R.layout.fragment_feed, container, false);
 
-        // set up toolbar
-        setUpToolbar();
+        setUpToolbar(view);
 
         // set up textFeedHint for showing messages related to feed
         textFeedHint = view.findViewById(R.id.textFeedHint);
@@ -119,11 +116,9 @@ public class FeedFragment extends Fragment {
             textFeedHint.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD);
         }
 
-        // setup gridView for the feed
-        setUpGridViewFeed();
+        setUpGridViewFeed(view);
 
-        // set swipe refresh action for fetching posts from accounts
-        setUpSwipeRefreshListener();
+        setupSwipeRefreshLayout(view);
 
         // new lists for threads when fetching posts
         finishedThreadsList = new ArrayList<>();
@@ -137,8 +132,12 @@ public class FeedFragment extends Fragment {
 
     /**
      * Sets up SwipeRefreshListener to load new posts after refresh action
+     *
+     * @param view View
      */
-    private void setUpSwipeRefreshListener() {
+    private void setupSwipeRefreshLayout(final View view) {
+        if (view == null) return;
+
         swipeRefreshLayout = view.findViewById(R.id.swipeRefresh);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -151,8 +150,12 @@ public class FeedFragment extends Fragment {
 
     /**
      * Sets up gridView for feed with onItemClickListener for posts to go to PostFragment
+     *
+     * @param view View
      */
-    private void setUpGridViewFeed() {
+    private void setUpGridViewFeed(final View view) {
+        if (view == null) return;
+
         gridView = view.findViewById(R.id.gridViewFeed);
 
         setAmountOfColumnsGridView();
@@ -168,7 +171,7 @@ public class FeedFragment extends Fragment {
 
                 // add fragment to container
                 FragmentHelper.addFragmentToContainer(postFragment,
-                        requireActivity().getSupportFragmentManager());
+                                                      requireActivity().getSupportFragmentManager());
             }
         });
     }
@@ -178,8 +181,7 @@ public class FeedFragment extends Fragment {
      */
     private void setAmountOfColumnsGridView() {
         // get the amount of columns from settings
-        SharedPreferences preferences =
-                PreferenceManager.getDefaultSharedPreferences(requireContext());
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
         if (preferences != null) {
             String amountColumns = preferences.getString("key_feed_list_columns", "2");
 
@@ -190,9 +192,13 @@ public class FeedFragment extends Fragment {
     }
 
     /**
-     * Sets up the toolbar
+     * Sets up the toolbar with menu and title
+     *
+     * @param view View
      */
-    private void setUpToolbar() {
+    private void setUpToolbar(final View view) {
+        if (view == null) return;
+
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitle(getResources().getString(R.string.toolbar_title_feed));
         toolbar.inflateMenu(R.menu.menu_main);
@@ -201,19 +207,21 @@ public class FeedFragment extends Fragment {
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.menu_action_followed_accounts) {
                     FragmentHelper.loadAndShowFragment(requireActivity().getSupportFragmentManager()
-                                    .findFragmentByTag(FollowingFragment.class.getSimpleName()),
-                            requireActivity().getSupportFragmentManager());
+                                                               .findFragmentByTag(FollowingFragment.class
+                                                                                          .getSimpleName()),
+                                                       requireActivity().getSupportFragmentManager());
                 } else if (item.getItemId() == R.id.menu_action_statistics_dialog) {
                     FragmentHelper.showStatisticsDialog(FeedFragment.this);
                 } else if (item.getItemId() == R.id.menu_settings) {
-                    FragmentHelper.loadAndShowFragment(
-                            requireActivity().getSupportFragmentManager()
-                                    .findFragmentByTag(SettingsHolderFragment.class.getSimpleName()),
-                            requireActivity().getSupportFragmentManager());
+                    FragmentHelper.loadAndShowFragment(requireActivity().getSupportFragmentManager()
+                                                               .findFragmentByTag(SettingsHolderFragment.class
+                                                                                          .getSimpleName()),
+                                                       requireActivity().getSupportFragmentManager());
                 } else if (item.getItemId() == R.id.menu_info) {
                     FragmentHelper.loadAndShowFragment(requireActivity().getSupportFragmentManager()
-                                    .findFragmentByTag(AboutFragment.class.getSimpleName()),
-                            requireActivity().getSupportFragmentManager());
+                                                               .findFragmentByTag(
+                                                                       AboutFragment.class.getSimpleName()),
+                                                       requireActivity().getSupportFragmentManager());
                 } else if (item.getItemId() == R.id.menu_exit) {
                     requireActivity().finish();
                 }
@@ -236,7 +244,7 @@ public class FeedFragment extends Fragment {
     }
 
     /**
-     * Sets text in center of fragment
+     * Sets text in center of fragment and makes it visible by set gridView visibility to gone
      *
      * @param text CharSequence
      */
@@ -251,6 +259,7 @@ public class FeedFragment extends Fragment {
      */
     private void stopAllAsyncTasks() {
         try {
+            // cancel all GetPostsFromAccount threads
             if (getPostsFromAccountThreadList != null && !getPostsFromAccountThreadList.isEmpty()) {
                 for (GetPostsFromAccount thread : getPostsFromAccountThreadList) {
                     if (thread != null) {
@@ -260,6 +269,7 @@ public class FeedFragment extends Fragment {
                 getPostsFromAccountThreadList.clear();
             }
 
+            // close all NetworkHandlers
             if (networkHandlersList != null && !networkHandlersList.isEmpty()) {
                 for (NetworkHandler sh : networkHandlersList) {
                     if (sh != null) {
@@ -278,7 +288,7 @@ public class FeedFragment extends Fragment {
     }
 
     /**
-     * Checks internet connection and notifies user if there is no connection. Starts the fetching
+     * Async task to check internet connection and notify user if there is no connection. Starts the fetching
      * at the end when internet is available. Otherwise error and stored posts will be shown
      */
     private static class CheckConnectionAndFetchPosts extends AsyncTask<Void, Void, Void> {
@@ -293,8 +303,7 @@ public class FeedFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (isCancelled())
-                return null;
+            if (isCancelled()) return null;
             // set boolean if internet is available
             isInternetAvailable = NetworkHandler.isInternetAvailable();
             return null;
@@ -303,13 +312,11 @@ public class FeedFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (isCancelled())
-                return;
+            if (isCancelled()) return;
 
             // get reference from fragment
             final FeedFragment fragment = fragmentReference.get();
-            if (fragment == null)
-                return;
+            if (fragment == null) return;
 
             if (isInternetAvailable) {
                 try {
@@ -324,15 +331,14 @@ public class FeedFragment extends Fragment {
 
                 // show posts from storage if there are any
                 if (fragment.getContext() != null) {
-                    fragment.posts = StorageHelper
-                            .readPostsFromInternalStorage(fragment.requireContext(),
-                                    StorageHelper.filename_posts);
+                    fragment.posts = StorageHelper.readPostsFromInternalStorage(fragment.requireContext(),
+                                                                                StorageHelper.filename_posts);
 
                     if (fragment.posts != null && !fragment.posts.isEmpty()) {
                         // set adapter with posts
                         GridViewAdapterFeed adapter = new GridViewAdapterFeed(fragment.getContext(),
-                                R.layout.gridview_item_image,
-                                fragment.posts);
+                                                                              R.layout.gridview_item_image,
+                                                                              fragment.posts);
                         fragment.gridView.setAdapter(adapter);
                         fragment.gridView.setVisibility(View.VISIBLE);
 
@@ -352,7 +358,7 @@ public class FeedFragment extends Fragment {
     }
 
     /**
-     * Fetches posts from all followed accounts and displays them in gridView
+     * Async task to fetch posts from all followed accounts and displays them in gridView
      */
     private static class GetPosts extends AsyncTask<Void, Integer, Void> {
 
@@ -366,13 +372,11 @@ public class FeedFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if (isCancelled())
-                return;
+            if (isCancelled()) return;
 
             // get reference from fragment
             final FeedFragment fragment = fragmentReference.get();
-            if (fragment == null)
-                return;
+            if (fragment == null) return;
 
             // reset lists before fetch
             resetListsForFetching(fragment);
@@ -394,7 +398,8 @@ public class FeedFragment extends Fragment {
                 // only show message when there are no stored posts and no followed accounts
                 if (!fragment.bStoredPosts) {
                     // set text "no followed accounts"
-                    fragment.setTextFeedHint(fragment.getResources().getString(R.string.no_followed_accounts));
+                    fragment.setTextFeedHint(
+                            fragment.getResources().getString(R.string.no_followed_accounts));
 
                     // invalidate view
                     fragment.gridView.invalidateViews();
@@ -438,8 +443,7 @@ public class FeedFragment extends Fragment {
                 // start new threads for all accounts parallel with THREAD_POOL_EXECUTOR and add
                 // threads to list
                 for (Account account : fragment.accounts) {
-                    GetPostsFromAccount getPostsFromAccount =
-                            new GetPostsFromAccount(fragment, account);
+                    GetPostsFromAccount getPostsFromAccount = new GetPostsFromAccount(fragment, account);
                     getPostsFromAccount.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     fragment.getPostsFromAccountThreadList.add(getPostsFromAccount);
                 }
@@ -452,7 +456,8 @@ public class FeedFragment extends Fragment {
                         Log.d("FeedFragment", Log.getStackTraceString(e));
                         fragment.bSomethingWentWrong = true;
                     }
-                } while (fragment.finishedThreadsList.size() < fragment.getPostsFromAccountThreadList.size());
+                }
+                while (fragment.finishedThreadsList.size() < fragment.getPostsFromAccountThreadList.size());
             }
             return null;
         }
@@ -474,7 +479,8 @@ public class FeedFragment extends Fragment {
                     // set adapter of view with fragment.posts
                     setGridViewAdapterFeed();
 
-                } else if (fragment.finishedThreadsList.size() == fragment.getPostsFromAccountThreadList.size()) {
+                } else if (fragment.finishedThreadsList.size() ==
+                           fragment.getPostsFromAccountThreadList.size()) {
 
                     if (fragment.fetchedPosts != null) {
                         // only show new posts if fetchedPosts is not empty
@@ -490,13 +496,15 @@ public class FeedFragment extends Fragment {
                             }
 
                             // set textFeedHint with hint that there are no followed accounts
-                            fragment.setTextFeedHint(fragment.getResources().getString(R.string.no_followed_accounts));
+                            fragment.setTextFeedHint(
+                                    fragment.getResources().getString(R.string.no_followed_accounts));
 
                         } else if (fragment.accounts.size() > 0 && !fragment.bStoredPosts) {
                             // there are accounts but no fetchedPosts, no stored posts ->
                             // show message when there are no stored posts but followed accounts
                             // set text "no stored posts yet, refresh to fetch posts"
-                            fragment.setTextFeedHint(fragment.getResources().getString(R.string.no_stored_posts_but_followed_accounts));
+                            fragment.setTextFeedHint(fragment.getResources().getString(
+                                    R.string.no_stored_posts_but_followed_accounts));
 
                             // invalidate view
                             fragment.gridView.invalidateViews();
@@ -507,14 +515,9 @@ public class FeedFragment extends Fragment {
                     }
                 }
             } catch (Exception e) {
-                if (!NetworkHandler.isInternetAvailable()) {
-                    Log.d("FeedFragment", Log.getStackTraceString(e));
-                    // notify user about no internet connection
-                    FragmentHelper.notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
-                } else {
-                    // notify user, something else is problem
-                    FragmentHelper.notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
-                }
+                Log.d("FeedFragment", Log.getStackTraceString(e));
+
+                FragmentHelper.showNetworkOrSomethingWrongErrorToUser(fragment);
             }
 
             // reset boolean for next iteration
@@ -538,11 +541,9 @@ public class FeedFragment extends Fragment {
         private void resetListsForFetching(FeedFragment fragment) {
             if (fragment == null) return;
 
-            if (fragment.posts != null)
-                fragment.posts.clear();
+            if (fragment.posts != null) fragment.posts.clear();
 
-            if (fragment.finishedThreadsList != null)
-                fragment.finishedThreadsList.clear();
+            if (fragment.finishedThreadsList != null) fragment.finishedThreadsList.clear();
 
             if (fragment.getPostsFromAccountThreadList != null)
                 fragment.getPostsFromAccountThreadList.clear();
@@ -554,16 +555,15 @@ public class FeedFragment extends Fragment {
          * @param fragment FeedFragment
          */
         private void deleteStoredPosts(FeedFragment fragment) {
-            if (fragment.getContext() != null && StorageHelper.checkIfFileExists(
-                    StorageHelper.filename_posts, fragment.getContext())) {
-                StorageHelper.deleteSpecificFile(fragment.requireContext(),
-                        StorageHelper.filename_posts);
+            if (fragment.getContext() != null && StorageHelper.checkIfFileExists(StorageHelper.filename_posts,
+                                                                                 fragment.getContext())) {
+                StorageHelper.deleteSpecificFile(fragment.requireContext(), StorageHelper.filename_posts);
             }
         }
 
         /**
-         * Saves newly fetched posts in internal storage and makes them visible in gridView in
-         * sorted order. Duplicate posts are being removed
+         * Saves newly fetched posts in internal storage and makes them visible in gridView in sorted order.
+         * Duplicate posts are being removed
          *
          * @param fragment FeedFragment
          */
@@ -589,8 +589,7 @@ public class FeedFragment extends Fragment {
 
                 // resize list to improve performance
                 if (fragment.posts.size() > FeedHelper.counterFeedBorder) {
-                    fragment.posts.subList(FeedHelper.counterFeedBorder,
-                            fragment.posts.size()).clear();
+                    fragment.posts.subList(FeedHelper.counterFeedBorder, fragment.posts.size()).clear();
                 }
 
                 // list to store posts in storage for next startup
@@ -600,20 +599,18 @@ public class FeedFragment extends Fragment {
                 new StorePostsInStorage(fragment).execute();
 
                 // show snackBar alert when not all but some accounts could be queried
-                if (fragment.bSomethingWentWrong &&
-                        fragment.fetchedAccountsMap != null &&
-                        fragment.fetchedAccountsMap.keySet().size() < fragment.counterAmountAccountsToFetch) {
-                    FragmentHelper.notifyUserOfIncompleteFetchProblem(
-                            fragment,
-                            fragment.fetchedAccountsMap.keySet().size(),
-                            fragment.counterAmountAccountsToFetch);
+                if (fragment.bSomethingWentWrong && fragment.fetchedAccountsMap != null &&
+                    fragment.fetchedAccountsMap.keySet().size() < fragment.counterAmountAccountsToFetch) {
+                    FragmentHelper.notifyUserOfIncompleteFetchProblem(fragment,
+                                                                      fragment.fetchedAccountsMap.keySet()
+                                                                              .size(),
+                                                                      fragment.counterAmountAccountsToFetch);
                 }
             } else {
                 // show alert that nothing could be queried and something went wrong
                 if (fragment.bSomethingWentWrong) {
-                    FragmentHelper.notifyUserOfIncompleteFetchProblem(
-                            fragment, 0,
-                            fragment.counterAmountAccountsToFetch);
+                    FragmentHelper.notifyUserOfIncompleteFetchProblem(fragment, 0,
+                                                                      fragment.counterAmountAccountsToFetch);
                 }
             }
 
@@ -632,8 +629,8 @@ public class FeedFragment extends Fragment {
 
             if (fragment != null) {
                 GridViewAdapterFeed adapter = new GridViewAdapterFeed(fragment.getContext(),
-                        R.layout.gridview_item_image,
-                        fragment.posts);
+                                                                      R.layout.gridview_item_image,
+                                                                      fragment.posts);
                 fragment.gridView.setAdapter(adapter);
                 fragment.gridView.setVisibility(View.VISIBLE);
 
@@ -646,9 +643,9 @@ public class FeedFragment extends Fragment {
         /**
          * Returns a list without duplicate posts
          *
-         * @param oldListPosts ArrayList<Post> with duplicates
+         * @param oldListPostsWithDuplicates ArrayList<Post>
          */
-        private void removeDuplicatePosts(ArrayList<Post> oldListPosts) {
+        private void removeDuplicatePosts(ArrayList<Post> oldListPostsWithDuplicates) {
             if (isCancelled()) return;
 
             // get reference from fragment
@@ -659,7 +656,7 @@ public class FeedFragment extends Fragment {
 
                 // try to add shortCode to set, if successful add post to newListPosts
                 // (-> no duplicate)
-                for (Post post : oldListPosts) {
+                for (Post post : oldListPostsWithDuplicates) {
                     if (shortCodes.add(post.getShortcode())) {
                         newListPosts.add(post);
                     }
@@ -682,8 +679,7 @@ public class FeedFragment extends Fragment {
 
             if (fragment != null && fragment.getContext() != null) {
                 // get accounts from storage
-                fragment.accounts = StorageHelper.readAccountsFromInternalStorage(
-                        fragment.requireContext());
+                fragment.accounts = StorageHelper.readAccountsFromInternalStorage(fragment.requireContext());
             }
         }
 
@@ -698,9 +694,8 @@ public class FeedFragment extends Fragment {
 
             if (fragment != null && fragment.getContext() != null) {
                 // get stored posts
-                fragment.posts = StorageHelper
-                        .readPostsFromInternalStorage(fragment.requireContext(),
-                                StorageHelper.filename_posts);
+                fragment.posts = StorageHelper.readPostsFromInternalStorage(fragment.requireContext(),
+                                                                            StorageHelper.filename_posts);
 
                 // set boolean bStoredPosts if list is not empty
                 if (fragment.posts != null && !fragment.posts.isEmpty()) {
@@ -711,7 +706,7 @@ public class FeedFragment extends Fragment {
     }
 
     /**
-     * Gets posts from a single account
+     * Async task to get posts from a single account
      */
     private static class GetPostsFromAccount extends AsyncTask<Void, Void, Void> {
 
@@ -731,52 +726,7 @@ public class FeedFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (!isCancelled()) {
-                final FeedFragment fragment = fragmentReference.get();
-
-                // initialize NetworkHandler
-                sh = new NetworkHandler();
-
-                // create handlerList to close connections afterwards, if it not exists already
-                if (fragment != null && fragment.networkHandlersList == null) {
-                    fragment.networkHandlersList = new ArrayList<>();
-                }
-
-                try {
-                    // add handler to handlersList
-                    if (fragment != null) {
-                        fragment.networkHandlersList.add(sh);
-
-                        // put account name in map for fetched accounts to
-                        // determine if fetching was successful
-                        fragment.fetchedAccountsMap.put(account.getUsername(), true);
-                    }
-                } catch (Exception e) {
-                    Log.d("FeedFragment", Log.getStackTraceString(e));
-                }
-
-                do {
-                    // make valid urls from accounts
-                    makeValidURLS();
-
-                    // fetch data of url
-                    fetchDataOfUrl(url);
-
-                    // set start- and endIndex
-                    int startIndex = 0;
-                    int endIndex = url.edgesTotalOfPage;
-
-                    // fetch edge data with start- and endIndex
-                    fetchEdgeData(url.jsonArrayEdges, startIndex, endIndex);
-
-                    // prevent url.hasNextPage is null
-                } while (url.hasNextPage != null && url.hasNextPage && counterPost < counterPostBorder);
-
-                // if fetching was not successful remove account name from map
-                if (!successfulFetchedPostsOfAccount && url.tag != null && fragment != null) {
-                    fragment.fetchedAccountsMap.remove(account.getUsername());
-                }
-            } else {
+            if (isCancelled()) {
                 // get reference from fragment
                 final FeedFragment fragment = fragmentReference.get();
                 if (fragment == null) return null;
@@ -786,6 +736,53 @@ public class FeedFragment extends Fragment {
 
                 // if fetching was not successful remove account name from map
                 fragment.fetchedAccountsMap.remove(account.getUsername());
+
+                return null;
+            }
+
+            final FeedFragment fragment = fragmentReference.get();
+            if (fragment == null) return null;
+
+            // initialize NetworkHandler
+            sh = new NetworkHandler();
+
+            // create handlerList to close connections afterwards, if it not exists already
+            if (fragment.networkHandlersList == null) {
+                fragment.networkHandlersList = new ArrayList<>();
+            }
+
+            try {
+                // add handler to handlersList
+                fragment.networkHandlersList.add(sh);
+
+                // put account name in map for fetched accounts to
+                // determine if fetching was successful
+                fragment.fetchedAccountsMap.put(account.getUsername(), true);
+            } catch (Exception e) {
+                Log.d("FeedFragment", Log.getStackTraceString(e));
+            }
+
+            do {
+                // make valid urls from accounts
+                makeValidUrls();
+
+                // fetch data of url
+                fetchDataOfUrl(url);
+
+                // set start- and endIndex
+                int startIndex = 0;
+                int endIndex = url.edgesTotalOfPage;
+
+                // fetch edge data with start- and endIndex
+                fetchEdgeData(url.jsonArrayEdges, startIndex, endIndex);
+
+                // prevent url.hasNextPage is null
+            }
+            while (url.hasNextPage != null && url.hasNextPage && counterPost < counterPostBorder);
+
+            // if fetching was not successful remove account name from map
+            if (!successfulFetchedPostsOfAccount && url.tag != null) {
+                fragment.fetchedAccountsMap.remove(account.getUsername());
             }
 
             return null;
@@ -794,32 +791,31 @@ public class FeedFragment extends Fragment {
         /**
          * Makes valid URLs for fetching posts of account
          */
-        private void makeValidURLS() {
+        private void makeValidUrls() {
             if (isCancelled()) return;
 
             // get reference from fragment
             final FeedFragment fragment = fragmentReference.get();
             if (fragment == null) return;
 
-            if (account != null) {
-                String urlAddress = null;
-
-                // make url for account posts (hint: url.endCursor is null at first
-                // page fetch)
-                if (url == null || (url.endCursor == null && bFirstFetch)) {
-                    urlAddress = "https://www.instagram.com/graphql/query/?query_id=" + query_id +
-                            "&id=" + account.getId() + "&first=" + fetchBorderPerPage + "&after=";
-                    bFirstFetch = false;
-                } else if (url.hasNextPage != null && url.hasNextPage) {
-                    urlAddress = "https://www.instagram.com/graphql/query/?query_id=" + query_id +
-                            "&id=" + account.getId() + "&first=" + fetchBorderPerPage + "&after=" +
-                            url.endCursor;
-                }
-                url = new URL(urlAddress, account.getUsername(), FeedObject.ACCOUNT);
-            } else {
+            if (account == null) {
                 fragment.bSomethingWentWrong = true;
                 successfulFetchedPostsOfAccount = false;
+                return;
             }
+
+            String urlAddress = null;
+
+            // make url for account posts (hint: url.endCursor is null at first page fetch)
+            if (url == null || (url.endCursor == null && bFirstFetch)) {
+                urlAddress = "https://www.instagram.com/graphql/query/?query_id=" + query_id + "&id=" +
+                             account.getId() + "&first=" + fetchBorderPerPage + "&after=";
+                bFirstFetch = false;
+            } else if (url.hasNextPage != null && url.hasNextPage) {
+                urlAddress = "https://www.instagram.com/graphql/query/?query_id=" + query_id + "&id=" +
+                             account.getId() + "&first=" + fetchBorderPerPage + "&after=" + url.endCursor;
+            }
+            url = new URL(urlAddress, account.getUsername(), FeedObject.ACCOUNT);
         }
 
         /**
@@ -859,10 +855,8 @@ public class FeedFragment extends Fragment {
                     // get only relevant data (so save followers etc. later when need
                     // => when account site should be visited) save page_info and
                     // has_next_page
-                    JSONObject page_info =
-                            jsonObj.getJSONObject("data").getJSONObject("user")
-                                    .getJSONObject("edge_owner_to_timeline_media")
-                                    .getJSONObject("page_info");
+                    JSONObject page_info = jsonObj.getJSONObject("data").getJSONObject("user").getJSONObject(
+                            "edge_owner_to_timeline_media").getJSONObject("page_info");
                     if (page_info.getBoolean("has_next_page")) {
                         url.hasNextPage = true;
                         url.endCursor = page_info.getString("end_cursor");
@@ -870,10 +864,8 @@ public class FeedFragment extends Fragment {
                         url.hasNextPage = false;
                     }
 
-                    JSONArray edges =
-                            jsonObj.getJSONObject("data").getJSONObject("user")
-                                    .getJSONObject("edge_owner_to_timeline_media")
-                                    .getJSONArray("edges");
+                    JSONArray edges = jsonObj.getJSONObject("data").getJSONObject("user").getJSONObject(
+                            "edge_owner_to_timeline_media").getJSONArray("edges");
 
                     url.jsonArrayEdges = edges;
                     if (edges != null && !edges.isNull(0)) {
@@ -910,17 +902,16 @@ public class FeedFragment extends Fragment {
                     JSONObject edge = edges.getJSONObject(i);
 
                     // check if post is sidecar
-                    boolean is_sidecar = edge.getJSONObject("node").getString("__typename")
-                            .equals("GraphSidecar");
+                    boolean is_sidecar = edge.getJSONObject("node").getString("__typename").equals(
+                            "GraphSidecar");
 
                     // create post with minimal information (initialize post)
                     Post post = new Post(edge.getJSONObject("node").getString("id"),
-                            edge.getJSONObject("node").getString("shortcode"),
-                            new Date(Long.parseLong(edge.getJSONObject("node")
-                                    .getString("taken_at_timestamp")) * 1000),
-                            edge.getJSONObject("node").getBoolean("is_video"),
-                            edge.getJSONObject("node").getString("thumbnail_src"), is_sidecar,
-                            null, null);
+                                         edge.getJSONObject("node").getString("shortcode"), new Date(
+                            Long.parseLong(edge.getJSONObject("node").getString("taken_at_timestamp")) *
+                            1000), edge.getJSONObject("node").getBoolean("is_video"),
+                                         edge.getJSONObject("node").getString("thumbnail_src"), is_sidecar,
+                                         null, null);
 
                     if (fragment.fetchedPosts == null) {
                         fragment.fetchedPosts = new ArrayList<>();
@@ -944,16 +935,17 @@ public class FeedFragment extends Fragment {
 
             // get reference from fragment
             final FeedFragment fragment = fragmentReference.get();
-            if (fragment != null) {
-                // add finished thread to list
-                fragment.finishedThreadsList.add(this);
-            }
+            if (fragment == null) return;
+
+            // add finished thread to list
+            fragment.finishedThreadsList.add(this);
+
             super.onPostExecute(aVoid);
         }
     }
 
     /**
-     * Stores fetched posts in internal storage (list postsToStore)
+     * Async task to store fetched posts in internal storage (list postsToStore)
      */
     private static class StorePostsInStorage extends AsyncTask<Void, Void, Void> {
 
@@ -970,20 +962,18 @@ public class FeedFragment extends Fragment {
             // get reference from fragment
             final FeedFragment fragment = fragmentReference.get();
 
-            if (fragment != null && fragment.postsToStore != null &&
-                    fragment.getContext() != null) {
+            if (fragment != null && fragment.postsToStore != null && fragment.getContext() != null) {
                 // check if file exits, if true, delete file
                 if (StorageHelper.checkIfFileExists(StorageHelper.filename_posts,
-                        fragment.requireContext())) {
-                    StorageHelper.deleteSpecificFile(fragment.requireContext(),
-                            StorageHelper.filename_posts);
+                                                    fragment.requireContext())) {
+                    StorageHelper.deleteSpecificFile(fragment.requireContext(), StorageHelper.filename_posts);
                 }
 
                 try {
                     // store posts in storage in proper storage representation
                     StorageHelper.storePostListInInternalStorage(fragment.postsToStore,
-                            fragment.requireContext(),
-                            StorageHelper.filename_posts);
+                                                                 fragment.requireContext(),
+                                                                 StorageHelper.filename_posts);
 
                 } catch (Exception e) {
                     Log.d("FeedFragment", Log.getStackTraceString(e));

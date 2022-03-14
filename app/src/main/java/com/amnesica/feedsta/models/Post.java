@@ -9,6 +9,7 @@ import java.util.HashMap;
  * Represents a single post
  */
 public class Post implements Serializable {
+
     // serialVersionUID (same as computed! - use the one from the exception message)
     private static final long serialVersionUID = 6519669658345894950L;
 
@@ -37,19 +38,9 @@ public class Post implements Serializable {
     }
 
     // constructor (main constructor)
-    public Post(String id,
-                String imageUrl,
-                int likes,
-                String ownerId,
-                int comments,
-                String caption,
-                String shortcode,
-                Date takenAtDate,
-                Boolean is_video,
-                String username,
-                String imageUrlProfilePicOwner,
-                String imageUrlThumbnail,
-                Boolean is_sideCar) {
+    public Post(String id, String imageUrl, int likes, String ownerId, int comments, String caption,
+                String shortcode, Date takenAtDate, Boolean is_video, String username,
+                String imageUrlProfilePicOwner, String imageUrlThumbnail, Boolean is_sideCar) {
         this.id = id;
         this.imageUrl = imageUrl;
         this.likes = likes;
@@ -66,14 +57,8 @@ public class Post implements Serializable {
     }
 
     // constructor (to initialize post from FeedFragment)
-    public Post(String id,
-                String shortcode,
-                Date takenAtDate,
-                boolean is_video,
-                String imageUrlThumbnail,
-                Boolean is_sideCar,
-                String category,
-                String imageThumbnail) {
+    public Post(String id, String shortcode, Date takenAtDate, boolean is_video, String imageUrlThumbnail,
+                Boolean is_sideCar, String category, String imageThumbnail) {
         this.id = id;
         this.shortcode = shortcode;
         this.takenAtDate = takenAtDate;

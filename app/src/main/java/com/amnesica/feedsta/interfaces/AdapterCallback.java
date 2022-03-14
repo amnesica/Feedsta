@@ -6,6 +6,10 @@ import com.amnesica.feedsta.models.Account;
  * Interface used to communicate between adapter and fragment to remove an account from storage
  */
 public interface AdapterCallback {
-    // removes an account from storage
+    /**
+     * Removes an account from storage
+     *
+     * @param account Account
+     */
     void removeAccountFromStorage(Account account);
 }

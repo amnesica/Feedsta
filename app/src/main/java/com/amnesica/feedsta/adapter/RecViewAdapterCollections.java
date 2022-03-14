@@ -1,6 +1,5 @@
 package com.amnesica.feedsta.adapter;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
@@ -19,9 +18,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amnesica.feedsta.R;
@@ -64,137 +65,139 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
             return false;
         }
 
-        @SuppressLint("NonConstantResourceId")
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.menu_remove_collection_bookmarks:
-                    // get all checked collections in list and save to new list to remove items
-                    listCollectionsToRemove = new ArrayList<>();
-                    for (Collection collection : selectedCollections) {
-                        if (collection.isChecked()) {
-                            listCollectionsToRemove.add(collection);
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_remove_collection_bookmarks) {
+                // get all checked collections in list and save to new list to remove items
+                listCollectionsToRemove = new ArrayList<>();
+                for (Collection collection : selectedCollections) {
+                    if (collection.isChecked()) {
+                        listCollectionsToRemove.add(collection);
+                    }
+                }
+
+                // check if list is not empty
+                if (!listCollectionsToRemove.isEmpty()) {
+                    removeCollectionWithDialogFirst();
+                }
+
+                // exit contextual action menu
+                mode.finish();
+            } else if (itemId == R.id.menu_rename_category_bookmarks) {
+                if (listener != null && !selectedCollections.isEmpty()) {
+                    // temporary list with all selected collections
+                    List<Collection> listTmpSelectedCollections = new ArrayList<>(selectedCollections);
+
+                    // get all collections and see if collection "All" is selected
+                    List<Collection> listWithoutAllCollection;
+                    listWithoutAllCollection = Stream.of(listTmpSelectedCollections).filter(
+                            new Predicate<Collection>() {
+                                @Override
+                                public boolean test(Collection c) {
+                                    return (c.getName() != null) && c.getName().equals("All");
+                                }
+                            }).collect(Collectors.<Collection>toList());
+
+                    if (listWithoutAllCollection != null && !listWithoutAllCollection.isEmpty()) {
+                        if (context != null) {
+                            Toast.makeText(context,
+                                           context.getString(R.string.collection_all_cannot_be_renamed),
+                                           Toast.LENGTH_SHORT).show();
+                        }
+
+                        // remove collection "All" from selectedCollections
+                        listTmpSelectedCollections.removeAll(listWithoutAllCollection);
+                    }
+
+                    // check if there is more than one collection to be renamed -> cancel
+                    if (listWithoutAllCollection != null && listWithoutAllCollection.size() > 1) {
+                        if (context != null) {
+                            Toast.makeText(context, context.getString(
+                                    R.string.only_one_collection_can_renamed_at_time), Toast.LENGTH_SHORT)
+                                    .show();
                         }
                     }
 
-                    // check if list is not empty
-                    if (!listCollectionsToRemove.isEmpty()) {
-                        removeCollectionWithDialogFirst();
-                    }
-
-                    // exit contextual action menu
-                    mode.finish();
-                    break;
-                case R.id.menu_rename_category_bookmarks:
-                    if (listener != null && !selectedCollections.isEmpty()) {
-                        // temporary list with all selected collections
-                        List<Collection> listTmpSelectedCollections = new ArrayList<>(selectedCollections);
-
-                        // get all collections and see if collection "All" is selected
-                        List<Collection> listWithoutAllCollection;
-                        listWithoutAllCollection = Stream.of(listTmpSelectedCollections).filter(new Predicate<Collection>() {
-                            @Override
-                            public boolean test(Collection c) {
-                                return (c.getName() != null) && c.getName().equals("All");
-                            }
-                        }).collect(Collectors.<Collection>toList());
-
-                        if (listWithoutAllCollection != null && !listWithoutAllCollection.isEmpty()) {
-                            if (context != null) {
-                                Toast.makeText(context, context.getString(R.string.collection_all_cannot_be_renamed), Toast.LENGTH_SHORT).show();
-                            }
-
-                            // remove collection "All" from selectedCollections
-                            listTmpSelectedCollections.removeAll(listWithoutAllCollection);
-                        }
-
-                        // check if there is more than one collection to be renamed -> cancel
-                        if (listWithoutAllCollection != null && listWithoutAllCollection.size() > 1) {
-                            if (context != null) {
-                                Toast.makeText(context, context.getString(R.string.only_one_collection_can_renamed_at_time), Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        // change category name
-                        if (listTmpSelectedCollections.size() == 1) {
-                            listener.renameCategory(listTmpSelectedCollections);
-                        } else {
-                            // more than one collection is selected
-                            if (context != null) {
-                                Toast.makeText(context, context.getString(R.string.only_one_collection_can_renamed_at_time), Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-
-                    // exit contextual action menu
-                    mode.finish();
-                    break;
-
-                case R.id.menu_download_collection_bookmarks:
-                    // download selected bookmarks
-                    if (listener != null && !selectedCollections.isEmpty()) {
-                        listener.downloadSelectedCollections(selectedCollections);
-                    }
-
-                    // exit contextual action menu
-                    mode.finish();
-                    break;
-
-                case R.id.menu_remove_only_collection:
-                    if (listener != null && !selectedCollections.isEmpty()) {
-                        // temporary list with all selected collections
-                        List<Collection> listTmpSelectedCollections = new ArrayList<>(selectedCollections);
-
-                        // if "All" collection is selected -> cancel operation (will result in loss of all collections)
-                        List<Collection> listWithAllCollection;
-                        listWithAllCollection = Stream.of(listTmpSelectedCollections).filter(new Predicate<Collection>() {
-                            @Override
-                            public boolean test(Collection c) {
-                                return (c.getName() != null) && c.getName().equals("All");
-                            }
-                        }).collect(Collectors.<Collection>toList());
-
-                        if (listWithAllCollection != null && !listWithAllCollection.isEmpty()) {
-                            if (context != null) {
-                                Toast.makeText(context, context.getString(R.string.operation_cannot_be_applied_to_coll_all_cancelled), Toast.LENGTH_SHORT).show();
-                            }
-
-                            // exit contextual action menu because "All" is selected
-                            mode.finish();
-                            break;
-                        }
-
-                        // change category name to null if "All" is not selected
-                        if (listTmpSelectedCollections.size() >= 1 && listener != null) {
-                            listener.resetCollectionInAllSelectedBookmarksOfCategory(listTmpSelectedCollections);
-                        } else {
-                            // more than one collection is selected
-                            if (context != null) {
-                                Toast.makeText(context, context.getString(R.string.select_at_least_one_coll), Toast.LENGTH_SHORT).show();
-                            }
-                        }
+                    // change category name
+                    if (listTmpSelectedCollections.size() == 1) {
+                        listener.renameCategory(listTmpSelectedCollections);
                     } else {
-                        if (selectedCollections != null) {
-                            if (context != null) {
-                                Toast.makeText(context, context.getString(R.string.select_at_least_one_coll), Toast.LENGTH_SHORT).show();
-                            }
+                        // more than one collection is selected
+                        if (context != null) {
+                            Toast.makeText(context, context.getString(
+                                    R.string.only_one_collection_can_renamed_at_time), Toast.LENGTH_SHORT)
+                                    .show();
                         }
                     }
+                }
 
-                    // exit contextual action menu
-                    mode.finish();
-                    break;
+                // exit contextual action menu
+                mode.finish();
+            } else if (itemId == R.id.menu_download_collection_bookmarks) {
+                // download selected bookmarks
+                if (listener != null && !selectedCollections.isEmpty()) {
+                    listener.downloadSelectedCollections(selectedCollections);
+                }
 
-                case R.id.menu_select_all_bookmarks:
-                    for (Collection collection : listCollectionsBookmarked) {
-                        if (!collection.isChecked()) {
-                            selectedCollections.add(collection);
-                            collection.toggleChecked();
+                // exit contextual action menu
+                mode.finish();
+            } else if (itemId == R.id.menu_remove_only_collection) {
+                if (listener != null && !selectedCollections.isEmpty()) {
+                    // temporary list with all selected collections
+                    List<Collection> listTmpSelectedCollections = new ArrayList<>(selectedCollections);
+
+                    // if "All" collection is selected -> cancel operation
+                    // (will result in loss of all collections)
+                    List<Collection> listWithAllCollection;
+                    listWithAllCollection = Stream.of(listTmpSelectedCollections).filter(
+                            new Predicate<Collection>() {
+                                @Override
+                                public boolean test(Collection c) {
+                                    return (c.getName() != null) && c.getName().equals("All");
+                                }
+                            }).collect(Collectors.<Collection>toList());
+
+                    if (listWithAllCollection != null && !listWithAllCollection.isEmpty()) {
+                        if (context != null) {
+                            Toast.makeText(context, context.getString(
+                                    R.string.operation_cannot_be_applied_to_coll_all_cancelled),
+                                           Toast.LENGTH_SHORT).show();
+                        }
+
+                        // exit contextual action menu because "All" is selected
+                        mode.finish();
+                        return true;
+                    }
+
+                    // change category name to null if "All" is not selected
+                    if (listTmpSelectedCollections.size() >= 1 && listener != null) {
+                        listener.resetCollectionInAllSelectedBookmarksOfCategory(listTmpSelectedCollections);
+                    } else {
+                        // more than one collection is selected
+                        if (context != null) {
+                            Toast.makeText(context, context.getString(R.string.select_at_least_one_coll),
+                                           Toast.LENGTH_SHORT).show();
                         }
                     }
-                    notifyDataSetChanged();
-                    // hint: no mode finish
-                    break;
+                } else {
+                    if (context != null) {
+                        Toast.makeText(context, context.getString(R.string.select_at_least_one_coll),
+                                       Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                // exit contextual action menu
+                mode.finish();
+            } else if (itemId == R.id.menu_select_all_bookmarks) {
+                for (Collection collection : listCollectionsBookmarked) {
+                    if (!collection.isChecked()) {
+                        selectedCollections.add(collection);
+                        collection.toggleChecked();
+                    }
+                }
+                notifyDataSetChanged();
+                // hint: no mode finish
             }
             return true;
         }
@@ -209,7 +212,6 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
         }
     };
 
-    // provide a suitable constructor
     public RecViewAdapterCollections(List<Collection> listCollectionsBookmarked) {
         this.listCollectionsBookmarked = listCollectionsBookmarked;
     }
@@ -235,30 +237,33 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
     private void removeCollectionWithDialogFirst() {
         AlertDialog.Builder alertDialogBuilder;
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(context)
-                .setTitle(R.string.remove_collection_confirm_dialog_title)
-                .setMessage(R.string.remove_collection_confirm_dialog_message)
-                .setPositiveButton(context.getResources().getString(R.string.button_continue), new DialogInterface.OnClickListener() {
+        alertDialogBuilder = new AlertDialog.Builder(context).setTitle(
+                R.string.remove_collection_confirm_dialog_title).setMessage(
+                R.string.remove_collection_confirm_dialog_message).setPositiveButton(
+                context.getResources().getString(R.string.button_continue),
+                new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
                         //  Continue with remove operation
-                        if (listener != null && listCollectionsToRemove != null && !listCollectionsToRemove.isEmpty()) {
+                        if (listener != null && listCollectionsToRemove != null &&
+                            !listCollectionsToRemove.isEmpty()) {
                             listener.removeBookmarksOfCollectionFromStorage(listCollectionsToRemove);
                         }
                     }
-                })
-                .setNegativeButton(context.getResources().getString(R.string.CANCEL), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        selectedCollections.clear();
-                        if (listCollectionsToRemove != null) {
-                            listCollectionsToRemove.clear();
-                            listCollectionsToRemove = null;
-                        }
-                    }
-                })
+                }).setNegativeButton(context.getResources().getString(R.string.CANCEL),
+                                     new DialogInterface.OnClickListener() {
+                                         @Override
+                                         public void onClick(DialogInterface dialog, int which) {
+                                             selectedCollections.clear();
+                                             if (listCollectionsToRemove != null) {
+                                                 listCollectionsToRemove.clear();
+                                                 listCollectionsToRemove = null;
+                                             }
+                                         }
+                                     })
 
-                // get the click outside the dialog to set the behaviour like the negative button was clicked
+                // get the click outside the dialog to set the behaviour like the negative button
+                // was clicked
                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
@@ -287,18 +292,24 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
     }
 
     // create new views (invoked by the layout manager)
+    @NonNull
     @Override
     public RecViewAdapterCollections.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         // create a new view
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View v = inflater.inflate(R.layout.bookmarks_directory_item_grid, parent, false);
+        View view = inflater.inflate(R.layout.bookmarks_directory_item_grid, parent, false);
         context = parent.getContext();
 
-        return new ViewHolder(v);
+        return new ViewHolder(view);
     }
 
-    // replace the contents of a view (invoked by the layout manager)
+    /**
+     * Replaces the contents of a view (invoked by the layout manager)
+     *
+     * @param holder   ViewHolder
+     * @param position int
+     */
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         Collection collection = listCollectionsBookmarked.get(position);
@@ -307,23 +318,14 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
         // load base64 encoded image into view
         if (collection.getImageThumbnail() != null) {
             // load image into view
-            Glide.with(context)
-                    .asBitmap()
-                    .load(Base64.decode(collection.getImageThumbnail(), Base64.DEFAULT))
-                    .placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.placeholder_image_post_error)
-                    .dontAnimate()
-                    .centerCrop()
-                    .into(holder.imageViewDir);
+            Glide.with(context).asBitmap().load(Base64.decode(collection.getImageThumbnail(), Base64.DEFAULT))
+                    .placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image_post_error)
+                    .dontAnimate().centerCrop().into(holder.imageViewDir);
         } else {
             // load image with url into view
-            Glide.with(context)
-                    .load(collection.getThumbnailUrl())
-                    .placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.placeholder_image_post_error)
-                    .dontAnimate()
-                    .centerCrop()
-                    .into(holder.imageViewDir);
+            Glide.with(context).load(collection.getThumbnailUrl()).placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image_post_error).dontAnimate().centerCrop().into(
+                    holder.imageViewDir);
         }
         holder.update(listCollectionsBookmarked.get(position));
     }
@@ -337,9 +339,8 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
         this.listCollectionsBookmarked = listCollectionsBookmarked;
     }
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
+    // Provide a reference to the views for each data item. Complex data items may need more than
+    // one view per item, and you provide access to all the views for a data item in a view holder
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView textViewDirName;
@@ -356,10 +357,9 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
         }
 
         /**
-         * Selects a collection and shows the "checked" icon
-         * in the upper right corner
+         * Selects a collection and shows the "checked" icon in the upper right corner
          *
-         * @param collection Collection to be selected
+         * @param collection Collection
          */
         private void selectItem(Collection collection) {
             if (multiSelect) {
@@ -368,8 +368,9 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
                 } else {
                     selectedCollections.add(collection);
                 }
+
                 collection.toggleChecked();
-                showIconToCollectionInCorner(collection);
+                showIconInCornerToSelectCollection(collection);
             }
         }
 
@@ -379,7 +380,7 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
          * @param collection Collection
          */
         private void update(final Collection collection) {
-            showIconToCollectionInCorner(collection);
+            showIconInCornerToSelectCollection(collection);
 
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -396,34 +397,36 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
                     if (multiSelect) {
                         selectItem(collection);
                     } else {
-                        if (listener != null) {
-                            int position = getAdapterPosition();
-                            if (position != RecyclerView.NO_POSITION) {
-                                listener.onItemClick(position);
-                            }
+                        if (listener == null) return;
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onItemClick(position);
                         }
                     }
                 }
             });
         }
 
-        @SuppressLint("UseCompatLoadingForDrawables")
-        private void showIconToCollectionInCorner(Collection collection) {
-            // set image overlay for sidecar and video posts
-            if (frameLayout != null) {
+        /**
+         * Shows an icon in the corner of the thumbnail to mark collection as selected
+         *
+         * @param collection Collection
+         */
+        private void showIconInCornerToSelectCollection(Collection collection) {
+            if (frameLayout == null) return;
 
-                // when post is checked show check mark otherwise show image or sidecar overlay
-                if (collection.isChecked()) {
+            // when collection is checked show check mark
+            if (collection.isChecked()) {
 
-                    // set checked icon
-                    frameLayout.setForeground(context.getDrawable(R.drawable.ic_baseline_check_circle_white_24));
+                // set checked icon
+                frameLayout.setForeground(
+                        ContextCompat.getDrawable(context, R.drawable.ic_baseline_check_circle_white_24));
 
-                    // top right corner
-                    frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);
-                } else {
-                    // image overlay thumbnail (no overlay)
-                    frameLayout.setForeground(null);
-                }
+                // top right corner
+                frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);
+            } else {
+                // image overlay thumbnail (no overlay)
+                frameLayout.setForeground(null);
             }
         }
     }

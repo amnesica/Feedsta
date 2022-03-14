@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amnesica.feedsta.R;
@@ -18,16 +19,16 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 /**
- * Adapter for the RecyclerView which shows all collections except
- * "All" in the BtmSheetDialogSelectCollection
+ * Adapter for the RecyclerView which shows all collections except "All" in the
+ * BtmSheetDialogSelectCollection
  */
-public class RecViewAdapterSelectCollection extends RecyclerView.Adapter<RecViewAdapterSelectCollection.ViewHolder> {
+public class RecViewAdapterSelectCollection
+        extends RecyclerView.Adapter<RecViewAdapterSelectCollection.ViewHolder> {
 
     private List<Collection> listCollectionsBookmarked;
     private Context context;
     private OnItemClickListenerSelectColl listener;
 
-    // provide a suitable constructor
     public RecViewAdapterSelectCollection(List<Collection> listCollectionsBookmarked) {
         this.listCollectionsBookmarked = listCollectionsBookmarked;
     }
@@ -37,16 +38,17 @@ public class RecViewAdapterSelectCollection extends RecyclerView.Adapter<RecView
     }
 
     // create new views (invoked by the layout manager)
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         // create a new view
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View v = inflater.inflate(R.layout.bookmarks_directory_item_grid, parent, false);
+        View view = inflater.inflate(R.layout.bookmarks_directory_item_grid, parent, false);
         context = parent.getContext();
 
         // set the view's size, margins, paddings and layout parameters
-        return new ViewHolder(v, listener);
+        return new ViewHolder(view, listener);
     }
 
     // replace the contents of a view (invoked by the layout manager)
@@ -58,25 +60,15 @@ public class RecViewAdapterSelectCollection extends RecyclerView.Adapter<RecView
         // load base64 encoded image into view
         if (collection.getImageThumbnail() != null) {
             // load image into view
-            Glide.with(context)
-                    .asBitmap()
-                    .load(Base64.decode(collection.getImageThumbnail(), Base64.DEFAULT))
-                    .placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.placeholder_image_post_error)
-                    .dontAnimate()
-                    .centerCrop()
-                    .into(holder.imageViewDir);
+            Glide.with(context).asBitmap().load(Base64.decode(collection.getImageThumbnail(), Base64.DEFAULT))
+                    .placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image_post_error)
+                    .dontAnimate().centerCrop().into(holder.imageViewDir);
         } else {
             // load image with url into view
-            Glide.with(context)
-                    .load(collection.getThumbnailUrl())
-                    .placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.placeholder_image_post_error)
-                    .dontAnimate()
-                    .centerCrop()
-                    .into(holder.imageViewDir);
+            Glide.with(context).load(collection.getThumbnailUrl()).placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image_post_error).dontAnimate().centerCrop().into(
+                    holder.imageViewDir);
         }
-        holder.update(listCollectionsBookmarked.get(position));
     }
 
     @Override
@@ -88,29 +80,27 @@ public class RecViewAdapterSelectCollection extends RecyclerView.Adapter<RecView
         this.listCollectionsBookmarked = listCollectionsBookmarked;
     }
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
+    // Provide a reference to the views for each data item. Complex data items may need more than
+    // one view per item, and you provide access to all the views for a data item in a view holder
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView textViewDirName;
         public ImageView imageViewDir;
         public View layout;
 
-        public ViewHolder(View v, final OnItemClickListenerSelectColl listener) {
-            super(v);
-            layout = v;
-            textViewDirName = v.findViewById(R.id.dir_name);
-            imageViewDir = v.findViewById(R.id.dir_thumbnail);
+        public ViewHolder(View view, final OnItemClickListenerSelectColl listener) {
+            super(view);
+            layout = view;
+            textViewDirName = view.findViewById(R.id.dir_name);
+            imageViewDir = view.findViewById(R.id.dir_thumbnail);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (listener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(position);
-                        }
+                    if (listener == null) return;
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(position);
                     }
                 }
             });
@@ -120,11 +110,10 @@ public class RecViewAdapterSelectCollection extends RecyclerView.Adapter<RecView
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (listener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(position);
-                        }
+                    if (listener == null) return;
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(position);
                     }
                 }
             });

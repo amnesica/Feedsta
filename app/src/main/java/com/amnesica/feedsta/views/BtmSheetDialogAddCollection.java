@@ -23,12 +23,13 @@ import com.amnesica.feedsta.interfaces.FragmentCallback;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 /**
- * Fragment for adding a collection of bookmarks
+ * Fragment for adding a collection of bookmarks (used in CollectionsFragment, SingleCollectionFragment and
+ * PostFragment)
  */
 public class BtmSheetDialogAddCollection extends BottomSheetDialogFragment {
 
     // view stuff
-    private View v;
+    private View view;
     private TextView textInputField;
 
     private final EditBookmarksType editMode;
@@ -36,7 +37,7 @@ public class BtmSheetDialogAddCollection extends BottomSheetDialogFragment {
     private FragmentCallback callback;
 
     // case when collection should be renamed -> initial text in inputField
-    private String initialCollectionName = null;
+    private final String initialCollectionName;
 
     public BtmSheetDialogAddCollection(String currentCategoryName, EditBookmarksType editMode) {
         super();
@@ -45,13 +46,13 @@ public class BtmSheetDialogAddCollection extends BottomSheetDialogFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable
-            ViewGroup container, @Nullable Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.bottom_sheet_add_collection, container, false);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.bottom_sheet_add_collection, container, false);
 
-        Button buttonCancel = v.findViewById(R.id.bottom_sheet_cancel_button);
-        textInputField = v.findViewById(R.id.bottom_sheet_editText);
-        TextView bottomSheetTitle = v.findViewById(R.id.bottom_sheet_title);
+        Button buttonCancel = view.findViewById(R.id.bottom_sheet_cancel_button);
+        textInputField = view.findViewById(R.id.bottom_sheet_editText);
+        TextView bottomSheetTitle = view.findViewById(R.id.bottom_sheet_title);
 
         // set initial category if string is not null
         if (initialCollectionName != null) {
@@ -86,13 +87,16 @@ public class BtmSheetDialogAddCollection extends BottomSheetDialogFragment {
                             }
 
                         } else {
-                            FragmentHelper.showToast(requireContext().getString(R.string.collection_with_name_already_exists), requireActivity(), requireContext());
+                            FragmentHelper.showToast(
+                                    requireContext().getString(R.string.collection_with_name_already_exists),
+                                    requireActivity(), requireContext());
                         }
 
                         // hide keyboard
-                        InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(
+                                Context.INPUT_METHOD_SERVICE);
                         assert imm != null;
-                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
                         dismiss();
                     }
@@ -122,14 +126,14 @@ public class BtmSheetDialogAddCollection extends BottomSheetDialogFragment {
             }
         });
 
-        return v;
+        return view;
     }
 
     /**
      * Validates input string of inputField
      *
-     * @param inputString name of collection
-     * @return string is valid
+     * @param inputString String
+     * @return boolean
      */
     private boolean inputStringIsValid(String inputString) {
         return inputString != null && !inputString.isEmpty();

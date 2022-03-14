@@ -15,8 +15,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 
 /**
- * Helper class to deal with the file system in terms of paths and uris
- * source: https://stackoverflow.com/a/36162691
+ * Helper class to deal with the file system in terms of paths and uris Source:
+ * https://stackoverflow.com/a/36162691
  */
 public final class FileUtil {
 
@@ -27,18 +27,17 @@ public final class FileUtil {
         if (treeUri == null) return null;
         String volumePath = getVolumePath(getVolumeIdFromTreeUri(treeUri), con);
         if (volumePath == null) return File.separator;
-        if (volumePath.endsWith(File.separator))
-            volumePath = volumePath.substring(0, volumePath.length() - 1);
+        if (volumePath.endsWith(File.separator)) volumePath = volumePath.substring(0,
+                                                                                   volumePath.length() - 1);
 
         String documentPath = getDocumentPathFromTreeUri(treeUri);
-        if (documentPath.endsWith(File.separator))
-            documentPath = documentPath.substring(0, documentPath.length() - 1);
+        if (documentPath.endsWith(File.separator)) documentPath = documentPath.substring(0, documentPath
+                                                                                                    .length() -
+                                                                                            1);
 
         if (documentPath.length() > 0) {
-            if (documentPath.startsWith(File.separator))
-                return volumePath + documentPath;
-            else
-                return volumePath + File.separator + documentPath;
+            if (documentPath.startsWith(File.separator)) return volumePath + documentPath;
+            else return volumePath + File.separator + documentPath;
         } else return volumePath;
     }
 
@@ -47,8 +46,8 @@ public final class FileUtil {
     private static String getVolumePath(final String volumeId, Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return null;
         try {
-            StorageManager mStorageManager =
-                    (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+            StorageManager mStorageManager = (StorageManager) context.getSystemService(
+                    Context.STORAGE_SERVICE);
             Class<?> storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
             Method getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
             Method getUuid = storageVolumeClazz.getMethod("getUuid");
@@ -63,12 +62,12 @@ public final class FileUtil {
                 Boolean primary = (Boolean) isPrimary.invoke(storageVolumeElement);
 
                 //  primary volume?
-                if (primary && PRIMARY_VOLUME_NAME.equals(volumeId))
-                    return (String) getPath.invoke(storageVolumeElement);
+                if (primary && PRIMARY_VOLUME_NAME.equals(volumeId)) return (String) getPath.invoke(
+                        storageVolumeElement);
 
                 //  other volumes?
-                if (uuid != null && uuid.equals(volumeId))
-                    return (String) getPath.invoke(storageVolumeElement);
+                if (uuid != null && uuid.equals(volumeId)) return (String) getPath.invoke(
+                        storageVolumeElement);
             }
             //  not found.
             return null;
@@ -84,7 +83,6 @@ public final class FileUtil {
         if (split.length > 0) return split[0];
         else return null;
     }
-
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private static String getDocumentPathFromTreeUri(final Uri treeUri) {

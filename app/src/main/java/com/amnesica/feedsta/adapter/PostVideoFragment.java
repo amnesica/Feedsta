@@ -38,17 +38,17 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
 
 /**
- * Displays a video in a sideCar
+ * Displays a video in a sidecar post
  */
 public class PostVideoFragment extends Fragment {
 
     // view stuff
-    private View v;
+    private View view;
     private ProgressBar progressBar;
 
     // exoplayer stuff
     private SimpleExoPlayer player;
-    private String sVideoUrl;
+    private String videoUrl;
     private PlayerView playerView;
     private FrameLayout mainMediaFrameLayout;
     private ImageView fullScreenIcon;
@@ -56,7 +56,7 @@ public class PostVideoFragment extends Fragment {
     private DataSource.Factory dataSourceFactory;
     private int resumeWindow;
     private long resumePosition;
-    private boolean exoPlayerFullscreen = false;
+    private boolean exoPlayerIsInFullscreenMode = false;
     private boolean videoMuted = true;
     private boolean fullscreenIsPortrait = false;
 
@@ -79,11 +79,12 @@ public class PostVideoFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.fragment_viewpager_video_post, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.fragment_viewpager_video_post, container, false);
 
         // get views
-        progressBar = v.findViewById(R.id.progress_bar);
+        progressBar = view.findViewById(R.id.progress_bar);
 
         // get videoUrl from arguments
         String videoUrl = null;
@@ -91,103 +92,73 @@ public class PostVideoFragment extends Fragment {
             videoUrl = getArguments().getString("videoUrl");
         }
         if (videoUrl != null) {
-            sVideoUrl = videoUrl;
+            this.videoUrl = videoUrl;
         }
 
         // get positions of video
         if (savedInstanceState != null) {
             resumeWindow = savedInstanceState.getInt(STATE_RESUME_WINDOW);
             resumePosition = savedInstanceState.getLong(STATE_RESUME_POSITION);
-            exoPlayerFullscreen = savedInstanceState.getBoolean(STATE_PLAYER_FULLSCREEN);
+            exoPlayerIsInFullscreenMode = savedInstanceState.getBoolean(STATE_PLAYER_FULLSCREEN);
             videoMuted = savedInstanceState.getBoolean(STATE_VIDEO_MUTED);
             fullscreenIsPortrait = savedInstanceState.getBoolean(STATE_FULLSCREEN_IS_PORTRAIT);
         }
-
-        return v;
+        return view;
     }
 
     /**
-     * Loads and plays a video with the video_url
+     * Loads and plays a video with the videoUrl
      *
-     * @param video_url String url of video
+     * @param videoUrl String
      */
-    private void loadVideoFromUrl(String video_url) {
-        if (video_url != null && getContext() != null) {
-            dataSourceFactory = new DefaultDataSourceFactory(getContext(), Util.getUserAgent(getContext(), requireActivity().getPackageName()));
+    private void loadVideoFromUrl(String videoUrl) {
+        if (videoUrl == null || getContext() == null) return;
 
-            if (playerView == null) {
-                playerView = v.findViewById(R.id.exoplayer_vp);
-                playerView.setVisibility(VISIBLE);
+        dataSourceFactory = new DefaultDataSourceFactory(getContext(), Util.getUserAgent(getContext(),
+                                                                                         requireActivity()
+                                                                                                 .getPackageName()));
 
-                // make frame visible
-                mainMediaFrameLayout = v.findViewById(R.id.main_media_frame_vp);
-                mainMediaFrameLayout.setVisibility(VISIBLE);
+        if (playerView == null) {
+            // initialize playerView
+            playerView = view.findViewById(R.id.exoplayer_vp);
+            playerView.setVisibility(VISIBLE);
 
-                initFullscreenDialog();
-                initFullscreenButton();
-            }
+            // make frame visible
+            mainMediaFrameLayout = view.findViewById(R.id.main_media_frame_vp);
+            mainMediaFrameLayout.setVisibility(VISIBLE);
 
-            initExoPlayer(video_url);
+            initDialogToHoldFullscreenVideo();
+            initializeFullscreenVideoButton();
+        }
 
-            if (exoPlayerFullscreen) {
-                ((ViewGroup) playerView.getParent()).removeView(playerView);
-                fullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                fullScreenIcon.setImageDrawable(ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_exit_24));
-                fullScreenDialog.show();
-            }
+        initializeExoPlayer(videoUrl);
+
+        if (exoPlayerIsInFullscreenMode) {
+            ((ViewGroup) playerView.getParent()).removeView(playerView);
+            fullScreenDialog.addContentView(playerView,
+                                            new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                       ViewGroup.LayoutParams.MATCH_PARENT));
+
+            // set image to close fullscreen
+            fullScreenIcon.setImageDrawable(
+                    ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_exit_24));
+
+            fullScreenDialog.show();
         }
     }
 
     /**
-     * Initialize Exoplayer video
+     * Initialize exoplayer video
      *
-     * @param video_url String url of video
+     * @param videoUrl String
      */
-    private void initExoPlayer(String video_url) {
+    private void initializeExoPlayer(String videoUrl) {
         boolean showControls = shouldControlsBeDisplayed(requireContext());
 
         if (!showControls) {
-            playerView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // single click -> mute/unmute video
-                    if (player != null && player.isPlaying() && player.getVolume() > 0f) {
-
-                        // mute video
-                        player.setVolume(0f);
-                        videoMuted = true;
-                    } else {
-
-                        // unmute video
-                        if (player != null) {
-                            player.setVolume(1f);
-                            videoMuted = false;
-                        }
-                    }
-                }
-            });
-        } else { // show controls
-            final ImageView volumeButton = playerView.findViewById(R.id.exo_volume_icon);
-
-            // mute video clickListener
-            volumeButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (videoMuted) {
-                        volumeButton.setImageDrawable(ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_volume_up_24));
-                        if (player != null) {
-                            player.setVolume(1f);
-                        }
-                        videoMuted = false;
-                    } else {
-                        volumeButton.setImageDrawable(ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_volume_off_24));
-                        if (player != null) {
-                            player.setVolume(0f);
-                        }
-                        videoMuted = true;
-                    }
-                }
-            });
+            setupMuteUnmuteOnVideoClick();
+        } else {
+            setupVideoVolumeButton();
         }
 
         // new player instance
@@ -209,6 +180,7 @@ public class PostVideoFragment extends Fragment {
         playerView.hideController();
 
         if (!showControls) {
+            // hide controller when visibility of playerView changes
             playerView.setControllerVisibilityListener(new PlayerControlView.VisibilityListener() {
                 @Override
                 public void onVisibilityChange(int i) {
@@ -219,7 +191,9 @@ public class PostVideoFragment extends Fragment {
             });
         }
 
-        MediaSource videoSource = new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(video_url));
+        // provide media to be played by exoplayer with videoUrl
+        MediaSource videoSource = new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(
+                Uri.parse(videoUrl));
         player.prepare(videoSource);
 
         // loop video
@@ -232,41 +206,7 @@ public class PostVideoFragment extends Fragment {
         player.setPlayWhenReady(true);
 
         // rescale and resize video to screen
-        player.addVideoListener(new VideoListener() {
-            //  This is where we will resize view to fit aspect ratio of video
-            @Override
-            public void onVideoSizeChanged(
-                    int width,
-                    int height,
-                    int unappliedRotationDegrees,
-                    float pixelWidthHeightRatio) {
-
-                if (width <= height) {
-                    fullscreenIsPortrait = true;
-                    try {
-                        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                    } catch (Exception e) {
-                        Log.d("PostVideoFragment", Log.getStackTraceString(e));
-                    }
-                }
-
-                //  Get layout params of view
-                //  Use MyView.this to refer to the current MyView instance
-                //  inside a callback
-                ViewGroup.LayoutParams p = mainMediaFrameLayout.getLayoutParams();
-                int currWidth = mainMediaFrameLayout.getWidth();
-
-                //  Set new width/height of view
-                //  height or width must be cast to float as int/int will give 0
-                //  and distort view, e.g. 9/16 = 0 but 9.0/16 = 0.5625.
-                //  p.height is int hence the final cast to int.
-                p.width = currWidth;
-                p.height = (int) ((float) height / width * currWidth);
-
-                //  Redraw myView
-                mainMediaFrameLayout.requestLayout();
-            }
-        });
+        setupAdjustmentOfVideoSizeWhenSizeChanges();
 
         // seek to previous position if there is one
         boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
@@ -281,13 +221,105 @@ public class PostVideoFragment extends Fragment {
     }
 
     /**
-     * Initialize Dialog with fullscreen video
+     * Set up VideoListener to adjust size and aspect ratio of video when size changes, e.g. when fullscreen
+     * mode is entered. Boolean fullscreenIsPortrait is set to true here
      */
-    private void initFullscreenDialog() {
+    private void setupAdjustmentOfVideoSizeWhenSizeChanges() {
+        player.addVideoListener(new VideoListener() {
+            //  this is where we will resize view to fit aspect ratio of video
+            @Override
+            public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees,
+                                           float pixelWidthHeightRatio) {
+
+                if (width <= height) {
+                    // set boolean to stay in portrait mode fullscreen if video was made in portrait
+                    // mode
+                    fullscreenIsPortrait = true;
+                    try {
+                        // lock orientation in portrait mode then
+                        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    } catch (Exception e) {
+                        Log.d("PostVideoFragment", Log.getStackTraceString(e));
+                    }
+                }
+
+                //  get layout params of view
+                ViewGroup.LayoutParams p = mainMediaFrameLayout.getLayoutParams();
+                int currWidth = mainMediaFrameLayout.getWidth();
+
+                //  set new width/height of view. Height or width must be cast to float as int/int
+                //  will give 0 and distort view, e.g. 9/16 = 0 but 9.0/16 = 0.5625. p.height is
+                //  int hence the final cast to int
+                p.width = currWidth;
+                p.height = (int) ((float) height / width * currWidth);
+
+                //  redraw layout
+                mainMediaFrameLayout.requestLayout();
+            }
+        });
+    }
+
+    /**
+     * Set up video volume button to mute video and show different image
+     */
+    private void setupVideoVolumeButton() {
+        final ImageView volumeButton = playerView.findViewById(R.id.exo_volume_icon);
+
+        // mute video clickListener
+        volumeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (videoMuted) {
+                    volumeButton.setImageDrawable(ContextCompat.getDrawable(requireActivity(),
+                                                                            R.drawable.ic_baseline_volume_up_24));
+                    if (player != null) {
+                        player.setVolume(1f);
+                    }
+                    videoMuted = false;
+                } else {
+                    volumeButton.setImageDrawable(ContextCompat.getDrawable(requireActivity(),
+                                                                            R.drawable.ic_baseline_volume_off_24));
+                    if (player != null) {
+                        player.setVolume(0f);
+                    }
+                    videoMuted = true;
+                }
+            }
+        });
+    }
+
+    /**
+     * Set up listener to mute or unmute video on click
+     */
+    private void setupMuteUnmuteOnVideoClick() {
+        playerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // single click -> mute/unmute video
+                if (player != null && player.isPlaying() && player.getVolume() > 0f) {
+
+                    // mute video
+                    player.setVolume(0f);
+                    videoMuted = true;
+                } else {
+
+                    // unmute video
+                    if (player != null) {
+                        player.setVolume(1f);
+                        videoMuted = false;
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Initialize dialog with fullscreen video
+     */
+    private void initDialogToHoldFullscreenVideo() {
         fullScreenDialog = new Dialog(requireActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
             public void onBackPressed() {
-                if (exoPlayerFullscreen)
-                    closeFullscreenDialog();
+                if (exoPlayerIsInFullscreenMode) closeFullscreenDialog();
                 super.onBackPressed();
             }
         };
@@ -299,18 +331,24 @@ public class PostVideoFragment extends Fragment {
     private void openFullscreenDialog() {
         try {
             if (fullscreenIsPortrait) {
+                // stay in portrait mode if video was made in portrait mode
                 requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             } else {
+                // change to landscape mode otherwise
                 requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             }
         } catch (Exception e) {
             Log.d("PostVideoFragment", Log.getStackTraceString(e));
         }
 
+        // remove old view and show video fullscreen in dialog
         ((ViewGroup) playerView.getParent()).removeView(playerView);
-        fullScreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        fullScreenIcon.setImageDrawable(ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_exit_24));
-        exoPlayerFullscreen = true;
+        fullScreenDialog.addContentView(playerView,
+                                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                   ViewGroup.LayoutParams.MATCH_PARENT));
+        fullScreenIcon.setImageDrawable(
+                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_exit_24));
+        exoPlayerIsInFullscreenMode = true;
         fullScreenDialog.show();
     }
 
@@ -319,6 +357,7 @@ public class PostVideoFragment extends Fragment {
      */
     private void closeFullscreenDialog() {
         try {
+            // force orientation to portrait mode
             requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } catch (Exception e) {
             Log.d("PostVideoFragment", Log.getStackTraceString(e));
@@ -326,26 +365,29 @@ public class PostVideoFragment extends Fragment {
 
         ((ViewGroup) playerView.getParent()).removeView(playerView);
         mainMediaFrameLayout.addView(playerView);
-        exoPlayerFullscreen = false;
+
+        exoPlayerIsInFullscreenMode = false;
+
         fullScreenDialog.dismiss();
-        fullScreenIcon.setImageDrawable(ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_24));
+
+        // set image to open fullscreen again
+        fullScreenIcon.setImageDrawable(
+                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_24));
     }
 
     /**
-     * Initialize custom button in exoplayer controls
-     * to open or close fullscreen video
+     * Initialize custom button in exoplayer controls to open or close fullscreen video
      */
-    private void initFullscreenButton() {
-        PlayerControlView controlView = playerView.findViewById(R.id.exo_controller);
+    private void initializeFullscreenVideoButton() {
+        final PlayerControlView controlView = playerView.findViewById(R.id.exo_controller);
         fullScreenIcon = controlView.findViewById(R.id.exo_fullscreen_icon);
-        FrameLayout fullScreenButton = controlView.findViewById(R.id.exo_fullscreen_button);
+
+        final FrameLayout fullScreenButton = controlView.findViewById(R.id.exo_fullscreen_button);
         fullScreenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!exoPlayerFullscreen)
-                    openFullscreenDialog();
-                else
-                    closeFullscreenDialog();
+                if (!exoPlayerIsInFullscreenMode) openFullscreenDialog();
+                else closeFullscreenDialog();
             }
         });
     }
@@ -354,18 +396,19 @@ public class PostVideoFragment extends Fragment {
      * Checks if video controller should be displayed
      *
      * @param context Context
-     * @return true, if video controller should be displayed
+     * @return boolean
      */
     private boolean shouldControlsBeDisplayed(Context context) {
-        if (context != null) {
-            // get the amount of columns from settings
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            if (preferences != null) {
-                if (preferences.contains(getResources().getString(R.string.videoControls))) {
-                    return preferences.getBoolean(getResources().getString(R.string.videoControls), false);
-                }
+        if (context == null) return false;
+
+        // get the amount of columns from settings
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences != null) {
+            if (preferences.contains(getResources().getString(R.string.videoControls))) {
+                return preferences.getBoolean(getResources().getString(R.string.videoControls), false);
             }
         }
+
         return false;
     }
 
@@ -378,13 +421,12 @@ public class PostVideoFragment extends Fragment {
 
     @Override
     public void onResume() {
-        // reset screen orientation if video was fullscreen before and app was exited
-        if (exoPlayerFullscreen)
-            closeFullscreenDialog();
+        // reset screen orientation to portrait if video was fullscreen before and app was exited
+        if (exoPlayerIsInFullscreenMode) closeFullscreenDialog();
 
         // resume with video
-        if (sVideoUrl != null) {
-            loadVideoFromUrl(sVideoUrl);
+        if (videoUrl != null) {
+            loadVideoFromUrl(videoUrl);
         }
 
         super.onResume();
@@ -394,7 +436,7 @@ public class PostVideoFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(STATE_RESUME_WINDOW, resumeWindow);
         outState.putLong(STATE_RESUME_POSITION, resumePosition);
-        outState.putBoolean(STATE_PLAYER_FULLSCREEN, exoPlayerFullscreen);
+        outState.putBoolean(STATE_PLAYER_FULLSCREEN, exoPlayerIsInFullscreenMode);
         outState.putBoolean(STATE_VIDEO_MUTED, videoMuted);
         outState.putBoolean(STATE_FULLSCREEN_IS_PORTRAIT, fullscreenIsPortrait);
         super.onSaveInstanceState(outState);
@@ -403,7 +445,7 @@ public class PostVideoFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        // mute and release player;
+        // mute and release player
         if (playerView != null && player != null) {
             resumeWindow = player.getCurrentWindowIndex();
             resumePosition = Math.max(0, player.getContentPosition());
@@ -420,7 +462,7 @@ public class PostVideoFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // mute and release player;
+        // mute and release player
         releasePlayer();
     }
 

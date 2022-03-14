@@ -5,8 +5,8 @@ import java.io.Serializable;
 /**
  * Represents an account or profile
  */
-@SuppressWarnings("CanBeFinal")
 public class Account implements Serializable {
+
     // serialVersionUID (same as computed! - use the one from the exception message)
     private static final long serialVersionUID = -1316217135523228502L;
 
@@ -24,7 +24,8 @@ public class Account implements Serializable {
     private String imageThumbnail;
 
     // constructor
-    public Account(String imageProfilePicUrl, String username, String fullName, Boolean is_private, String id, String imageThumbnail) {
+    public Account(String imageProfilePicUrl, String username, String fullName, Boolean is_private, String id,
+                   String imageThumbnail) {
         this.imageProfilePicUrl = imageProfilePicUrl;
         this.username = username;
         this.fullName = fullName;

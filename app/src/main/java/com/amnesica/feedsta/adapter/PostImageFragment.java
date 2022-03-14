@@ -17,7 +17,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 /**
- * Displays an image in a sideCar
+ * Displays an image in a sidecar post
  */
 public class PostImageFragment extends Fragment {
 
@@ -33,7 +33,8 @@ public class PostImageFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_viewpager_image_post, container, false);
         ImageView imagePost = view.findViewById(R.id.imagePost);
 
@@ -44,14 +45,9 @@ public class PostImageFragment extends Fragment {
         }
 
         // load image in imageView but don't cache or store it
-        Glide.with(view)
-                .load(imageUrl)
-                .error(R.drawable.placeholder_image_post_error)
-                .centerInside()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
-                .dontAnimate()
-                .into(imagePost);
+        Glide.with(view).load(imageUrl).error(R.drawable.placeholder_image_post_error).centerInside()
+                .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).dontAnimate().into(
+                imagePost);
 
         // copy imageUrl to temp final variable
         final String finalImageUrl = imageUrl;
@@ -61,13 +57,14 @@ public class PostImageFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // start fullscreen image post fragment
-                FullscreenImagePostFragment fullscreenImagePostFragment = FullscreenImagePostFragment.newInstance(finalImageUrl);
+                FullscreenImagePostFragment fullscreenImagePostFragment =
+                        FullscreenImagePostFragment.newInstance(finalImageUrl);
 
                 // add fullscreenImagePostFragment to FragmentManager
-                FragmentHelper.addFragmentToContainer(fullscreenImagePostFragment, requireActivity().getSupportFragmentManager());
+                FragmentHelper.addFragmentToContainer(fullscreenImagePostFragment,
+                                                      requireActivity().getSupportFragmentManager());
             }
         });
-
         return view;
     }
 }

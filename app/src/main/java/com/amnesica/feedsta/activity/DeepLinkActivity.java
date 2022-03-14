@@ -9,11 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.amnesica.feedsta.R;
 
 /**
- * When a link with prefix 'www.instagram.com' is opened this class
- * serves as an entry point to give MainActivity the intent data.
- * Class is needed to have only one Feedsta instance existing,
- * otherwise every deep link would open a new Feedsta instance.
- * When app is used as usual this class is not called
+ * When a link with prefix "www.instagram.com" is opened this class serves as an entry point to give
+ * MainActivity the intent data. Class is needed to have only one Feedsta instance existing, otherwise every
+ * deep link would open a new Feedsta instance. When app is used as usual this class is not called
  */
 public class DeepLinkActivity extends AppCompatActivity {
 

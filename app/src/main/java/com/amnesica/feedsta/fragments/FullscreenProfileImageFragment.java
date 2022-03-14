@@ -13,7 +13,8 @@ import com.amnesica.feedsta.R;
 import com.bumptech.glide.Glide;
 
 /**
- * Fragment for displaying an profile image fullscreen
+ * Fragment for displaying an profile image fullscreen (used in ListAdapterSearch, HashtagFragment,
+ * ProfileFragment)
  */
 public class FullscreenProfileImageFragment extends Fragment {
 
@@ -26,10 +27,9 @@ public class FullscreenProfileImageFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_fullscreen_image, container, false);
+        View view = inflater.inflate(R.layout.fragment_fullscreen_image, container, false);
 
         // to retrieve object in fragment
         String profileImageUrl = null;
@@ -38,24 +38,18 @@ public class FullscreenProfileImageFragment extends Fragment {
         }
 
         // get image view
-        final ImageView imageProfilePicFullscreen = v.findViewById(R.id.imageProfilePicFullscreen);
+        final ImageView imageProfilePicFullscreen = view.findViewById(R.id.imageProfilePicFullscreen);
 
         // load image with url or from base64 encoded string glide
+        assert profileImageUrl != null;
         if (!profileImageUrl.startsWith("https://instagram")) {
             // load image into view
-            Glide.with(this)
-                    .asBitmap()
-                    .load(Base64.decode(profileImageUrl, Base64.DEFAULT))
-                    .error(R.drawable.placeholder_image_post_error)
-                    .dontAnimate()
-                    .into(imageProfilePicFullscreen);
+            Glide.with(this).asBitmap().load(Base64.decode(profileImageUrl, Base64.DEFAULT)).error(
+                    R.drawable.placeholder_image_post_error).dontAnimate().into(imageProfilePicFullscreen);
         } else {
             // load image with url into view (url starts with "https://instagram")
-            Glide.with(this)
-                    .load(profileImageUrl)
-                    .error(R.drawable.placeholder_image_post_error)
-                    .dontAnimate()
-                    .into(imageProfilePicFullscreen);
+            Glide.with(this).load(profileImageUrl).error(R.drawable.placeholder_image_post_error)
+                    .dontAnimate().into(imageProfilePicFullscreen);
         }
 
         // set onClickListener for closing fragment
@@ -67,6 +61,6 @@ public class FullscreenProfileImageFragment extends Fragment {
             }
         });
 
-        return v;
+        return view;
     }
 }

@@ -7,7 +7,6 @@ import org.json.JSONArray;
 /**
  * Represents a specific url from Instagram
  */
-@SuppressWarnings({"WeakerAccess", "CanBeFinal"})
 public class URL {
 
     public Enum FeedObject;

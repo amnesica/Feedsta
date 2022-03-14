@@ -2,7 +2,6 @@ package com.amnesica.feedsta.adapter;
 
 import static android.view.View.GONE;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
@@ -27,7 +26,6 @@ import java.util.ArrayList;
 /**
  * Adapter for displaying comments in PostFragment
  */
-@SuppressWarnings("NullableProblems")
 public class ListAdapterComment extends ArrayAdapter<Comment> {
 
     final Fragment fragment;
@@ -37,11 +35,11 @@ public class ListAdapterComment extends ArrayAdapter<Comment> {
         this.fragment = fragment;
     }
 
-    @SuppressLint("InflateParams")
     public View getView(int position, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(
+                    Activity.LAYOUT_INFLATER_SERVICE);
             assert layoutInflater != null;
             convertView = layoutInflater.inflate(R.layout.list_item_comment, null, true);
         }
@@ -52,41 +50,38 @@ public class ListAdapterComment extends ArrayAdapter<Comment> {
 
             if (comment != null) {
                 // find layout views
-                ImageView imageView = convertView.findViewById(R.id.accountProfilePic);
+                final ImageView imageView = convertView.findViewById(R.id.accountProfilePic);
                 final TextView username = convertView.findViewById(R.id.textUsername);
-                TextView textComment = convertView.findViewById(R.id.textTextComment);
-                TextView textDate = convertView.findViewById(R.id.textDate);
+                final TextView textComment = convertView.findViewById(R.id.textTextComment);
+                final TextView textDate = convertView.findViewById(R.id.textDate);
 
-                // set profile picture
+                // set profile picture of author/owner
                 if (comment.getOwnerProfilePicUrl() != null) {
-                    Glide.with(convertView)
-                            .load(comment.getOwnerProfilePicUrl())
-                            .error(R.drawable.placeholder_image_post_error)
-                            .dontAnimate()
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .skipMemoryCache(true)
-                            .into(imageView);
+                    Glide.with(convertView).load(comment.getOwnerProfilePicUrl()).error(
+                            R.drawable.placeholder_image_post_error).dontAnimate().diskCacheStrategy(
+                            DiskCacheStrategy.NONE).skipMemoryCache(true).into(imageView);
                 } else {
                     imageView.setVisibility(GONE);
                 }
 
-                // set username
+                // set username of author/owner
                 if (comment.getUsername() != null) {
                     username.setText(comment.getUsername());
                 } else {
                     username.setVisibility(GONE);
                 }
 
-                // set comment
+                // set comment/text
                 if (comment.getText() != null) {
                     // make links clickable if necessary
-                    textComment.setText(FragmentHelper.createSpannableStringWithClickableLinks(
-                            comment.getText(), fragment));
+                    textComment.setText(FragmentHelper
+                                                .createSpannableStringWithClickableLinks(comment.getText(),
+                                                                                         fragment));
                 } else {
                     textComment.setVisibility(GONE);
                 }
 
-                // set date
+                // set date of comment
                 if (comment.getCreated_at() != null) {
                     textDate.setText(DateFormat.getDateTimeInstance().format(comment.getCreated_at()));
                 } else {
@@ -96,7 +91,6 @@ public class ListAdapterComment extends ArrayAdapter<Comment> {
         } catch (Exception e) {
             Log.d("ListAdapterComment", Log.getStackTraceString(e));
         }
-
         return convertView;
     }
 }

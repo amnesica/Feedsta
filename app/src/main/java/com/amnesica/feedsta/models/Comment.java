@@ -5,7 +5,6 @@ import java.util.Date;
 /**
  * Represents a comment from a post
  */
-@SuppressWarnings("CanBeFinal")
 public class Comment {
 
     private final String id;

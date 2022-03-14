@@ -5,8 +5,7 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * Minimal representation of post to store in internal storage
- * hint: do changes very carefully!
+ * Minimal representation of post to store in internal storage. Hint: do changes very carefully!
  */
 public class PostStorage implements Serializable {
 
@@ -23,7 +22,8 @@ public class PostStorage implements Serializable {
     private String imageThumbnail;
 
     // constructor
-    public PostStorage(String id, String shortcode, Date takenAtDate, Boolean is_video, String imageUrlThumbnail, Boolean is_sideCar, String category, String imageThumbnail) {
+    public PostStorage(String id, String shortcode, Date takenAtDate, Boolean is_video,
+                       String imageUrlThumbnail, Boolean is_sideCar, String category, String imageThumbnail) {
         this.id = id;
         this.shortcode = shortcode;
         this.takenAtDate = takenAtDate;
@@ -107,18 +107,16 @@ public class PostStorage implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PostStorage that = (PostStorage) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(shortcode, that.shortcode) &&
-                Objects.equals(takenAtDate, that.takenAtDate) &&
-                Objects.equals(is_video, that.is_video) &&
-                Objects.equals(imageUrlThumbnail, that.imageUrlThumbnail) &&
-                Objects.equals(imageThumbnail, that.imageThumbnail) &&
-                Objects.equals(is_sideCar, that.is_sideCar) &&
-                Objects.equals(category, that.category);
+        return Objects.equals(id, that.id) && Objects.equals(shortcode, that.shortcode) && Objects.equals(
+                takenAtDate, that.takenAtDate) && Objects.equals(is_video, that.is_video) && Objects.equals(
+                imageUrlThumbnail, that.imageUrlThumbnail) && Objects.equals(imageThumbnail,
+                                                                             that.imageThumbnail) &&
+               Objects.equals(is_sideCar, that.is_sideCar) && Objects.equals(category, that.category);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, shortcode, takenAtDate, is_video, imageUrlThumbnail, imageThumbnail, is_sideCar, category);
+        return Objects.hash(id, shortcode, takenAtDate, is_video, imageUrlThumbnail, imageThumbnail,
+                            is_sideCar, category);
     }
 }

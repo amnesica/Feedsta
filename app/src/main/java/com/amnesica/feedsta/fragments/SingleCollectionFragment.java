@@ -6,7 +6,6 @@ import static com.amnesica.feedsta.helper.StaticIdentifier.permsWriteOnly;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,35 +73,52 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_single_collection, container, false);
+        View view = inflater.inflate(R.layout.fragment_single_collection, container, false);
 
-        textViewNoBookmarksInSingleCollection = v.findViewById(R.id.textNoBookmarksInSingleCollection);
-        recyclerView = v.findViewById(R.id.recycler_view_single_collection);
-        // use this setting to
-        // improve performance if you know that changes
-        // in content do not change the layout size
-        // of the RecyclerView
-        // recyclerView.setHasFixedSize(true);
+        // setup toolbar with title from category
+        setupToolbar(view);
+
+        textViewNoBookmarksInSingleCollection = view.findViewById(R.id.textNoBookmarksInSingleCollection);
+        recyclerView = view.findViewById(R.id.recycler_view_single_collection);
 
         // use a linear layout manager
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
         recyclerView.setLayoutManager(layoutManager);
 
-        //  Retrieve listPostsInCollectionBookmarked
+        // retrieve bookmarks in collection
         if (this.getArguments() != null) {
             if (getArguments().getSerializable("bookmarksInCollection") != null) {
-                listPostsInCollectionBookmarked = (List<Post>) getArguments().getSerializable("bookmarksInCollection");
+                listPostsInCollectionBookmarked = (List<Post>) getArguments().getSerializable(
+                        "bookmarksInCollection");
                 category = (String) getArguments().getSerializable("category");
             }
         }
 
-        // display no bookmarks textView
         showTextNoBookmarksIfNoPosts();
 
-        // define an adapter
+        setupAdapter();
+
+        return view;
+    }
+
+    /**
+     * Sets up toolbar with with title and back button
+     *
+     * @param view View
+     */
+    private void setupToolbar(View view) {
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        toolbar.setTitle(category);
+        FragmentHelper.setupToolbarWithBackButton(toolbar,
+                                                  new WeakReference<>(SingleCollectionFragment.this));
+    }
+
+    /**
+     * Sets up itemClickListener to go to postFragment and show actions on long click on items in collection
+     */
+    private void setupAdapter() {
         adapter = new RecViewAdapterSingleCollection(listPostsInCollectionBookmarked);
         recyclerView.setAdapter(adapter);
 
@@ -118,7 +134,8 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
                     PostFragment postFragment = PostFragment.newInstance(postToSend);
 
                     // add fragment to container
-                    FragmentHelper.addFragmentToContainer(postFragment, requireActivity().getSupportFragmentManager());
+                    FragmentHelper.addFragmentToContainer(postFragment,
+                                                          requireActivity().getSupportFragmentManager());
                 }
             }
 
@@ -135,23 +152,29 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
 
                     if (FragmentHelper.collectionsAlreadyExist(requireContext())) {
                         // open dialog to select existing collection for bookmark
-                        BtmSheetDialogSelectCollection btmSheetDialogSelectCollection = new BtmSheetDialogSelectCollection(EditBookmarksType.MOVE_BOOKMARKS);
+                        BtmSheetDialogSelectCollection btmSheetDialogSelectCollection =
+                                new BtmSheetDialogSelectCollection(EditBookmarksType.MOVE_BOOKMARKS);
 
                         // set listener to get selected category
-                        btmSheetDialogSelectCollection.setOnFragmentCallbackListener(SingleCollectionFragment.this);
+                        btmSheetDialogSelectCollection.setOnFragmentCallbackListener(
+                                SingleCollectionFragment.this);
 
                         // show bottom sheet
-                        btmSheetDialogSelectCollection.show(requireActivity().getSupportFragmentManager(), BtmSheetDialogSelectCollection.class.getSimpleName());
+                        btmSheetDialogSelectCollection.show(requireActivity().getSupportFragmentManager(),
+                                                            BtmSheetDialogSelectCollection.class
+                                                                    .getSimpleName());
 
                     } else {
                         // open dialog to add bookmark to collection
-                        BtmSheetDialogAddCollection bottomSheetAddCollection = new BtmSheetDialogAddCollection(null, EditBookmarksType.MOVE_BOOKMARKS);
+                        BtmSheetDialogAddCollection bottomSheetAddCollection =
+                                new BtmSheetDialogAddCollection(null, EditBookmarksType.MOVE_BOOKMARKS);
 
                         // set listener to get selected category
                         bottomSheetAddCollection.setOnFragmentCallbackListener(SingleCollectionFragment.this);
 
                         // show bottom sheet
-                        bottomSheetAddCollection.show(requireActivity().getSupportFragmentManager(), BtmSheetDialogAddCollection.class.getSimpleName());
+                        bottomSheetAddCollection.show(requireActivity().getSupportFragmentManager(),
+                                                      BtmSheetDialogAddCollection.class.getSimpleName());
                     }
                 }
             }
@@ -163,9 +186,7 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
                     postsToDownload.addAll(selectedPosts);
 
                     // check permissions and start batch download
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        requestPermissions(permsWriteOnly, permsRequestCode);
-                    }
+                    requestPermissions(permsWriteOnly, permsRequestCode);
                 }
             }
 
@@ -175,39 +196,33 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
                     postsToReset = new ArrayList<>();
                     postsToReset.addAll(selectedPosts);
 
-                    SetCategoryToListOfPosts setCategoryToListOfPosts =
-                            new SetCategoryToListOfPosts(SingleCollectionFragment.this, postsToReset,
-                                    null, progressDialogBatch,
-                                    EditBookmarksType.REMOVE_FROM_THIS_COLLECTION);
+                    SetCategoryToListOfPosts setCategoryToListOfPosts = new SetCategoryToListOfPosts(
+                            SingleCollectionFragment.this, postsToReset, null, progressDialogBatch,
+                            EditBookmarksType.REMOVE_FROM_THIS_COLLECTION);
                     setCategoryToListOfPosts.setOnFragmentRefreshCallback(SingleCollectionFragment.this);
                     setCategoryToListOfPosts.execute();
                 }
             }
         });
-
-        // setup toolbar with title from category
-        Toolbar toolbar = v.findViewById(R.id.toolbar);
-        toolbar.setTitle(category);
-        FragmentHelper.setupToolbarWithBackButton(toolbar, new WeakReference<>(SingleCollectionFragment.this));
-
-        return v;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (permsRequestCode == 200) {
-            if (grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission is granted. Continue the action or workflow in your app.
                 // start BatchDownloadPosts async task
-                new BatchDownloadPosts(SingleCollectionFragment.this, postsToDownload, progressDialogBatch).execute();
+                new BatchDownloadPosts(SingleCollectionFragment.this, postsToDownload, progressDialogBatch)
+                        .execute();
             } else {
                 // Explain to the user that the feature is unavailable because
                 // the features requires a permission that the user has denied.
                 // At the same time, respect the user's decision. Don't link to
                 // system settings in an effort to convince the user to change
                 // their decision.
-                FragmentHelper.showToast(getResources().getString(R.string.permission_denied), requireActivity(), requireContext());
+                FragmentHelper.showToast(getResources().getString(R.string.permission_denied),
+                                         requireActivity(), requireContext());
             }
         }
     }
@@ -229,11 +244,11 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
     /**
      * Removes all posts in list postsToRemove from bookmarks in storage
      *
-     * @param listPostsToRemove ArrayList<Post> posts to be removed from bookmarks
+     * @param listPostsToRemove List<Post>
      */
     private void removeBookmarkedPostsInList(List<Post> listPostsToRemove) {
-        RemoveBookmarksInList removeBookmarksInList =
-                new RemoveBookmarksInList(SingleCollectionFragment.this, listPostsToRemove);
+        RemoveBookmarksInList removeBookmarksInList = new RemoveBookmarksInList(SingleCollectionFragment.this,
+                                                                                listPostsToRemove);
         removeBookmarksInList.execute();
     }
 
@@ -259,7 +274,8 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
      */
     private void refreshAdapter() {
         if (category != null && adapter != null) {
-            listPostsInCollectionBookmarked = FragmentHelper.getAllBookmarkedPostsOfCollection(category, requireContext());
+            listPostsInCollectionBookmarked = FragmentHelper.getAllBookmarkedPostsOfCollection(category,
+                                                                                               requireContext());
             adapter.setItems(listPostsInCollectionBookmarked);
             adapter.notifyDataSetChanged();
 
@@ -270,15 +286,14 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
     /**
      * Moves bookmarks to other collection (other category)
      *
-     * @param category name of new collection
+     * @param category String
      * @param editMode EditBookmarksType
      */
     @Override
     public void savePostOrListToCollection(String category, EditBookmarksType editMode) {
-        if (postsToMove != null && !postsToMove.isEmpty() &&
-                category != null && !category.isEmpty()) {
-            SetCategoryToListOfPosts setCategoryToListOfPosts = new SetCategoryToListOfPosts(SingleCollectionFragment.this,
-                    postsToMove, category, progressDialogBatch, editMode);
+        if (postsToMove != null && !postsToMove.isEmpty() && category != null && !category.isEmpty()) {
+            SetCategoryToListOfPosts setCategoryToListOfPosts = new SetCategoryToListOfPosts(
+                    SingleCollectionFragment.this, postsToMove, category, progressDialogBatch, editMode);
             setCategoryToListOfPosts.setOnFragmentRefreshCallback(SingleCollectionFragment.this);
             setCategoryToListOfPosts.execute();
         }
@@ -287,13 +302,15 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
     @Override
     public void openBtmSheetDialogAddCollection(EditBookmarksType editMode) {
         // open BottomSheetDialogAddCollection
-        BtmSheetDialogAddCollection bottomSheetAddCollection = new BtmSheetDialogAddCollection(null, editMode);
+        BtmSheetDialogAddCollection bottomSheetAddCollection = new BtmSheetDialogAddCollection(null,
+                                                                                               editMode);
 
         // set FragmentCallbackListener
         bottomSheetAddCollection.setOnFragmentCallbackListener(SingleCollectionFragment.this);
 
         //show Fragment
-        bottomSheetAddCollection.show(requireActivity().getSupportFragmentManager(), BtmSheetDialogAddCollection.class.getSimpleName());
+        bottomSheetAddCollection.show(requireActivity().getSupportFragmentManager(),
+                                      BtmSheetDialogAddCollection.class.getSimpleName());
     }
 
     @Override
@@ -330,31 +347,32 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final SingleCollectionFragment fragment = fragmentReference.get();
-                if (fragment != null) {
+            if (isCancelled()) return null;
 
-                    if (listPostsToRemove != null && !listPostsToRemove.isEmpty()) {
-                        // set initial max size to zero
-                        progressDialogBatch.setMax(0);
+            // get reference from fragment
+            final SingleCollectionFragment fragment = fragmentReference.get();
+            if (fragment == null) return null;
 
-                        // set max size of progressDialog
-                        int progressMaxSize = listPostsToRemove.size();
+            if (listPostsToRemove != null && !listPostsToRemove.isEmpty()) {
+                // set initial max size to zero
+                progressDialogBatch.setMax(0);
 
-                        // set length of progressDialog
-                        progressDialogBatch.setMax(progressMaxSize);
+                // set max size of progressDialog
+                int progressMaxSize = listPostsToRemove.size();
 
-                        for (Post post : listPostsToRemove) {
-                            removingSuccessful = StorageHelper.removePostFromInternalStorage(post, fragment.requireContext(), StorageHelper.filename_bookmarks);
+                // set length of progressDialog
+                progressDialogBatch.setMax(progressMaxSize);
 
-                            if (!removingSuccessful) {
-                                return null;
-                            }
+                for (Post post : listPostsToRemove) {
+                    removingSuccessful = StorageHelper.removePostFromInternalStorage(post,
+                                                                                     fragment.requireContext(),
+                                                                                     StorageHelper.filename_bookmarks);
 
-                            publishProgress(editedItems += 1);
-                        }
+                    if (!removingSuccessful) {
+                        return null;
                     }
+
+                    publishProgress(editedItems += 1);
                 }
             }
             return null;
@@ -363,23 +381,26 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (!isCancelled()) {
+            if (isCancelled()) return;
 
-                // dismiss progress dialog
-                progressDialogBatch.dismiss();
+            // dismiss progress dialog
+            progressDialogBatch.dismiss();
 
-                // get reference from fragment
-                final SingleCollectionFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    if (removingSuccessful) {
-                        FragmentHelper.showToast(fragment.requireContext().getString(R.string.selected_bookmarks_removed_success), fragment.requireActivity(), fragment.requireContext());
+            // get reference from fragment
+            final SingleCollectionFragment fragment = fragmentReference.get();
+            if (fragment == null) return;
 
-                        // refresh bookmarked posts
-                        fragment.refreshAdapter();
-                    } else {
-                        FragmentHelper.showToast(fragment.requireContext().getString(R.string.selected_bookmarks_removed_fail), fragment.requireActivity(), fragment.requireContext());
-                    }
-                }
+            if (removingSuccessful) {
+                FragmentHelper.showToast(
+                        fragment.requireContext().getString(R.string.selected_bookmarks_removed_success),
+                        fragment.requireActivity(), fragment.requireContext());
+
+                // refresh bookmarked posts
+                fragment.refreshAdapter();
+            } else {
+                FragmentHelper.showToast(
+                        fragment.requireContext().getString(R.string.selected_bookmarks_removed_fail),
+                        fragment.requireActivity(), fragment.requireContext());
             }
         }
 
@@ -390,21 +411,20 @@ public class SingleCollectionFragment extends Fragment implements FragmentCallba
         }
 
         private void showProgressDialog() {
-            if (!isCancelled()) {
-                if (!isCancelled()) {
-                    // get reference from fragment
-                    final SingleCollectionFragment fragment = fragmentReference.get();
+            if (isCancelled()) return;
 
-                    if (fragment != null) {
-                        progressDialogBatch = new ProgressDialog(fragment.requireContext());
-                        progressDialogBatch.setTitle(fragment.requireContext().getString(R.string.remove_bookmarks_confirm_dialog_title));
-                        progressDialogBatch.setMessage(fragment.requireContext().getString(R.string.remove_bookmarks_list_message));
-                        progressDialogBatch.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                        progressDialogBatch.setProgress(0);
-                        progressDialogBatch.show();
-                    }
-                }
-            }
+            // get reference from fragment
+            final SingleCollectionFragment fragment = fragmentReference.get();
+
+            if (fragment == null) return;
+            progressDialogBatch = new ProgressDialog(fragment.requireContext());
+            progressDialogBatch.setTitle(
+                    fragment.requireContext().getString(R.string.remove_bookmarks_confirm_dialog_title));
+            progressDialogBatch.setMessage(
+                    fragment.requireContext().getString(R.string.remove_bookmarks_list_message));
+            progressDialogBatch.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialogBatch.setProgress(0);
+            progressDialogBatch.show();
         }
     }
 }

@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -64,14 +63,13 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
     private ProgressDialog progressDialogBatch;
 
     // download posts
-    List<Post> postsToDownload;
-    List<Post> postsToRenameCollection;
+    private List<Post> postsToDownload;
+    private List<Post> postsToRenameCollection;
 
     // list with collections
     private List<Collection> listCollectionsBookmarked;
 
-    // update thumbnail urls
-    // with new list of bookmarked posts with updated thumbnailUrls
+    // update thumbnail urls with new list of bookmarked posts with updated thumbnailUrls
     private ArrayList<Post> listPostsBookmarked;
     private ArrayList<Post> listPostFailedRefresh;
     private ArrayList<Post> listPostsUpdatedBookmarked;
@@ -82,38 +80,25 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_collections, container, false);
+        View view = inflater.inflate(R.layout.fragment_collections, container, false);
 
-        textNoBookmarks = v.findViewById(R.id.textNoBookmarksCollections);
-        swipeRefreshLayout = v.findViewById(R.id.swipeRefreshBookmarks);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                updateBookmarkThumbnails();
-            }
-        });
+        textNoBookmarks = view.findViewById(R.id.textNoBookmarksCollections);
 
-        recyclerView = v.findViewById(R.id.recycler_view_collections);
-        // use this setting to
-        // improve performance if you know that changes
-        // in content do not change the layout size
-        // of the RecyclerView
-        // recyclerView.setHasFixedSize(true);
+        setupSwipeRefreshLayout(view);
 
         // use a linear layout manager
+        recyclerView = view.findViewById(R.id.recycler_view_collections);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
         recyclerView.setLayoutManager(layoutManager);
 
         // create collections in listCollectionsBookmarked
         listCollectionsBookmarked = FragmentHelper.createCollectionsFromBookmarks(requireContext());
 
-        // display no bookmarks textView
         showTextNoBookmarksIfNoPosts();
 
-        //  define an adapter
+        // define and set an adapter
         adapter = new RecViewAdapterCollections(listCollectionsBookmarked);
         recyclerView.setAdapter(adapter);
 
@@ -125,7 +110,8 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
             }
 
             @Override
-            public void removeBookmarksOfCollectionFromStorage(ArrayList<Collection> listCollectionsToRemove) {
+            public void removeBookmarksOfCollectionFromStorage(
+                    ArrayList<Collection> listCollectionsToRemove) {
                 removeBookmarksOfCollection(listCollectionsToRemove);
             }
 
@@ -140,16 +126,32 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
             }
 
             @Override
-            public void resetCollectionInAllSelectedBookmarksOfCategory(List<Collection> listCollectionsToReset) {
+            public void resetCollectionInAllSelectedBookmarksOfCategory(
+                    List<Collection> listCollectionsToReset) {
                 resetCollectionInSelectedBookmarks(listCollectionsToReset);
             }
         });
 
         // setup toolbar with title
-        Toolbar toolbar = v.findViewById(R.id.toolbar);
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setTitle(getResources().getString(R.string.toolbar_title_bookmarks));
 
-        return v;
+        return view;
+    }
+
+    /**
+     * Sets up swipeRefreshLayout to update bookmarks on refresh
+     *
+     * @param view View
+     */
+    private void setupSwipeRefreshLayout(final View view) {
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshBookmarks);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateBookmarkThumbnails();
+            }
+        });
     }
 
     /**
@@ -164,14 +166,15 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
         // get all posts in collections
         for (Collection collection : listCollectionsToReset) {
             String nameOfCollection = collection.getName();
-            List<Post> postsInCollection = FragmentHelper.getAllBookmarkedPostsOfCollection(nameOfCollection, requireContext());
+            List<Post> postsInCollection = FragmentHelper.getAllBookmarkedPostsOfCollection(nameOfCollection,
+                                                                                            requireContext());
             setPostsToResetCategory.addAll(postsInCollection);
         }
 
         // call async task
-        SetCategoryToListOfPosts setCategoryToListOfPosts =
-                new SetCategoryToListOfPosts(CollectionsFragment.this, new ArrayList<>(setPostsToResetCategory),
-                        null, progressDialogBatch, EditBookmarksType.REMOVE_FROM_MULTIPLE_COLLECTIONS);
+        SetCategoryToListOfPosts setCategoryToListOfPosts = new SetCategoryToListOfPosts(
+                CollectionsFragment.this, new ArrayList<>(setPostsToResetCategory), null, progressDialogBatch,
+                EditBookmarksType.REMOVE_FROM_MULTIPLE_COLLECTIONS);
         setCategoryToListOfPosts.setOnFragmentRefreshCallback(CollectionsFragment.this);
         setCategoryToListOfPosts.execute();
     }
@@ -181,12 +184,13 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
     }
 
     /**
-     * Gets all bookmarks from storage and calls method showDialogAndStartFetching to
-     * show dialog and start fetching new thumbnails of bookmarks
+     * Gets all bookmarks from storage and calls method showDialogAndStartFetching to show dialog and start
+     * fetching new thumbnails of bookmarks
      */
     private void updateBookmarkThumbnails() {
         // get all bookmarks from storage in list
-        listPostsBookmarked = StorageHelper.readPostsFromInternalStorage(requireContext(), StorageHelper.filename_bookmarks);
+        listPostsBookmarked = StorageHelper.readPostsFromInternalStorage(requireContext(),
+                                                                         StorageHelper.filename_bookmarks);
 
         // show dialog that it might take long
         if (listPostsBookmarked != null && !listPostsBookmarked.isEmpty()) {
@@ -202,24 +206,25 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
     private void showDialogAndStartFetching() {
         AlertDialog.Builder alertDialogBuilder;
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(requireContext())
-                .setTitle(getResources().getString(R.string.title_dialog_refresh_bookmarks))
-                .setMessage(getResources().getString(R.string.message_dialog_refresh_bookmarks))
-                .setPositiveButton(getResources().getString(R.string.button_continue), new DialogInterface.OnClickListener() {
+        alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+                getResources().getString(R.string.title_dialog_refresh_bookmarks)).setMessage(
+                getResources().getString(R.string.message_dialog_refresh_bookmarks)).setPositiveButton(
+                getResources().getString(R.string.button_continue), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         //  Continue with refresh operation
                         new CheckConnectionAndUpdateBookmarks(CollectionsFragment.this).execute();
                     }
-                })
-                .setNegativeButton(getResources().getString(R.string.CANCEL), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // stop refreshing
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
-                })
+                }).setNegativeButton(getResources().getString(R.string.CANCEL),
+                                     new DialogInterface.OnClickListener() {
+                                         @Override
+                                         public void onClick(DialogInterface dialog, int which) {
+                                             // stop refreshing
+                                             swipeRefreshLayout.setRefreshing(false);
+                                         }
+                                     })
 
-                // get the click outside the dialog to set the behaviour like the negative button was clicked
+                // get the click outside the dialog to set the behaviour like the negative button
+                // was clicked
                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
@@ -250,9 +255,9 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
     }
 
     /**
-     * Downloads all bookmarks in selected collections
+     * Downloads all bookmarks in the selected collections
      *
-     * @param selectedCollections list with collections
+     * @param selectedCollections ArrayList<Collection>
      */
     private void downloadSelectedBookmarksInCollections(ArrayList<Collection> selectedCollections) {
         if (selectedCollections != null && !selectedCollections.isEmpty()) {
@@ -261,7 +266,8 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
 
             // get all bookmarks from selected collections
             for (Collection collection : selectedCollections) {
-                List<Post> postsInCollection = FragmentHelper.getAllBookmarkedPostsOfCollection(collection.getName(), requireContext());
+                List<Post> postsInCollection = FragmentHelper.getAllBookmarkedPostsOfCollection(
+                        collection.getName(), requireContext());
                 if (postsInCollection != null) {
                     setPostsToDownload.addAll(postsInCollection);
                 }
@@ -271,64 +277,68 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
             postsToDownload = new ArrayList<>(setPostsToDownload);
 
             // check permissions and start batch download
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(permsWriteOnly, permsRequestCode);
-            }
+            requestPermissions(permsWriteOnly, permsRequestCode);
         }
     }
 
     /**
-     * Renames the collection in all bookmarks of the collection.
-     * Hint: The collection "All" is not contained anymore at this point
+     * Renames the collection in all bookmarks of the collection. Hint: The collection "All" is not contained
+     * anymore at this point
      *
-     * @param listCollectionsToRename list with collections
+     * @param listCollectionsToRename List<Collection>
      */
     private void renameCategoryInBookmarksOfCollection(List<Collection> listCollectionsToRename) {
         String nameOfCollection = listCollectionsToRename.get(0).getName();
-        postsToRenameCollection = FragmentHelper.getAllBookmarkedPostsOfCollection(nameOfCollection, requireContext());
+        postsToRenameCollection = FragmentHelper.getAllBookmarkedPostsOfCollection(nameOfCollection,
+                                                                                   requireContext());
 
         if (postsToRenameCollection != null && !postsToRenameCollection.isEmpty()) {
             // open new BtmSheetDialogAddCollection
-            BtmSheetDialogAddCollection bottomSheetAddCollection = new BtmSheetDialogAddCollection(nameOfCollection, EditBookmarksType.RENAME_COLLECTION);
+            BtmSheetDialogAddCollection bottomSheetAddCollection = new BtmSheetDialogAddCollection(
+                    nameOfCollection, EditBookmarksType.RENAME_COLLECTION);
 
             // set callback listener to refresh view afterwards
             bottomSheetAddCollection.setOnFragmentCallbackListener(CollectionsFragment.this);
 
             // show dialog
-            bottomSheetAddCollection.show(requireActivity().getSupportFragmentManager(), BtmSheetDialogAddCollection.class.getSimpleName());
+            bottomSheetAddCollection.show(requireActivity().getSupportFragmentManager(),
+                                          BtmSheetDialogAddCollection.class.getSimpleName());
         }
     }
 
     /**
      * Removes all bookmarks of selected collections
      *
-     * @param listCollectionsToRemove list of collection
+     * @param listCollectionsToRemove ArrayList<Collection>
      */
     private void removeBookmarksOfCollection(ArrayList<Collection> listCollectionsToRemove) {
-        RemoveBookmarksOfCollection removeBookmarksOfCollection =
-                new RemoveBookmarksOfCollection(CollectionsFragment.this, listCollectionsToRemove);
+        RemoveBookmarksOfCollection removeBookmarksOfCollection = new RemoveBookmarksOfCollection(
+                CollectionsFragment.this, listCollectionsToRemove);
         removeBookmarksOfCollection.execute();
     }
 
     /**
-     * Opens a specific collection. It searches for all bookmarks which are in that category and
-     * opens a new SingleCollectionFragment
+     * Opens a specific collection. It searches for all bookmarks which are in that category and opens a new
+     * SingleCollectionFragment
      *
-     * @param position position in listCollectionsBookmarked
+     * @param position int
      */
     private void openSpecificCollection(int position) {
         listCollectionsBookmarked = FragmentHelper.createCollectionsFromBookmarks(requireContext());
         String category = listCollectionsBookmarked.get(position).getName();
 
         // find all posts of specific collection
-        List<Post> listPostsInCollectionBookmarked = FragmentHelper.getAllBookmarkedPostsOfCollection(category, requireContext());
+        List<Post> listPostsInCollectionBookmarked = FragmentHelper.getAllBookmarkedPostsOfCollection(
+                category, requireContext());
 
         if (listPostsInCollectionBookmarked != null) {
             // new SingleCollectionFragment
-            SingleCollectionFragment singleCollectionFragment = SingleCollectionFragment.newInstance(listPostsInCollectionBookmarked, category);
+            SingleCollectionFragment singleCollectionFragment = SingleCollectionFragment.newInstance(
+                    listPostsInCollectionBookmarked, category);
 
             // add fragment to container
-            FragmentHelper.addFragmentToContainer(singleCollectionFragment, requireActivity().getSupportFragmentManager());
+            FragmentHelper.addFragmentToContainer(singleCollectionFragment,
+                                                  requireActivity().getSupportFragmentManager());
         }
     }
 
@@ -381,11 +391,16 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
         }
     }
 
+    /**
+     * Rename collection to category
+     *
+     * @param category String
+     * @param editMode EditBookmarksType
+     */
     @Override
-    // rename collection to String category
     public void savePostOrListToCollection(String category, EditBookmarksType editMode) {
-        SetCategoryToListOfPosts setCategoryToListOfPosts = new SetCategoryToListOfPosts(CollectionsFragment.this, postsToRenameCollection,
-                category, progressDialogBatch, editMode);
+        SetCategoryToListOfPosts setCategoryToListOfPosts = new SetCategoryToListOfPosts(
+                CollectionsFragment.this, postsToRenameCollection, category, progressDialogBatch, editMode);
         setCategoryToListOfPosts.setOnFragmentRefreshCallback(CollectionsFragment.this);
         setCategoryToListOfPosts.execute();
     }
@@ -396,54 +411,58 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (permsRequestCode == 200) {
-            if (grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted. Continue the action or workflow in your app.
-                // start download of all bookmarks in selected collections
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted. Continue the action or workflow in your app. Start
+                // download of all bookmarks in selected collections
                 if (postsToDownload != null && !postsToDownload.isEmpty()) {
-                    new BatchDownloadPosts(CollectionsFragment.this, postsToDownload, progressDialogBatch).execute();
+                    new BatchDownloadPosts(CollectionsFragment.this, postsToDownload, progressDialogBatch)
+                            .execute();
                 }
             } else {
-                // Explain to the user that the feature is unavailable because
-                // the features requires a permission that the user has denied.
-                // At the same time, respect the user's decision. Don't link to
-                // system settings in an effort to convince the user to change
-                // their decision.
-                FragmentHelper.showToast(getResources().getString(R.string.permission_denied), requireActivity(), requireContext());
+                // Explain to the user that the feature is unavailable because the features
+                // requires a permission that the user has denied. At the same time, respect
+                // the user's decision. Don't link to system settings in an effort to convince
+                // the user to change their decision
+                FragmentHelper.showToast(getResources().getString(R.string.permission_denied),
+                                         requireActivity(), requireContext());
             }
         }
     }
 
     /**
-     * Shows the dialog after refreshing thumbnails of bookmarks to
-     * remove bookmarks that could not be refreshed or to try again later
+     * Shows the dialog after refreshing thumbnails of bookmarks to remove bookmarks that could not be
+     * refreshed or hint to try again later
      */
     private void showConfirmationDialogAndRemoveBookmarksRefresh() {
         try {
             AlertDialog.Builder alertDialogBuilder;
             // create alertDialog
-            alertDialogBuilder = new AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.dialog_refresh_bookmarks_problems_title)
-                    .setMessage(listPostFailedRefresh.size() + "/" + listPostsBookmarked.size() + " " + getString(R.string.dialog_refresh_bookmarks_problems_message))
-                    .setPositiveButton(R.string.dialog_refresh_bookmarks_problems_positive_button, new DialogInterface.OnClickListener() {
+            alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+                    R.string.dialog_refresh_bookmarks_problems_title).setMessage(
+                    listPostFailedRefresh.size() + "/" + listPostsBookmarked.size() + " " +
+                    getString(R.string.dialog_refresh_bookmarks_problems_message)).setPositiveButton(
+                    R.string.dialog_refresh_bookmarks_problems_positive_button,
+                    new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             // override existing bookmarks (store posts) update listView
                             new StoreUpdatedBookmarkedPostsInStorage(CollectionsFragment.this).execute();
                         }
-                    })
-                    .setNegativeButton(R.string.dialog_refresh_bookmarks_problems_negative_button, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (listPostFailedRefresh != null) {
-                                listPostFailedRefresh.clear();
-                                listPostFailedRefresh = null;
-                            }
-                            resetSomethingsWrong();
-                        }
-                    })
-                    // get the click outside the dialog to set the behaviour like the negative button was clicked
+                    }).setNegativeButton(R.string.dialog_refresh_bookmarks_problems_negative_button,
+                                         new DialogInterface.OnClickListener() {
+                                             @Override
+                                             public void onClick(DialogInterface dialog, int which) {
+                                                 if (listPostFailedRefresh != null) {
+                                                     listPostFailedRefresh.clear();
+                                                     listPostFailedRefresh = null;
+                                                 }
+                                                 resetSomethingsWrong();
+                                             }
+                                         })
+                    // get the click outside the dialog to set the behaviour like the negative
+                    // button was clicked
                     .setOnCancelListener(new DialogInterface.OnCancelListener() {
                         @Override
                         public void onCancel(DialogInterface dialog) {
@@ -480,10 +499,8 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
     }
 
     /**
-     * Checks internet connection and notifies user if there is no connection.
-     * Updates bookmarks at the end
+     * Checks internet connection and notifies user if there is no connection. Updates bookmarks at the end
      */
-    @SuppressWarnings("CanBeFinal")
     private static class CheckConnectionAndUpdateBookmarks extends AsyncTask<Void, Void, Void> {
 
         private final WeakReference<CollectionsFragment> fragmentReference;
@@ -505,33 +522,31 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (!isCancelled()) {
-                // get reference from fragment
-                final CollectionsFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    if (isInternetAvailable) {
-                        // call update method
-                        if (fragment.listPostsBookmarked != null &&
-                                !fragment.listPostsBookmarked.isEmpty()) {
-                            new UpdateThumbnailURL(fragment).execute();
-                        } else {
-                            fragment.swipeRefreshLayout.setRefreshing(false);
-                        }
-                    } else {
-                        FragmentHelper.notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
-                        fragment.swipeRefreshLayout.setRefreshing(false);
-                    }
+            if (isCancelled()) return;
+
+            // get reference from fragment
+            final CollectionsFragment fragment = fragmentReference.get();
+            if (fragment == null) return;
+
+            if (isInternetAvailable) {
+                // call update method
+                if (fragment.listPostsBookmarked != null && !fragment.listPostsBookmarked.isEmpty()) {
+                    new UpdateThumbnailURL(fragment).execute();
+                } else {
+                    fragment.swipeRefreshLayout.setRefreshing(false);
                 }
+            } else {
+                FragmentHelper.notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
+                fragment.swipeRefreshLayout.setRefreshing(false);
             }
         }
     }
 
     /**
-     * Updates the thumbnail url of bookmarked posts because they change over time.
-     * Hint/Explanation: With the new approach of storing the thumbnail image as a string,
-     * this functionality is deprecated and is not necessary for future installations.
-     * However, this functionality is needed for existing installations and existing
-     * bookmarks (legacy functionality)
+     * Async task to update the thumbnail url of bookmarked posts because they change over time.
+     * Hint/Explanation: With the new approach of storing the thumbnail image as a string, this functionality
+     * is deprecated and is not necessary for future installations. However, this functionality is needed for
+     * existing installations and existing bookmarks (legacy functionality)
      */
     @Deprecated
     private static class UpdateThumbnailURL extends AsyncTask<Void, Integer, Void> {
@@ -549,7 +564,6 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
             if (!isCancelled()) {
                 showProgressDialog();
             }
@@ -557,68 +571,67 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final CollectionsFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    sh = new NetworkHandler();
+            if (isCancelled()) return null;
 
-                    // set initial max size to zero
-                    progressDialogBatch.setMax(0);
+            // get reference from fragment
+            final CollectionsFragment fragment = fragmentReference.get();
 
-                    // set max size of progressDialog
-                    int progressMaxSize = fragment.listPostsBookmarked.size();
+            if (fragment == null) return null;
+            sh = new NetworkHandler();
 
-                    // set length of progressDialog
-                    progressDialogBatch.setMax(progressMaxSize);
+            // set initial max size to zero
+            progressDialogBatch.setMax(0);
 
-                    // initialize list for failed posts
-                    fragment.listPostFailedRefresh = new ArrayList<>();
+            // set max size of progressDialog
+            int progressMaxSize = fragment.listPostsBookmarked.size();
 
-                    for (Post bookmarkedPost : fragment.listPostsBookmarked) {
-                        if (bookmarkedPost != null && bookmarkedPost.getShortcode() != null) {
-                            String url = "https://www.instagram.com/p/" + bookmarkedPost.getShortcode() + "/?__a=1";
+            // set length of progressDialog
+            progressDialogBatch.setMax(progressMaxSize);
 
-                            // get new thumbnail url
-                            try {
-                                String newThumbnailUrl = getNewThumbnailUrl(url);
-                                if (newThumbnailUrl != null) {
-                                    if (fragment.listPostsUpdatedBookmarked == null) {
-                                        fragment.listPostsUpdatedBookmarked = new ArrayList<>();
-                                    }
+            // initialize list for failed posts
+            fragment.listPostFailedRefresh = new ArrayList<>();
 
-                                    // get new thumbnail as string with new url
-                                    String newImageThumbnail = FragmentHelper.getBase64EncodedImage(newThumbnailUrl);
+            for (Post bookmarkedPost : fragment.listPostsBookmarked) {
+                if (bookmarkedPost != null && bookmarkedPost.getShortcode() != null) {
+                    String url = "https://www.instagram.com/p/" + bookmarkedPost.getShortcode() + "/?__a=1";
 
-                                    // copy old bookmark and insert new one in listPostsUpdatedBookmarked
-                                    fragment.listPostsUpdatedBookmarked.add(
-                                            new Post(bookmarkedPost.getId(),
-                                                    bookmarkedPost.getShortcode(),
-                                                    bookmarkedPost.getTakenAtDate(),
-                                                    bookmarkedPost.getIs_video(),
-                                                    newThumbnailUrl,
-                                                    bookmarkedPost.getIs_sideCar(),
-                                                    bookmarkedPost.getCategory(),
-                                                    newImageThumbnail));
-
-                                    // publish progress -> not real progress here -> Saving is missing here
-                                    publishProgress(editedItems += 1);
-
-                                } else {
-                                    fragment.somethingWentWrong = true;
-
-                                    // add failed post to list
-                                    fragment.listPostFailedRefresh.add(bookmarkedPost);
-                                }
-                            } catch (Exception e) {
-                                fragment.somethingWentWrong = true;
-
-                                // add failed post to list (error when trying to download new thumbnail as string)
-                                fragment.listPostFailedRefresh.add(bookmarkedPost);
-
-                                Log.d("CollectionsFragment", Log.getStackTraceString(e));
+                    // get new thumbnail url
+                    try {
+                        String newThumbnailUrl = getNewThumbnailUrl(url);
+                        if (newThumbnailUrl != null) {
+                            if (fragment.listPostsUpdatedBookmarked == null) {
+                                fragment.listPostsUpdatedBookmarked = new ArrayList<>();
                             }
+
+                            // get new thumbnail as string with new url
+                            String newImageThumbnail = FragmentHelper.getBase64EncodedImage(newThumbnailUrl);
+
+                            // copy old bookmark and insert new one in
+                            // listPostsUpdatedBookmarked
+                            fragment.listPostsUpdatedBookmarked.add(
+                                    new Post(bookmarkedPost.getId(), bookmarkedPost.getShortcode(),
+                                             bookmarkedPost.getTakenAtDate(), bookmarkedPost.getIs_video(),
+                                             newThumbnailUrl, bookmarkedPost.getIs_sideCar(),
+                                             bookmarkedPost.getCategory(), newImageThumbnail));
+
+                            // publish progress -> not real progress here -> Saving is
+                            // missing here
+                            publishProgress(editedItems += 1);
+
+                        } else {
+                            fragment.somethingWentWrong = true;
+
+                            // add failed post to list
+                            fragment.listPostFailedRefresh.add(bookmarkedPost);
                         }
+                    } catch (Exception e) {
+                        fragment.somethingWentWrong = true;
+
+                        // add failed post to list (error when trying to download new
+                        // thumbnail as string)
+                        fragment.listPostFailedRefresh.add(bookmarkedPost);
+
+                        Log.d("CollectionsFragment", Log.getStackTraceString(e));
                     }
                 }
             }
@@ -634,38 +647,33 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (!isCancelled()) {
-                // get reference from fragment
-                final CollectionsFragment fragment = fragmentReference.get();
-                if (fragment != null) {
+            if (isCancelled()) return;
 
-                    // dismiss progress dialog
-                    progressDialogBatch.dismiss();
+            // get reference from fragment
+            final CollectionsFragment fragment = fragmentReference.get();
+            if (fragment == null) return;
 
-                    // if there was no error store updated bookmarks in memory
-                    if (!fragment.somethingWentWrong) {
+            // dismiss progress dialog
+            progressDialogBatch.dismiss();
 
-                        // store updated bookmarkedPosts in memory
-                        new StoreUpdatedBookmarkedPostsInStorage(fragment).execute();
-                    } else {
+            // if there was no error store updated bookmarks in memory
+            if (!fragment.somethingWentWrong) {
 
-                        // notify user
-                        if (fragment.listPostFailedRefresh != null && !fragment.listPostFailedRefresh.isEmpty()) {
-                            // show dialog with amount of failed posts and ask what to do
-                            fragment.showConfirmationDialogAndRemoveBookmarksRefresh();
-                        } else if (!NetworkHandler.isInternetAvailable()) {
-                            // no internet
-                            FragmentHelper.notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
-                        } else {
-                            // something else
-                            FragmentHelper.notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
-                        }
+                // store updated bookmarkedPosts in memory
+                new StoreUpdatedBookmarkedPostsInStorage(fragment).execute();
+            } else {
 
-                        fragment.swipeRefreshLayout.setRefreshing(false);
-
-                        fragment.resetSomethingsWrong();
-                    }
+                // notify user
+                if (fragment.listPostFailedRefresh != null && !fragment.listPostFailedRefresh.isEmpty()) {
+                    // show dialog with amount of failed posts and ask what to do
+                    fragment.showConfirmationDialogAndRemoveBookmarksRefresh();
+                } else {
+                    FragmentHelper.showNetworkOrSomethingWrongErrorToUser(fragment);
                 }
+
+                fragment.swipeRefreshLayout.setRefreshing(false);
+
+                fragment.resetSomethingsWrong();
             }
         }
 
@@ -678,53 +686,53 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
          */
         private String getNewThumbnailUrl(String url) throws JSONException {
             String newThumbnailUrl = null;
-            if (!isCancelled()) {
-                // get reference from fragment
-                final CollectionsFragment fragment = fragmentReference.get();
-                if (fragment != null) {
+            if (isCancelled()) return null;
 
-                    // get json string from url
-                    String jsonStr = sh.makeServiceCall(url, this.getClass().getSimpleName());
+            // get reference from fragment
+            final CollectionsFragment fragment = fragmentReference.get();
+            if (fragment == null) return null;
 
-                    if (jsonStr != null) {
-                        // something went wrong -> possible rate limit reached
-                        if (!FragmentHelper.checkIfJsonStrIsValid(jsonStr, fragment)) {
-                            return null;
-                        }
-                        // file overall as json object
-                        JSONObject jsonObj = new JSONObject(jsonStr);
-                        JSONObject graphql = jsonObj.getJSONObject("graphql");
-                        JSONObject shortcode_media = graphql.getJSONObject("shortcode_media");
-                        // get new new thumbnail url
-                        newThumbnailUrl = shortcode_media.getJSONArray("display_resources").getJSONObject(0).getString("src");
-                        jsonObj = null;
-                    }
-                }
+            // get json string from url
+            String jsonStr = sh.makeServiceCall(url, this.getClass().getSimpleName());
+
+            // something went wrong -> possible rate limit reached
+            if (!FragmentHelper.checkIfJsonStrIsValid(jsonStr, fragment)) {
+                return null;
             }
+
+            // file overall as json object
+            JSONObject jsonObj = new JSONObject(jsonStr);
+            JSONObject graphql = jsonObj.getJSONObject("graphql");
+            JSONObject shortcode_media = graphql.getJSONObject("shortcode_media");
+
+            // get new new thumbnail url
+            newThumbnailUrl = shortcode_media.getJSONArray("display_resources").getJSONObject(0).getString(
+                    "src");
+            jsonObj = null;
+
             return newThumbnailUrl;
         }
 
         private void showProgressDialog() {
-            if (!isCancelled()) {
-                if (!isCancelled()) {
-                    // get reference from fragment
-                    final CollectionsFragment fragment = fragmentReference.get();
+            if (isCancelled()) return;
 
-                    if (fragment != null) {
-                        progressDialogBatch = new ProgressDialog(fragment.requireContext());
-                        progressDialogBatch.setTitle(fragment.requireContext().getString(R.string.title_dialog_refresh_bookmarks));
-                        progressDialogBatch.setMessage(fragment.requireContext().getString(R.string.message_dialog_refresh_bookmarks));
-                        progressDialogBatch.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                        progressDialogBatch.setProgress(0);
-                        progressDialogBatch.show();
-                    }
-                }
-            }
+            // get reference from fragment
+            final CollectionsFragment fragment = fragmentReference.get();
+            if (fragment == null) return;
+
+            progressDialogBatch = new ProgressDialog(fragment.requireContext());
+            progressDialogBatch.setTitle(
+                    fragment.requireContext().getString(R.string.title_dialog_refresh_bookmarks));
+            progressDialogBatch.setMessage(
+                    fragment.requireContext().getString(R.string.message_dialog_refresh_bookmarks));
+            progressDialogBatch.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialogBatch.setProgress(0);
+            progressDialogBatch.show();
         }
     }
 
     /**
-     * Stores updated bookmarkedPosts in internal storage
+     * Async task to store updated bookmarkedPosts in internal storage
      */
     private static class StoreUpdatedBookmarkedPostsInStorage extends AsyncTask<Void, Void, Void> {
 
@@ -740,18 +748,22 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final CollectionsFragment fragment = fragmentReference.get();
-                if (fragment != null && fragment.listPostsUpdatedBookmarked != null &&
-                        fragment.getContext() != null) {
-                    try {
-                        // store posts in storage in proper storage representation in bookmarkedPosts_updated
-                        storingSuccessful = StorageHelper.storePostListInInternalStorage(fragment.listPostsUpdatedBookmarked, fragment.requireContext(), StorageHelper.filename_bookmarks_updated);
-                    } catch (Exception e) {
-                        storingSuccessful = false;
-                        Log.d("CollectionsFragment", Log.getStackTraceString(e));
-                    }
+            if (isCancelled()) return null;
+
+            // get reference from fragment
+            final CollectionsFragment fragment = fragmentReference.get();
+
+            if (fragment != null && fragment.listPostsUpdatedBookmarked != null &&
+                fragment.getContext() != null) {
+                try {
+                    // store posts in storage in proper storage representation in
+                    // bookmarkedPosts_updated
+                    storingSuccessful = StorageHelper.storePostListInInternalStorage(
+                            fragment.listPostsUpdatedBookmarked, fragment.requireContext(),
+                            StorageHelper.filename_bookmarks_updated);
+                } catch (Exception e) {
+                    storingSuccessful = false;
+                    Log.d("CollectionsFragment", Log.getStackTraceString(e));
                 }
             }
             return null;
@@ -760,62 +772,68 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (!isCancelled()) {
-                // get reference from fragment
-                final CollectionsFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    // check if storing filename_posts_updated was successful and if the file exists
-                    //  and rename filename_posts_updated to old filename_bookmarks
-                    if (storingSuccessful && fragment.getContext() != null &&
-                            StorageHelper.checkIfFileExists(StorageHelper.filename_bookmarks_updated, fragment.requireContext())) { // old: fragment.listPostsUpdatedBookmarked.size() == fragment.listPostsBookmarked.size
+            if (isCancelled()) return;
 
-                        try {
-                            StorageHelper.renameSpecificFileTo(fragment.requireContext(), StorageHelper.filename_bookmarks, StorageHelper.filename_bookmarks_updated);
-                            renamingFilesSuccessful = true;
-                        } catch (NullPointerException e) {
-                            renamingFilesSuccessful = false;
-                            Log.d("CollectionsFragment", Log.getStackTraceString(e));
-                        }
-                    }// if fetching of all bookmarks failed -> remove them all
-                    else if (fragment.listPostsUpdatedBookmarked == null && fragment.getContext() != null &&
-                            fragment.listPostFailedRefresh != null && !fragment.listPostFailedRefresh.isEmpty()) {
+            // get reference from fragment
+            final CollectionsFragment fragment = fragmentReference.get();
+            if (fragment == null) return;
 
-                        for (Post post : fragment.listPostFailedRefresh) {
-                            removingSuccessful = StorageHelper.removePostFromInternalStorage(post, fragment.getContext(), StorageHelper.filename_bookmarks);
-                            if (!removingSuccessful) {
-                                return;
-                            }
-                        }
+            // check if storing filename_posts_updated was successful and if the file exists
+            // and rename filename_posts_updated to old filename_bookmarks
+            if (storingSuccessful && fragment.getContext() != null && StorageHelper.checkIfFileExists(
+                    StorageHelper.filename_bookmarks_updated, fragment.requireContext())) {
+                try {
+                    StorageHelper.renameSpecificFileTo(fragment.requireContext(),
+                                                       StorageHelper.filename_bookmarks,
+                                                       StorageHelper.filename_bookmarks_updated);
+                    renamingFilesSuccessful = true;
+                } catch (NullPointerException e) {
+                    renamingFilesSuccessful = false;
+                    Log.d("CollectionsFragment", Log.getStackTraceString(e));
+                }
+            } // if fetching of all bookmarks failed -> remove them all
+            else if (fragment.listPostsUpdatedBookmarked == null && fragment.getContext() != null &&
+                     fragment.listPostFailedRefresh != null && !fragment.listPostFailedRefresh.isEmpty()) {
+
+                for (Post post : fragment.listPostFailedRefresh) {
+                    removingSuccessful = StorageHelper.removePostFromInternalStorage(post,
+                                                                                     fragment.getContext(),
+                                                                                     StorageHelper.filename_bookmarks);
+                    if (!removingSuccessful) {
+                        return;
                     }
-
-                    // reset listPostsUpdatedBookmarked and listPostFailedRefresh for next iteration
-                    // hint: only after 'else if'
-                    if (fragment.listPostsUpdatedBookmarked != null) {
-                        fragment.listPostsUpdatedBookmarked.clear();
-                        fragment.listPostsUpdatedBookmarked = null;
-                    }
-                    if (fragment.listPostFailedRefresh != null) {
-                        fragment.listPostFailedRefresh.clear();
-                        fragment.listPostFailedRefresh = null;
-                    }
-
-                    // show toast to display posts updated successful or failed
-                    if (fragment.getActivity() != null && storingSuccessful && renamingFilesSuccessful) {
-                        FragmentHelper.showToast(fragment.getResources().getString(R.string.posts_updated), fragment.requireActivity(), fragment.requireContext());
-                    } else if (removingSuccessful) {
-                        FragmentHelper.showToast(fragment.getResources().getString(R.string.posts_removed_successful), fragment.requireActivity(), fragment.requireContext());
-                    } else {
-                        FragmentHelper.showToast(fragment.getResources().getString(R.string.posts_updated_failed), fragment.requireActivity(), fragment.requireContext());
-                    }
-
-                    // set refreshing false
-                    fragment.swipeRefreshLayout.setRefreshing(false);
-
-                    fragment.refreshAdapter();
-
-                    fragment.resetSomethingsWrong();
                 }
             }
+
+            // reset listPostsUpdatedBookmarked and listPostFailedRefresh for next iteration
+            // hint: only after 'else if'
+            if (fragment.listPostsUpdatedBookmarked != null) {
+                fragment.listPostsUpdatedBookmarked.clear();
+                fragment.listPostsUpdatedBookmarked = null;
+            }
+            if (fragment.listPostFailedRefresh != null) {
+                fragment.listPostFailedRefresh.clear();
+                fragment.listPostFailedRefresh = null;
+            }
+
+            // show toast to display posts updated successful or failed
+            if (fragment.getActivity() != null && storingSuccessful && renamingFilesSuccessful) {
+                FragmentHelper.showToast(fragment.getResources().getString(R.string.posts_updated),
+                                         fragment.requireActivity(), fragment.requireContext());
+            } else if (removingSuccessful) {
+                FragmentHelper.showToast(fragment.getResources().getString(R.string.posts_removed_successful),
+                                         fragment.requireActivity(), fragment.requireContext());
+            } else {
+                FragmentHelper.showToast(fragment.getResources().getString(R.string.posts_updated_failed),
+                                         fragment.requireActivity(), fragment.requireContext());
+            }
+
+            // set refreshing false
+            fragment.swipeRefreshLayout.setRefreshing(false);
+
+            fragment.refreshAdapter();
+
+            fragment.resetSomethingsWrong();
         }
     }
 
@@ -825,14 +843,14 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
     private static class RemoveBookmarksOfCollection extends AsyncTask<Void, Integer, Void> {
 
         private final WeakReference<CollectionsFragment> fragmentReference;
-
         private final ArrayList<Collection> listCollectionsToRemove;
         private ProgressDialog progressDialogBatch;
         private int editedItems = 0;
         private boolean removingSuccessful = false;
 
         // constructor
-        RemoveBookmarksOfCollection(CollectionsFragment context, ArrayList<Collection> listCollectionsToRemove) {
+        RemoveBookmarksOfCollection(CollectionsFragment context,
+                                    ArrayList<Collection> listCollectionsToRemove) {
             fragmentReference = new WeakReference<>(context);
             this.listCollectionsToRemove = listCollectionsToRemove;
         }
@@ -848,39 +866,42 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final CollectionsFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    // hint: use set here to avoid duplicates
-                    Set<Post> postsToRemove = new HashSet<>();
+            if (isCancelled()) return null;
 
-                    // get all bookmarks in collections that should be removed
-                    for (Collection collection : listCollectionsToRemove) {
-                        postsToRemove.addAll(FragmentHelper.getAllBookmarkedPostsOfCollection(collection.getName(), fragment.requireContext()));
+            // get reference from fragment
+            final CollectionsFragment fragment = fragmentReference.get();
+            if (fragment == null) return null;
+
+            // hint: use set here to avoid duplicates
+            Set<Post> postsToRemove = new HashSet<>();
+
+            // get all bookmarks in collections that should be removed
+            for (Collection collection : listCollectionsToRemove) {
+                postsToRemove.addAll(FragmentHelper.getAllBookmarkedPostsOfCollection(collection.getName(),
+                                                                                      fragment.requireContext()));
+            }
+
+            // set initial max size to zero
+            progressDialogBatch.setMax(0);
+
+            // set max size of progressDialog
+            int progressMaxSize = postsToRemove.size();
+
+            // set length of progressDialog
+            progressDialogBatch.setMax(progressMaxSize);
+
+            // remove all bookmarks in set
+            if (postsToRemove != null && !postsToRemove.isEmpty()) {
+                for (Post post : postsToRemove) {
+                    removingSuccessful = StorageHelper.removePostFromInternalStorage(post,
+                                                                                     fragment.requireContext(),
+                                                                                     StorageHelper.filename_bookmarks);
+
+                    if (!removingSuccessful) {
+                        return null;
                     }
 
-                    // set initial max size to zero
-                    progressDialogBatch.setMax(0);
-
-                    // set max size of progressDialog
-                    int progressMaxSize = postsToRemove.size();
-
-                    // set length of progressDialog
-                    progressDialogBatch.setMax(progressMaxSize);
-
-                    // remove all bookmarks in set
-                    if (postsToRemove != null && !postsToRemove.isEmpty()) {
-                        for (Post post : postsToRemove) {
-                            removingSuccessful = StorageHelper.removePostFromInternalStorage(post, fragment.requireContext(), StorageHelper.filename_bookmarks);
-
-                            if (!removingSuccessful) {
-                                return null;
-                            }
-
-                            publishProgress(editedItems += 1);
-                        }
-                    }
+                    publishProgress(editedItems += 1);
                 }
             }
             return null;
@@ -889,23 +910,26 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (!isCancelled()) {
+            if (isCancelled()) return;
 
-                // dismiss progress dialog
-                progressDialogBatch.dismiss();
+            // dismiss progress dialog
+            progressDialogBatch.dismiss();
 
-                // get reference from fragment
-                final CollectionsFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    if (removingSuccessful) {
-                        FragmentHelper.showToast(fragment.requireContext().getString(R.string.selected_collections_removed_success), fragment.requireActivity(), fragment.requireContext());
+            // get reference from fragment
+            final CollectionsFragment fragment = fragmentReference.get();
+            if (fragment == null) return;
 
-                        // refresh bookmarked posts
-                        fragment.refreshAdapter();
-                    } else {
-                        FragmentHelper.showToast(fragment.requireContext().getString(R.string.selected_collections_removed_fail), fragment.requireActivity(), fragment.requireContext());
-                    }
-                }
+            if (removingSuccessful) {
+                FragmentHelper.showToast(
+                        fragment.requireContext().getString(R.string.selected_collections_removed_success),
+                        fragment.requireActivity(), fragment.requireContext());
+
+                // refresh bookmarked posts
+                fragment.refreshAdapter();
+            } else {
+                FragmentHelper.showToast(
+                        fragment.requireContext().getString(R.string.selected_collections_removed_fail),
+                        fragment.requireActivity(), fragment.requireContext());
             }
         }
 
@@ -916,21 +940,20 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
         }
 
         private void showProgressDialog() {
-            if (!isCancelled()) {
-                if (!isCancelled()) {
-                    // get reference from fragment
-                    final CollectionsFragment fragment = fragmentReference.get();
+            if (isCancelled()) return;
 
-                    if (fragment != null) {
-                        progressDialogBatch = new ProgressDialog(fragment.requireContext());
-                        progressDialogBatch.setTitle(fragment.requireContext().getString(R.string.dialog_title_removing_collection));
-                        progressDialogBatch.setMessage(fragment.requireContext().getString(R.string.dialog_message_removing_collection));
-                        progressDialogBatch.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                        progressDialogBatch.setProgress(0);
-                        progressDialogBatch.show();
-                    }
-                }
-            }
+            // get reference from fragment
+            final CollectionsFragment fragment = fragmentReference.get();
+            if (fragment == null) return;
+
+            progressDialogBatch = new ProgressDialog(fragment.requireContext());
+            progressDialogBatch.setTitle(
+                    fragment.requireContext().getString(R.string.dialog_title_removing_collection));
+            progressDialogBatch.setMessage(
+                    fragment.requireContext().getString(R.string.dialog_message_removing_collection));
+            progressDialogBatch.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialogBatch.setProgress(0);
+            progressDialogBatch.show();
         }
     }
 }

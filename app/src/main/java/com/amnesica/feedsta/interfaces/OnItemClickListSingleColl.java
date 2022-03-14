@@ -8,18 +8,38 @@ import java.util.List;
  * Interface used by SingleCollectionsFragment to communicate with adapter
  */
 public interface OnItemClickListSingleColl {
-    // simple click on bookmark to go to PostFragment
+    /**
+     * Simple click on bookmark to go to PostFragment
+     *
+     * @param position int
+     */
     void onItemClick(int position);
 
-    // removes all selected bookmarks from storage
+    /**
+     * Removes all selected bookmarks from storage
+     *
+     * @param selectedPosts List<Post>
+     */
     void removeBookmarkedPostsFromStorage(List<Post> selectedPosts);
 
-    // move all selected bookmarks to other collection
+    /**
+     * Move all selected bookmarks to other collection
+     *
+     * @param selectedPosts List<Post
+     */
     void moveBookmarksToOtherCollection(List<Post> selectedPosts);
 
-    // download all selected bookmarks
+    /**
+     * Download all selected bookmarks
+     *
+     * @param selectedPosts List<Post>
+     */
     void downloadSelectedBookmarks(List<Post> selectedPosts);
 
-    // reset category of all selected bookmarks
+    /**
+     * Reset category of all selected bookmarks
+     *
+     * @param selectedPosts List<Post>
+     */
     void resetCategoryOnSelectedBookmarks(List<Post> selectedPosts);
 }

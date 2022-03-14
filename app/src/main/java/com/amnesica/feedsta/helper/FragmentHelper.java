@@ -79,10 +79,11 @@ public class FragmentHelper {
     }
 
     /**
-     * Sets up the toolbar of the weakReference fragment with a backButton and a clickListener
+     * Sets up the toolbar of the weakReference fragment with a backButton and a clickListener to go back on
+     * click
      *
-     * @param toolbar           toolbar
-     * @param fragmentReference weakReference of fragment
+     * @param toolbar           Toolbar
+     * @param fragmentReference WeakReference
      */
     public static void setupToolbarWithBackButton(Toolbar toolbar, WeakReference fragmentReference) {
         final Fragment weakReferenceFragment = (Fragment) fragmentReference.get();
@@ -105,7 +106,7 @@ public class FragmentHelper {
      * Returns the top fragment from backStack. If FragmentManager is null, return currently visible fragment
      *
      * @param fm FragmentManager
-     * @return top fragment from backStack, or currently visible fragment
+     * @return Fragment
      */
     private static Fragment getTopFragment(FragmentManager fm) {
         if (fm != null) {
@@ -126,16 +127,15 @@ public class FragmentHelper {
             String fragmentTag = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName();
             return fm.findFragmentByTag(fragmentTag);
         }
-        // fm is null
         return null;
     }
 
     /**
      * Loads and shows fragmentToShow from FragmentManager into container
      *
-     * @param fragmentToShow fragmentToShow
+     * @param fragmentToShow Fragment
      * @param fm             FragmentManager
-     * @return true, if successful
+     * @return Boolean
      */
     public static Boolean loadAndShowFragment(Fragment fragmentToShow, FragmentManager fm) {
         if (fragmentToShow != null) {
@@ -143,14 +143,10 @@ public class FragmentHelper {
             Fragment active = getTopFragment(fm);
             if (active != null) {
                 // show fragment
-                fm.beginTransaction()
-                        .hide(active)
-                        .show(fragmentToShow)
-                        .addToBackStack(fragmentToShow.getClass().getSimpleName())
-                        .commit();
+                fm.beginTransaction().hide(active).show(fragmentToShow).addToBackStack(
+                        fragmentToShow.getClass().getSimpleName()).commit();
                 return true;
             }
-            return false;
         }
         return false;
     }
@@ -158,7 +154,7 @@ public class FragmentHelper {
     /**
      * Adds a fragment to the container and to the backStack
      *
-     * @param fragmentToAdd fragmentToAdd
+     * @param fragmentToAdd Fragment
      * @param fm            FragmentManager
      */
     public static void addFragmentToContainer(Fragment fragmentToAdd, FragmentManager fm) {
@@ -170,11 +166,8 @@ public class FragmentHelper {
 
             try {
                 // add fragment to container
-                fm.beginTransaction()
-                        .hide(active)
-                        .add(R.id.main_container, fragmentToAdd, tag)
-                        .addToBackStack(tag)
-                        .commit();
+                fm.beginTransaction().hide(active).add(R.id.main_container, fragmentToAdd, tag)
+                        .addToBackStack(tag).commit();
             } catch (Exception e) {
                 Log.d("FragmentHelper", Log.getStackTraceString(e));
             }
@@ -184,25 +177,27 @@ public class FragmentHelper {
     /**
      * Sets highlighted element in navigation bar
      *
-     * @param activity activity to get nav_view
-     * @param resource resource to set highlighted
+     * @param activity FragmentActivity
+     * @param resource int
      */
     public static void setBottomNavViewSelectElem(FragmentActivity activity, int resource) {
-        BottomNavigationView bottomNavigationView = Objects.requireNonNull(activity).findViewById(R.id.nav_view);
+        BottomNavigationView bottomNavigationView = Objects.requireNonNull(activity).findViewById(
+                R.id.nav_view);
         Menu menu = bottomNavigationView.getMenu();
         menu.findItem(resource).setCheckable(true);
         menu.findItem(resource).setChecked(true);
     }
 
     /**
-     * Notifies the user that no account or not all but some accounts could be queried and
-     * shows a dialog. Method handles the NOT_ALL_ACCOUNTS_COULD_BE_QUERIED error
+     * Notifies the user that no account or not all but some accounts could be queried and shows a dialog.
+     * Method handles the NOT_ALL_ACCOUNTS_COULD_BE_QUERIED error
      *
      * @param fragment              Fragment
      * @param actualFetchedAccounts int
      * @param amountAccountsToFetch int
      */
-    public static void notifyUserOfIncompleteFetchProblem(final Fragment fragment, int actualFetchedAccounts, int amountAccountsToFetch) {
+    public static void notifyUserOfIncompleteFetchProblem(final Fragment fragment, int actualFetchedAccounts,
+                                                          int amountAccountsToFetch) {
         final Enum<Error> error = Error.NOT_ALL_ACCOUNTS_COULD_BE_QUERIED;
 
         if (!mapErrorWasShown.containsKey(error.toString())) {
@@ -211,45 +206,62 @@ public class FragmentHelper {
             mapErrorWasShown.put(error.toString(), true);
 
             // text for dialog
-            String alertText = null;
+            String alertText;
 
             // text for label at snackbar's left
-            String textViewLabel = null;
+            String textViewLabel;
 
             // label for action of snackbar
-            String textViewLabelAction = null;
+            String textViewLabelAction;
 
             // fixing "Fragment not attached to a context"
             if (fragment != null && fragment.getContext() != null) {
                 if (actualFetchedAccounts > 0) {
                     // not all accounts cound be queried
-                    textViewLabel = fragment.requireContext().getResources().getString(R.string.not_all_accounts_could_be_queried) + " " +
-                            "(" + actualFetchedAccounts + "/" + amountAccountsToFetch + ")";
+                    textViewLabel = fragment.requireContext().getResources().getString(
+                            R.string.not_all_accounts_could_be_queried) + " " + "(" + actualFetchedAccounts +
+                                    "/" + amountAccountsToFetch + ")";
                     // get proper response
-                    alertText = fragment.requireContext().getResources().getString(R.string.not_all_accounts_could_be_queried_more_info);
+                    alertText = fragment.requireContext().getResources().getString(
+                            R.string.not_all_accounts_could_be_queried_more_info);
                 } else {
                     // nothing could be querid
-                    textViewLabel = fragment.requireContext().getResources().getString(R.string.no_account_could_be_queried) + " " +
-                            "(" + actualFetchedAccounts + "/" + amountAccountsToFetch + ")";
+                    textViewLabel = fragment.requireContext().getResources().getString(
+                            R.string.no_account_could_be_queried) + " " + "(" + actualFetchedAccounts + "/" +
+                                    amountAccountsToFetch + ")";
                     // get proper response
-                    alertText = fragment.requireContext().getResources().getString(R.string.no_account_could_be_queried_more_info);
+                    alertText = fragment.requireContext().getResources().getString(
+                            R.string.no_account_could_be_queried_more_info);
                 }
 
                 textViewLabelAction = fragment.requireContext().getResources().getString(R.string.more_info);
 
                 // show alert as custom snackBar
-                showCustomSnackBarForAlert(fragment, alertText, error.toString(), textViewLabel, textViewLabelAction);
+                showCustomSnackBarForAlert(fragment, alertText, error.toString(), textViewLabel,
+                                           textViewLabelAction);
             }
         }
     }
 
     /**
-     * Notifies the user that there is a problem and shows a dialog.
-     * Hint: NOT_ALL_ACCOUNTS_COULD_BE_QUERIED is supposed to be handled
-     * in notifyUserOfIncompleteFetchProblem()!
+     * Shows network error or something wrong error to user. Calls notifyUserOfProblem internally
      *
-     * @param fragment calling fragment
-     * @param error    error
+     * @param fragment Fragment
+     */
+    public static void showNetworkOrSomethingWrongErrorToUser(Fragment fragment) {
+        if (!NetworkHandler.isInternetAvailable()) {
+            notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
+        } else {
+            notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
+        }
+    }
+
+    /**
+     * Notifies the user that there is a problem and shows a dialog. Hint: NOT_ALL_ACCOUNTS_COULD_BE_QUERIED
+     * is supposed to be handled in notifyUserOfIncompleteFetchProblem()!
+     *
+     * @param fragment Fragment
+     * @param error    Enum<Error>
      */
     public static void notifyUserOfProblem(final Fragment fragment, final Enum<Error> error) {
         if (!mapErrorWasShown.containsKey(error.toString())) {
@@ -271,29 +283,42 @@ public class FragmentHelper {
             if (fragment != null && fragment.getContext() != null) {
                 // get proper response
                 if (errorMessage.equals(Error.NO_INTERNET_CONNECTION.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(R.string.no_internet_connection);
-                    textViewLabel = fragment.requireContext().getResources().getString(R.string.no_internet_connection);
+                    alertText = fragment.requireContext().getResources().getString(
+                            R.string.no_internet_connection);
+                    textViewLabel = fragment.requireContext().getResources().getString(
+                            R.string.no_internet_connection);
                     textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
                 } else if (errorMessage.equals(Error.UPDATING_BOOKMARKS_CATEGORY_FAILED.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(R.string.updating_bookmarked_post_category_failed);
-                    textViewLabel = fragment.requireContext().getResources().getString(R.string.updating_bookmarked_post_category_failed_label);
+                    alertText = fragment.requireContext().getResources().getString(
+                            R.string.updating_bookmarked_post_category_failed);
+                    textViewLabel = fragment.requireContext().getResources().getString(
+                            R.string.updating_bookmarked_post_category_failed_label);
                     textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
                 } else if (errorMessage.equals(Error.SOMETHINGS_WRONG.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(R.string.something_went_wrong_more_info);
-                    textViewLabel = fragment.requireContext().getResources().getString(R.string.something_has_gone_wrong);
-                    textViewLabelAction = fragment.requireContext().getResources().getString(R.string.more_info);
+                    alertText = fragment.requireContext().getResources().getString(
+                            R.string.something_went_wrong_more_info);
+                    textViewLabel = fragment.requireContext().getResources().getString(
+                            R.string.something_has_gone_wrong);
+                    textViewLabelAction = fragment.requireContext().getResources().getString(
+                            R.string.more_info);
                 } else if (errorMessage.equals(Error.POST_NOT_AVAILABLE_ANYMORE.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(R.string.post_not_available_anymore);
-                    textViewLabel = fragment.requireContext().getResources().getString(R.string.post_not_available_anymore_label);
-                    textViewLabelAction = fragment.requireContext().getResources().getString(R.string.more_info);
+                    alertText = fragment.requireContext().getResources().getString(
+                            R.string.post_not_available_anymore);
+                    textViewLabel = fragment.requireContext().getResources().getString(
+                            R.string.post_not_available_anymore_label);
+                    textViewLabelAction = fragment.requireContext().getResources().getString(
+                            R.string.more_info);
                 } else if (errorMessage.equals(Error.ACCOUNT_COULD_NOT_BE_FOLLOWED.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(R.string.account_could_not_be_followed);
-                    textViewLabel = fragment.requireContext().getResources().getString(R.string.account_could_not_be_followed);
+                    alertText = fragment.requireContext().getResources().getString(
+                            R.string.account_could_not_be_followed);
+                    textViewLabel = fragment.requireContext().getResources().getString(
+                            R.string.account_could_not_be_followed);
                     textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
                 }
 
                 // show alert as custom snackBar
-                showCustomSnackBarForAlert(fragment, alertText, error.toString(), textViewLabel, textViewLabelAction);
+                showCustomSnackBarForAlert(fragment, alertText, error.toString(), textViewLabel,
+                                           textViewLabelAction);
             }
         }
     }
@@ -301,16 +326,22 @@ public class FragmentHelper {
     /**
      * Shows a custom snackBar to show option to save post to collection above the bottom navigation view
      *
-     * @param fragment  Fragment
-     * @param alertText alertText
-     * @param error     Error
+     * @param fragment            Fragment
+     * @param alertText           String
+     * @param error               String
+     * @param textViewLabel       String
+     * @param textViewLabelAction String
      */
-    private static void showCustomSnackBarForAlert(final Fragment fragment, final String alertText, final String error,
-                                                   final String textViewLabel, final String textViewLabelAction) {
+    private static void showCustomSnackBarForAlert(final Fragment fragment, final String alertText,
+                                                   final String error, final String textViewLabel,
+                                                   final String textViewLabelAction) {
         if (fragment != null && fragment.getContext() != null) {
-            final ConstraintLayout conLayCustomSnackBarAlert = fragment.requireActivity().findViewById(R.id.conLayCustomSnackBarAlert);
-            final TextView textViewLabelAlert = fragment.requireActivity().findViewById(R.id.textViewLabelAlert);
-            final TextView textViewActionAlert = fragment.requireActivity().findViewById(R.id.textViewActionAlert);
+            final ConstraintLayout conLayCustomSnackBarAlert = fragment.requireActivity().findViewById(
+                    R.id.conLayCustomSnackBarAlert);
+            final TextView textViewLabelAlert = fragment.requireActivity().findViewById(
+                    R.id.textViewLabelAlert);
+            final TextView textViewActionAlert = fragment.requireActivity().findViewById(
+                    R.id.textViewActionAlert);
 
             final Runnable[] runnable = new Runnable[1];
 
@@ -368,9 +399,9 @@ public class FragmentHelper {
             }
 
             // set action with action "OK" and no dialog afterwards
-            if (error.equals(Error.NO_INTERNET_CONNECTION.toString()) ||
-                    error.equals(Error.UPDATING_BOOKMARKS_CATEGORY_FAILED.toString()) ||
-                    error.equals(Error.ACCOUNT_COULD_NOT_BE_FOLLOWED.toString())) {
+            if (error.equals(Error.NO_INTERNET_CONNECTION.toString()) || error.equals(
+                    Error.UPDATING_BOOKMARKS_CATEGORY_FAILED.toString()) || error.equals(
+                    Error.ACCOUNT_COULD_NOT_BE_FOLLOWED.toString())) {
                 if (fragment.isAdded()) {
                     fragment.requireActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -444,9 +475,9 @@ public class FragmentHelper {
     /**
      * Shows an alert dialog with a alertText over a fragment
      *
-     * @param fragment  fragment to show alert on
-     * @param alertText text of alert
-     * @param error     error to notify user about
+     * @param fragment  Fragment
+     * @param alertText String
+     * @param error     String
      */
     private static void showAlertDialog(final Fragment fragment, String alertText, final String error) {
         if (fragment != null && fragment.isAdded()) {
@@ -456,19 +487,22 @@ public class FragmentHelper {
 
                 AlertDialog.Builder alertDialogBuilder;
                 // create alertDialog
-                alertDialogBuilder = new AlertDialog.Builder(fragment.requireContext())
-                        .setMessage(finalAlertText)
-                        .setPositiveButton(fragment.requireContext().getResources().getString(R.string.okay), new DialogInterface.OnClickListener() {
+                alertDialogBuilder = new AlertDialog.Builder(fragment.requireContext()).setMessage(
+                        finalAlertText).setPositiveButton(
+                        fragment.requireContext().getResources().getString(R.string.okay),
+                        new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 mapErrorWasShown.remove(error);
                                 assert finalAlertText != null;
-                                if (finalAlertText.equals(fragment.requireContext().getResources().getString(R.string.post_not_available_anymore))) {
+                                if (finalAlertText.equals(fragment.requireContext().getResources().getString(
+                                        R.string.post_not_available_anymore))) {
                                     fragment.requireActivity().onBackPressed();
                                 }
                             }
                         })
-                        // get the click outside the dialog to set the behaviour like the positive button was clicked
+                        // get the click outside the dialog to set the behaviour like the positive button
+                        // was clicked
                         .setOnCancelListener(new DialogInterface.OnCancelListener() {
                             @Override
                             public void onCancel(DialogInterface dialog) {
@@ -502,13 +536,12 @@ public class FragmentHelper {
     /**
      * Validates a jsonStr and shows error message in snackBar if error was found
      *
-     * @param jsonStr  String to check
-     * @param fragment calling Fragment
+     * @param jsonStr  String
+     * @param fragment Fragment
      */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean checkIfJsonStrIsValid(String jsonStr, Fragment fragment) {
         if (jsonStr != null && fragment != null) {
-            if (jsonStr.startsWith("<!DOCTYPE html>")) {
+            if (jsonStr.startsWith("<!DOCTYPE html>") || jsonStr.isEmpty()) {
 
                 // only throw error when fragment is not FeedFragment
                 if (fragment.getTag() != null && !fragment.getTag().equals("FeedFragment")) {
@@ -525,21 +558,22 @@ public class FragmentHelper {
     }
 
     /**
-     * Returns true, if theme is DarkTheme
+     * Returns true, if theme is darkTheme
      *
-     * @param context context
-     * @return true, if theme is DarkTheme
+     * @param context Context
+     * @return boolean
      */
     public static boolean getThemeIsDarkTheme(Context context) {
-        if (context != null) {
-            // get the amount of columns from settings
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            if (preferences != null) {
-                if (preferences.contains("darkMode")) {
-                    return preferences.getBoolean("darkMode", false);
-                }
+        if (context == null) return false;
+
+        // get the amount of columns from settings
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences != null) {
+            if (preferences.contains("darkMode")) {
+                return preferences.getBoolean("darkMode", false);
             }
         }
+
         return false;
     }
 
@@ -558,15 +592,15 @@ public class FragmentHelper {
 
         // create alertDialog
         AlertDialog.Builder alertDialogBuilder;
-        alertDialogBuilder = new AlertDialog.Builder(fragment.requireContext())
-                .setTitle("Statistics")
-                .setMessage(message)
-                .setPositiveButton(fragment.requireContext().getResources().getString(R.string.okay), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+        alertDialogBuilder = new AlertDialog.Builder(fragment.requireContext()).setTitle("Statistics")
+                .setMessage(message).setPositiveButton(
+                        fragment.requireContext().getResources().getString(R.string.okay),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
 
         final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
 
@@ -589,15 +623,18 @@ public class FragmentHelper {
     }
 
     /**
-     * Returns boolean, whether advertising string should be added to clipboard text
+     * Returns boolean whether advertising string should be added to clipboard text
      *
      * @param fragment Fragment
      * @return boolean
      */
     public static boolean addAdvertisingStringToClipboard(Fragment fragment) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(fragment.requireContext());
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                fragment.requireContext());
         if (preferences != null) {
-            return preferences.getBoolean(fragment.requireContext().getResources().getString(R.string.advertising_string_clipboard), false);
+            return preferences.getBoolean(
+                    fragment.requireContext().getResources().getString(R.string.advertising_string_clipboard),
+                    false);
         }
         return false;
     }
@@ -605,7 +642,8 @@ public class FragmentHelper {
     /**
      * Creates collections from bookmarks category and adds them to listCollectionsBookmarked
      *
-     * @param context context
+     * @param context Context
+     * @return List<Collection>
      */
     public static List<Collection> createCollectionsFromBookmarks(Context context) {
         // initialize lists
@@ -619,8 +657,9 @@ public class FragmentHelper {
         if (listAllPostsBookmarked != null && !listAllPostsBookmarked.isEmpty()) {
 
             // add first bookmark as thumbnail
-            listCollectionsBookmarked.add(new Collection("All", listAllPostsBookmarked.get(0).getImageUrlThumbnail(),
-                    listAllPostsBookmarked.get(0).getImageThumbnail()));
+            listCollectionsBookmarked.add(
+                    new Collection("All", listAllPostsBookmarked.get(0).getImageUrlThumbnail(),
+                                   listAllPostsBookmarked.get(0).getImageThumbnail()));
 
             // then create all categories from all bookmarks category
             if (!listAllPostsBookmarked.isEmpty()) {
@@ -628,8 +667,9 @@ public class FragmentHelper {
                     if (post.getCategory() != null && !listCategories.contains(post.getCategory())) {
 
                         // create new collection
-                        listCollectionsBookmarked.add(new Collection(post.getCategory(), post.getImageUrlThumbnail(),
-                                post.getImageThumbnail()));
+                        listCollectionsBookmarked.add(
+                                new Collection(post.getCategory(), post.getImageUrlThumbnail(),
+                                               post.getImageThumbnail()));
 
                         // add category to
                         listCategories.add(post.getCategory());
@@ -644,7 +684,7 @@ public class FragmentHelper {
     /**
      * Retrieves all bookmarks from storage
      *
-     * @param context context
+     * @param context Context
      * @return ArrayList<Post>
      */
     private static ArrayList<Post> readAllBookmarksFromStorage(Context context) {
@@ -652,10 +692,10 @@ public class FragmentHelper {
     }
 
     /**
-     * Retrieves all posts of specific collection
+     * Retrieves all posts of specific collection (category)
      *
-     * @param category category in post
-     * @param context  context
+     * @param category String
+     * @param context  Context
      * @return List<Post>
      */
     public static List<Post> getAllBookmarkedPostsOfCollection(final String category, Context context) {
@@ -666,12 +706,13 @@ public class FragmentHelper {
             // show all bookmarks if category is null or show specific category
             if (!category.equals("All")) {
                 // get all posts with specific category
-                listPostsInCollectionBookmarked = Stream.of(listPostsInCollectionBookmarked).filter(new Predicate<Post>() {
-                    @Override
-                    public boolean test(Post c) {
-                        return (c.getCategory() != null) && c.getCategory().equals(category);
-                    }
-                }).collect(Collectors.<Post>toList());
+                listPostsInCollectionBookmarked = Stream.of(listPostsInCollectionBookmarked).filter(
+                        new Predicate<Post>() {
+                            @Override
+                            public boolean test(Post c) {
+                                return (c.getCategory() != null) && c.getCategory().equals(category);
+                            }
+                        }).collect(Collectors.<Post>toList());
             }
         }
 
@@ -681,8 +722,8 @@ public class FragmentHelper {
     /**
      * Returns true, if there is a collection with the name of the String category
      *
-     * @param category String category
-     * @param context  context
+     * @param category String
+     * @param context  Context
      * @return boolean
      */
     public static boolean collectionWithNameDoesExist(final String category, Context context) {
@@ -700,9 +741,9 @@ public class FragmentHelper {
     }
 
     /**
-     * Returns true, if there are already collection
+     * Returns true, if there are already collections
      *
-     * @param context context
+     * @param context Context
      * @return boolean
      */
     public static boolean collectionsAlreadyExist(Context context) {
@@ -710,33 +751,36 @@ public class FragmentHelper {
         return listCollections.size() > 1;
     }
 
-
     /**
      * Sets new category from newCategory to post and saves updated post in storage
      *
-     * @param newCategory new category
+     * @param newCategory String
+     * @param post        Post
+     * @param context     Context
+     * @param fragment    Fragment
+     * @return boolean
      */
-    public static boolean setNewCategoryToPost(String newCategory, Post post, Context context, Fragment fragment) {
-        // set category to post
-        if (post != null) {
-            post.setCategory(newCategory);
+    public static boolean setNewCategoryToPost(String newCategory, Post post, Context context,
+                                               Fragment fragment) {
+        if (post == null) return false;
 
-            try {
-                // save post in storage
-                return StorageHelper.updateBookmarkCategoryInStorage(post, context);
-            } catch (IOException e) {
-                Log.d("FragmentHelper", Log.getStackTraceString(e));
-                if (fragment != null) {
-                    FragmentHelper.notifyUserOfProblem(fragment, Error.UPDATING_BOOKMARKS_CATEGORY_FAILED);
-                }
-                return false;
+        // set category to post
+        post.setCategory(newCategory);
+
+        try {
+            // save post in storage
+            return StorageHelper.updateBookmarkCategoryInStorage(post, context);
+        } catch (IOException e) {
+            Log.d("FragmentHelper", Log.getStackTraceString(e));
+            if (fragment != null) {
+                FragmentHelper.notifyUserOfProblem(fragment, Error.UPDATING_BOOKMARKS_CATEGORY_FAILED);
             }
+            return false;
         }
-        return false;
     }
 
     /**
-     * Start with rating the app. Determine if the Play Store is installed on the device first.
+     * Start intent to rate the app in Google Play or in the web browser if Google Play is not installed
      *
      * @param context Context
      */
@@ -758,7 +802,8 @@ public class FragmentHelper {
      * @return Intent
      */
     private static Intent rateIntentForUrl(String url, Context context) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("%s?id=%s", url, context.getPackageName())));
+        Intent intent = new Intent(Intent.ACTION_VIEW,
+                                   Uri.parse(String.format("%s?id=%s", url, context.getPackageName())));
         int flags = Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
         flags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
         intent.addFlags(flags);
@@ -766,7 +811,7 @@ public class FragmentHelper {
     }
 
     /**
-     * Show a toast on main thread with a message
+     * Shows a toast on main thread with a message
      *
      * @param message  String
      * @param activity Activity
@@ -784,11 +829,9 @@ public class FragmentHelper {
     }
 
     /**
-     * Returns a base64 encoded string of an image from url.
-     * Hint: Method exists in StorageHelper as well, but
-     * cannot be used here because this would be an async task
-     * call inside an async task call, hence the "duplicated"
-     * method!
+     * Returns a base64 encoded string of an image from url. Hint: Method exists in StorageHelper as well, but
+     * cannot be used here because this would be an async task call inside an async task call, hence the
+     * "duplicated" method!
      *
      * @param url String
      * @return String
@@ -802,7 +845,7 @@ public class FragmentHelper {
         InputStream is = ucon.getInputStream();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
-        int read = 0;
+        int read;
         while ((read = is.read(buffer, 0, buffer.length)) != -1) {
             baos.write(buffer, 0, read);
         }
@@ -811,15 +854,16 @@ public class FragmentHelper {
     }
 
     /**
-     * Creates an SpannableStringBuilder with clickable links to accounts and hashtags. A link
-     * is generated for every word which contains an "@" or "#" character. If
-     * something went wrong the input text is returned
+     * Creates an SpannableStringBuilder with clickable links to accounts and hashtags. A link is generated
+     * for every word which contains an "@" or "#" character. If something went wrong the input text is
+     * returned
      *
      * @param text     String
      * @param fragment Fragment
      * @return SpannableStringBuilder
      */
-    public static SpannableStringBuilder createSpannableStringWithClickableLinks(String text, final Fragment fragment) {
+    public static SpannableStringBuilder createSpannableStringWithClickableLinks(String text,
+                                                                                 final Fragment fragment) {
         if (text == null) return null;
 
         SpannableStringBuilder ssb = new SpannableStringBuilder();
@@ -859,11 +903,13 @@ public class FragmentHelper {
                             ProfileFragment profileFragment = ProfileFragment.newInstance(accountName);
 
                             // add fragment to container
-                            FragmentHelper.addFragmentToContainer(profileFragment, fragment.requireActivity().getSupportFragmentManager());
+                            FragmentHelper.addFragmentToContainer(profileFragment, fragment.requireActivity()
+                                    .getSupportFragmentManager());
                         }
                     };
 
-                    spannableString.setSpan(clickableSpan, indexStartAccountName, indexEndAccountName, SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableString.setSpan(clickableSpan, indexStartAccountName, indexEndAccountName,
+                                            SPAN_EXCLUSIVE_EXCLUSIVE);
                     ssb.append(spannableString);
                 } else if (word.contains("#")) {
                     // add link to hashtag
@@ -895,11 +941,13 @@ public class FragmentHelper {
                             HashtagFragment hashtagFragment = HashtagFragment.newInstance(hashtagName);
 
                             // add fragment to container
-                            FragmentHelper.addFragmentToContainer(hashtagFragment, fragment.requireActivity().getSupportFragmentManager());
+                            FragmentHelper.addFragmentToContainer(hashtagFragment, fragment.requireActivity()
+                                    .getSupportFragmentManager());
                         }
                     };
 
-                    spannableString.setSpan(clickableSpan, indexStartHashtagName, indexEndHashtagName, SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableString.setSpan(clickableSpan, indexStartHashtagName, indexEndHashtagName,
+                                            SPAN_EXCLUSIVE_EXCLUSIVE);
                     ssb.append(spannableString);
                 } else {
                     // insert normal word without link

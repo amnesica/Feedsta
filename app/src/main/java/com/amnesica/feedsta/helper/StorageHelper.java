@@ -35,7 +35,6 @@ import java.util.ArrayList;
 /**
  * Helper class for storing and retrieving elements from internal storage
  */
-@SuppressWarnings({"ResultOfMethodCallIgnored"})
 public class StorageHelper {
 
     // filename for file storing followed accounts
@@ -57,11 +56,13 @@ public class StorageHelper {
      * @param inputStream InputStream
      * @param buffer      byte[]
      * @param accountName String
-     * @return Boolean, if file was saved successfully
+     * @return Boolean
      */
-    public static Boolean saveVideo(InputStream inputStream, byte[] buffer, String accountName, Context context) {
+    public static Boolean saveVideo(InputStream inputStream, byte[] buffer, String accountName,
+                                    Context context) {
         if (inputStream != null && buffer != null && accountName != null && context != null) {
-            String filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsoluteFile() + "/Feedsta/";
+            String filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                                      .getAbsoluteFile() + "/Feedsta/";
             File dir = new File(filepath);
             dir.mkdir();
 
@@ -115,12 +116,13 @@ public class StorageHelper {
      *
      * @param finalBitmap Bitmap
      * @param accountName String
-     * @return Boolean, if file was saved successfully
+     * @return Boolean
      */
     public static Boolean saveImage(Bitmap finalBitmap, String accountName, Context context) {
         if (finalBitmap != null && context != null && accountName != null) {
             OutputStream outputStream;
-            String filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsoluteFile() + "/Feedsta/";
+            String filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                                      .getAbsoluteFile() + "/Feedsta/";
             File dir = new File(filepath);
             dir.mkdir();
             File file = new File(dir, System.currentTimeMillis() + "_" + accountName + ".jpg");
@@ -178,11 +180,12 @@ public class StorageHelper {
      * Backups an oldFile with oldFileName and renames a newFile with newFileName to oldFileName
      *
      * @param context     Context
-     * @param oldFileName name of oldFile
-     * @param newFileName name of newFile
+     * @param oldFileName String
+     * @param newFileName String
      * @throws NullPointerException NullPointerException
      */
-    public static void renameSpecificFileTo(Context context, String oldFileName, String newFileName) throws NullPointerException {
+    public static void renameSpecificFileTo(Context context, String oldFileName, String newFileName)
+            throws NullPointerException {
         // backup and rename old file
         File oldFile = new File(context.getFilesDir(), oldFileName);
         oldFile.renameTo(new File(context.getFilesDir(), oldFileName + "old" + System.currentTimeMillis()));
@@ -195,9 +198,9 @@ public class StorageHelper {
     /**
      * Removes an account from filename_accounts
      *
-     * @param account account to be removed
-     * @param context context
-     * @return true, if removing was successful
+     * @param account Account
+     * @param context Context
+     * @return Boolean
      */
     public static Boolean removeAccountFromInternalStorage(Account account, Context context) {
         boolean removed = false;
@@ -250,10 +253,10 @@ public class StorageHelper {
     /**
      * Removes an post from filename_posts or filename_bookmarks
      *
-     * @param post     post to remove
-     * @param context  context
-     * @param filename filename_posts or filename_bookmarks
-     * @return true, if removing was successful
+     * @param post     Post
+     * @param context  Context
+     * @param filename String
+     * @return Boolean
      */
     public static Boolean removePostFromInternalStorage(Post post, Context context, String filename) {
         boolean removed = false;
@@ -285,7 +288,7 @@ public class StorageHelper {
                     }
                 }
                 if (postStorageToDelete != null) {
-                    // Delete account to delete in list
+                    // delete account to delete in list
                     readPosts.remove(postStorageToDelete);
 
                     // delete file
@@ -303,15 +306,17 @@ public class StorageHelper {
     }
 
     /**
-     * Converts an ArrayList<Account> accounts to ArrayList<AccountStorage> and stores them in a file with filename
+     * Converts an ArrayList<Account> accounts to ArrayList<AccountStorage> and stores them in a file with
+     * filename
      *
      * @param accounts ArrayList<Account>
-     * @param context  context
-     * @param filename filename
-     * @return true, if storing was successful
+     * @param context  Context
+     * @param filename String
+     * @return Boolean
      * @throws Exception Exception
      */
-    public static Boolean storeAccountListInInternalStorage(ArrayList<Account> accounts, Context context, String filename) throws Exception {
+    public static Boolean storeAccountListInInternalStorage(ArrayList<Account> accounts, Context context,
+                                                            String filename) throws Exception {
         File file = new File(context.getFilesDir(), filename);
         byte[] bytesToWrite;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -319,12 +324,9 @@ public class StorageHelper {
 
         // convert to AccountStorage list
         for (Account account : accounts) {
-            accountStorages.add(new AccountStorage(account.getId(),
-                    account.getImageProfilePicUrl(),
-                    account.getUsername(),
-                    account.getFullName(),
-                    account.getIs_private(),
-                    account.getImageThumbnail()));
+            accountStorages.add(new AccountStorage(account.getId(), account.getImageProfilePicUrl(),
+                                                   account.getUsername(), account.getFullName(),
+                                                   account.getIs_private(), account.getImageThumbnail()));
         }
 
         ObjectOutputStream out;
@@ -352,12 +354,13 @@ public class StorageHelper {
      * Converts an ArrayList<Post> posts to ArrayList<PostStorage> and stores them in a file with filename
      *
      * @param posts    ArrayList<Post>
-     * @param context  context
-     * @param filename filename
-     * @return true, if storing was successful
+     * @param context  Context
+     * @param filename String
+     * @return Boolean
      * @throws Exception Exception
      */
-    public static Boolean storePostListInInternalStorage(ArrayList<Post> posts, Context context, String filename) throws Exception {
+    public static Boolean storePostListInInternalStorage(ArrayList<Post> posts, Context context,
+                                                         String filename) throws Exception {
         // file with path
         File file = new File(context.getFilesDir(), filename);
         byte[] bytesToWrite;
@@ -366,14 +369,10 @@ public class StorageHelper {
 
         // convert to PostStorage list
         for (Post post : posts) {
-            postStorages.add(new PostStorage(post.getId(),
-                    post.getShortcode(),
-                    post.getTakenAtDate(),
-                    post.getIs_video(),
-                    post.getImageUrlThumbnail(),
-                    post.getIs_sideCar(),
-                    post.getCategory(),
-                    post.getImageThumbnail()));
+            postStorages.add(new PostStorage(post.getId(), post.getShortcode(), post.getTakenAtDate(),
+                                             post.getIs_video(), post.getImageUrlThumbnail(),
+                                             post.getIs_sideCar(), post.getCategory(),
+                                             post.getImageThumbnail()));
         }
 
         ObjectOutputStream out;
@@ -398,15 +397,16 @@ public class StorageHelper {
     }
 
     /**
-     * Stores an account in AccountStorage representation in internal storage
-     * and adds the thumbnail image as string (network call)
+     * Stores an account in AccountStorage representation in internal storage and adds the thumbnail image as
+     * string (network call)
      *
-     * @param accountToStore account to be stored
-     * @param context        context
-     * @return true if storing was successful
+     * @param accountToStore Account
+     * @param context        Context
+     * @return Boolean
      * @throws IOException IOException
      */
-    public static Boolean storeAccountInInternalStorage(Account accountToStore, Context context) throws Exception {
+    public static Boolean storeAccountInInternalStorage(Account accountToStore, Context context)
+            throws Exception {
         String filename = filename_accounts;
         ArrayList<AccountStorage> readAccounts = null;
 
@@ -437,12 +437,10 @@ public class StorageHelper {
             String imageThumbnail = getBase64EncodedImage(accountToStore.getImageProfilePicUrl());
 
             // add account to list in AccountStorage representation
-            readAccounts.add(new AccountStorage(accountToStore.getId(),
-                    accountToStore.getImageProfilePicUrl(),
-                    accountToStore.getUsername(),
-                    accountToStore.getFullName(),
-                    accountToStore.getIs_private(),
-                    imageThumbnail));
+            readAccounts.add(
+                    new AccountStorage(accountToStore.getId(), accountToStore.getImageProfilePicUrl(),
+                                       accountToStore.getUsername(), accountToStore.getFullName(),
+                                       accountToStore.getIs_private(), imageThumbnail));
 
             ObjectOutputStream out;
             out = new ObjectOutputStream(bos);
@@ -465,17 +463,17 @@ public class StorageHelper {
     }
 
     /**
-     * Stores an post in PostStorage representation in internal storage
-     * (adds to list and does not edit specific post!!). Adds the
-     * thumbnail image as string (network call)
+     * Stores an post in PostStorage representation in internal storage (adds to list and does not edit
+     * specific post!!). Adds the thumbnail image as string (network call)
      *
-     * @param postToStore post to be stored
-     * @param context     context
-     * @param filename    filename (bookmarked_posts or posts)
-     * @return true if storing was successful
+     * @param postToStore Post
+     * @param context     Context
+     * @param filename    String
+     * @return Boolean
      * @throws Exception Exception
      */
-    public static Boolean storePostInInternalStorage(final Post postToStore, Context context, String filename) throws Exception {
+    public static Boolean storePostInInternalStorage(final Post postToStore, Context context, String filename)
+            throws Exception {
         ArrayList<PostStorage> readPosts = null;
 
         File file = new File(context.getFilesDir(), filename);
@@ -505,14 +503,10 @@ public class StorageHelper {
             String imageThumbnail = getBase64EncodedImage(postToStore.getImageUrlThumbnail());
 
             // add post to list in PostStorage representation
-            readPosts.add(new PostStorage(postToStore.getId(),
-                    postToStore.getShortcode(),
-                    postToStore.getTakenAtDate(),
-                    postToStore.getIs_video(),
-                    postToStore.getImageUrlThumbnail(),
-                    postToStore.getIs_sideCar(),
-                    postToStore.getCategory(),
-                    imageThumbnail));
+            readPosts.add(new PostStorage(postToStore.getId(), postToStore.getShortcode(),
+                                          postToStore.getTakenAtDate(), postToStore.getIs_video(),
+                                          postToStore.getImageUrlThumbnail(), postToStore.getIs_sideCar(),
+                                          postToStore.getCategory(), imageThumbnail));
 
             ObjectOutputStream out;
             out = new ObjectOutputStream(bos);
@@ -537,12 +531,13 @@ public class StorageHelper {
     /**
      * Updates a category of an bookmarked post in the specific bookmarked post in storage
      *
-     * @param postToUpdate post with new category
-     * @param context      context
-     * @return true, if update was successful
+     * @param postToUpdate Post
+     * @param context      Context
+     * @return Boolean
      * @throws IOException IOException
      */
-    public static Boolean updateBookmarkCategoryInStorage(Post postToUpdate, Context context) throws IOException {
+    public static Boolean updateBookmarkCategoryInStorage(Post postToUpdate, Context context)
+            throws IOException {
         ArrayList<PostStorage> readPosts = null;
 
         String filename = filename_bookmarks;
@@ -589,8 +584,8 @@ public class StorageHelper {
     /**
      * Read accounts from internal storage
      *
-     * @param context context
-     * @return ArrayList of accounts
+     * @param context Context
+     * @return ArrayList<Account>
      */
     public static ArrayList<Account> readAccountsFromInternalStorage(Context context) {
         String filename = filename_accounts;
@@ -631,12 +626,10 @@ public class StorageHelper {
             // convert AccountStorage accounts to normal Accounts
             if (readAccounts != null && listAccounts != null) {
                 for (AccountStorage accountStorage : readAccounts) {
-                    listAccounts.add(new Account(accountStorage.getImageProfilePicUrl(),
-                            accountStorage.getUsername(),
-                            accountStorage.getFullName(),
-                            accountStorage.getIs_private(),
-                            accountStorage.getId(),
-                            accountStorage.getImageThumbnail()));
+                    listAccounts.add(
+                            new Account(accountStorage.getImageProfilePicUrl(), accountStorage.getUsername(),
+                                        accountStorage.getFullName(), accountStorage.getIs_private(),
+                                        accountStorage.getId(), accountStorage.getImageThumbnail()));
                 }
 
                 // for normal behaviour in feedFragment to display text
@@ -650,9 +643,9 @@ public class StorageHelper {
     }
 
     /**
-     * Returns the ArrayList<AccountStorage> of accounts (only internal use in Storagehelper)
+     * Returns the ArrayList<AccountStorage> of accounts (only internal used in Storagehelper)
      *
-     * @param context context
+     * @param context Context
      * @return ArrayList<AccountStorage>
      */
     private static ArrayList<AccountStorage> readAccountStorageListFromInternalStorage(Context context) {
@@ -692,7 +685,15 @@ public class StorageHelper {
         return readAccounts;
     }
 
-    private static ArrayList<PostStorage> readPostStorageListFromInternalStorage(Context context, String filename) {
+    /**
+     * Returns the ArrayList<PostStorage> of posts (only internal used in Storagehelper)
+     *
+     * @param context  Context
+     * @param filename String
+     * @return ArrayList<PostStorage>
+     */
+    private static ArrayList<PostStorage> readPostStorageListFromInternalStorage(Context context,
+                                                                                 String filename) {
         ArrayList<PostStorage> readPosts = new ArrayList<>();
         File file = new File(context.getFilesDir(), filename);
 
@@ -731,9 +732,9 @@ public class StorageHelper {
     /**
      * Read posts from internal storage (for feed or bookmarked posts)
      *
-     * @param context  context
-     * @param filename filename of file in internal storage (filename_posts or filename_bookmarked_posts)
-     * @return ArrayList of posts
+     * @param context  Context
+     * @param filename String
+     * @return ArrayList<Post>
      */
     public static ArrayList<Post> readPostsFromInternalStorage(Context context, String filename) {
         ArrayList<Post> listPosts = null;
@@ -773,14 +774,10 @@ public class StorageHelper {
             // convert PostStorage posts to normal Posts
             if (readPosts != null && listPosts != null) {
                 for (PostStorage postStorage : readPosts) {
-                    listPosts.add(new Post(postStorage.getId(),
-                            postStorage.getShortcode(),
-                            postStorage.getTakenAtDate(),
-                            postStorage.getIs_video(),
-                            postStorage.getImageUrlThumbnail(),
-                            postStorage.getIs_sideCar(),
-                            postStorage.getCategory(),
-                            postStorage.getImageThumbnail()));
+                    listPosts.add(new Post(postStorage.getId(), postStorage.getShortcode(),
+                                           postStorage.getTakenAtDate(), postStorage.getIs_video(),
+                                           postStorage.getImageUrlThumbnail(), postStorage.getIs_sideCar(),
+                                           postStorage.getCategory(), postStorage.getImageThumbnail()));
                 }
 
                 // for normal behaviour in feedFragment to display text
@@ -799,7 +796,7 @@ public class StorageHelper {
      * @param object   Object
      * @param filename String
      * @param context  Context
-     * @return Boolean, if data exists in file
+     * @return Boolean
      */
     public static Boolean checkIfAccountOrPostIsInFile(Object object, String filename, Context context) {
         boolean dataIsInFile = false;
@@ -824,7 +821,8 @@ public class StorageHelper {
                             // check if readAccountStorage and account (inserted account) are the same
                             // note: readAccountStorage is AccountStorage and account is Account
                             // (no converting necessary here because comparision value is username)
-                            if (readAccountStorage != null && (readAccountStorage.getUsername().equals(account.getUsername()))) {
+                            if (readAccountStorage != null && (readAccountStorage.getUsername().equals(
+                                    account.getUsername()))) {
                                 dataIsInFile = true;
                                 break;
                             }
@@ -858,7 +856,7 @@ public class StorageHelper {
                         for (PostStorage readPostStorage : readPostStorages) {
                             // check if readPostStorages and post (inserted post) are the same
                             // note: readPostStorages is PostStorage and post is Post
-                            // (no converting necessary here because comparision value is id)
+                            // (no converting necessary here because comparison value is id)
                             if (readPostStorage != null && (readPostStorage.getId().equals(post.getId()))) {
                                 dataIsInFile = true;
                                 break;
@@ -871,7 +869,7 @@ public class StorageHelper {
                     }
                 }
                 return dataIsInFile;
-            } catch (IOException | NullPointerException | ClassNotFoundException e) {
+            } catch (Exception e) {
                 Log.d("StorageHelper", Log.getStackTraceString(e));
                 return false;
             }
@@ -882,9 +880,9 @@ public class StorageHelper {
     /**
      * Checks if file with filename exists in internal storage
      *
-     * @param filename filename of file
-     * @param context  context
-     * @return true, if file exists
+     * @param filename String
+     * @param context  Context
+     * @return boolean
      */
     public static boolean checkIfFileExists(String filename, Context context) {
         File file = new File(context.getFilesDir(), filename);
@@ -899,7 +897,8 @@ public class StorageHelper {
      * @return boolean
      * @throws IOException IOException
      */
-    private static boolean storeAccountStorageListInInternalStorage(ArrayList<AccountStorage> listNewAccountStorageRep, Context context) throws IOException {
+    private static boolean storeAccountStorageListInInternalStorage(
+            ArrayList<AccountStorage> listNewAccountStorageRep, Context context) throws IOException {
         byte[] bytesToWrite;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bos);
@@ -934,8 +933,11 @@ public class StorageHelper {
      * @return boolean
      * @throws IOException IOException
      */
-    private static boolean storePostStorageListInInternalStorage(ArrayList<PostStorage> listNewPostStorageRep, Context context, String filenamePara) throws IOException {
-        // filename for temporary new post list (bookmarks or posts) -> will be renamed in filename_posts after successful converting
+    private static boolean storePostStorageListInInternalStorage(ArrayList<PostStorage> listNewPostStorageRep,
+                                                                 Context context, String filenamePara)
+            throws IOException {
+        // filename for temporary new post list (bookmarks or posts) -> will be renamed in filename_posts
+        // after successful converting
         String newFilename = null;
         if (filenamePara.equals(filename_bookmarks)) {
             newFilename = filename_bookmarks;
@@ -974,7 +976,7 @@ public class StorageHelper {
      * Returns the amount of followed accounts
      *
      * @param context Context
-     * @return amount of followed accounts as integer
+     * @return int
      */
     static int amountFollowedAccounts(Context context) {
         if (context != null) {
@@ -990,11 +992,12 @@ public class StorageHelper {
      * Returns the amount of bookmarks
      *
      * @param context Context
-     * @return amount of bookmarks as integer
+     * @return int
      */
     static int amountBookmarks(Context context) {
         if (context != null) {
-            ArrayList<PostStorage> postList = readPostStorageListFromInternalStorage(context, filename_bookmarks);
+            ArrayList<PostStorage> postList = readPostStorageListFromInternalStorage(context,
+                                                                                     filename_bookmarks);
             if (postList != null) {
                 return postList.size();
             }
@@ -1005,11 +1008,11 @@ public class StorageHelper {
     /**
      * Imports (copies) one file from stringCopyPath to stringPastePath (existing files are overwritten)
      *
-     * @param fileToCopy      file to copy
-     * @param stringPastePath path to copy to
-     * @return true, if import was successful
+     * @param fileToCopy      File
+     * @param stringPastePath String
+     * @return boolean
      */
-    public static boolean copyFileImport(File fileToCopy, String stringPastePath, Context context) {
+    public static boolean copyFileImport(File fileToCopy, String stringPastePath) {
         File destination = new File(stringPastePath);
 
         try {
@@ -1022,20 +1025,24 @@ public class StorageHelper {
     }
 
     /**
-     * Exports app files to picked directory treeUriForPickedDir (internal or external sd card)
+     * Exports app files to picked directory treeUriForPickedDir (internal or external sd card). "inputPath"
+     * is path of file to be copied (without filename and extension)
      *
-     * @param inputPath                  path of file to be copied (without filename and extension)
-     * @param inputFilenameWithExtension filename and extension of file to be copied
-     * @param treeUriForPickedDir        picked destination directory
-     * @param context                    context
-     * @return true, if copied successful
+     * @param inputPath                  String
+     * @param inputFilenameWithExtension String
+     * @param treeUriForPickedDir        Uri
+     * @param context                    Context
+     * @return boolean
      */
-    public static boolean copyFileExport(String inputPath, String inputFilenameWithExtension, Uri treeUriForPickedDir, Context context) {
-        InputStream in = null;
-        OutputStream out = null;
+    public static boolean copyFileExport(String inputPath, String inputFilenameWithExtension,
+                                         Uri treeUriForPickedDir, Context context) {
+        InputStream inputStream;
+        OutputStream outputStream;
         boolean successful = true;
+
         DocumentFile pickedDir = DocumentFile.fromTreeUri(context, treeUriForPickedDir);
-        String extension = inputFilenameWithExtension.substring(inputFilenameWithExtension.lastIndexOf(".") + 1);
+        String extension = inputFilenameWithExtension.substring(
+                inputFilenameWithExtension.lastIndexOf(".") + 1);
 
         try {
             DocumentFile documentfile = pickedDir.findFile(inputFilenameWithExtension);
@@ -1046,18 +1053,18 @@ public class StorageHelper {
                 documentfile = pickedDir.createFile("text/" + extension, inputFilenameWithExtension);
             }
 
-            out = context.getContentResolver().openOutputStream(documentfile.getUri());
-            in = new FileInputStream(inputPath + File.separator + inputFilenameWithExtension);
+            outputStream = context.getContentResolver().openOutputStream(documentfile.getUri());
+            inputStream = new FileInputStream(inputPath + File.separator + inputFilenameWithExtension);
 
             byte[] buffer = new byte[1024];
             int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
             }
-            in.close();
+            inputStream.close();
             // write the output file (You have now copied the file)
-            out.flush();
-            out.close();
+            outputStream.flush();
+            outputStream.close();
 
         } catch (Exception e) {
             Log.d("StorageHelper", Log.getStackTraceString(e));
@@ -1084,7 +1091,7 @@ public class StorageHelper {
                     InputStream is = ucon.getInputStream();
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
-                    int read = 0;
+                    int read;
                     while ((read = is.read(buffer, 0, buffer.length)) != -1) {
                         baos.write(buffer, 0, read);
                     }
@@ -1101,7 +1108,8 @@ public class StorageHelper {
         try {
             String imageAsString = new GetImageFromUrlAsString().execute().get();
             if (imageAsString == null) {
-                throw new Exception("GetImageFromUrlAsString when bookmarking post failed: imageAsString is null");
+                throw new Exception(
+                        "GetImageFromUrlAsString when bookmarking post failed: imageAsString is null");
             }
             return imageAsString;
         } catch (Exception e) {
