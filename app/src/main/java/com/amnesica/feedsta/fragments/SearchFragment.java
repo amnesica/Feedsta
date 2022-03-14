@@ -101,8 +101,6 @@ public class SearchFragment extends Fragment {
                     // validate string and start getAccountsAndHashtags
                     if (inputStringIsValid(inputString)) {
                         new CheckConnectionAndStartSearch(SearchFragment.this).execute();
-                        // clear textField
-                        textInputField.setText(null);
 
                         // hide keyboard
                         InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(
