@@ -1,7 +1,5 @@
 package com.amnesica.feedsta.fragments;
 
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
@@ -19,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.amnesica.feedsta.BuildConfig;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.helper.FragmentHelper;
+import com.amnesica.feedsta.helper.StorageHelper;
 
 import java.lang.ref.WeakReference;
 
@@ -62,7 +61,7 @@ public class AboutFragment extends Fragment {
 
         // set app name
         if (getContext() != null) {
-            String applicationName = getApplicationName(requireContext());
+            String applicationName = StorageHelper.getApplicationName(requireContext());
             TextView textAppName = view.findViewById(R.id.textAppName);
             textAppName.setText(applicationName);
 
@@ -112,18 +111,6 @@ public class AboutFragment extends Fragment {
                 return false;
             }
         });
-    }
-
-    /**
-     * Returns the name of the application
-     *
-     * @param context Context
-     * @return String
-     */
-    private static String getApplicationName(Context context) {
-        ApplicationInfo applicationInfo = context.getApplicationInfo();
-        int stringId = applicationInfo.labelRes;
-        return stringId == 0 ? applicationInfo.nonLocalizedLabel.toString() : context.getString(stringId);
     }
 
     @Override

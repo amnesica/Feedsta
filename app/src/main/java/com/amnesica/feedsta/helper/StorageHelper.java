@@ -1,6 +1,7 @@
 package com.amnesica.feedsta.helper;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -50,6 +51,7 @@ public class StorageHelper {
     // filename for file storing posts in feed
     public static final String filename_posts = "feed_posts.txt";
 
+
     /**
      * Save video in internal storage
      *
@@ -61,8 +63,12 @@ public class StorageHelper {
     public static Boolean saveVideo(InputStream inputStream, byte[] buffer, String accountName,
                                     Context context) {
         if (inputStream != null && buffer != null && accountName != null && context != null) {
+            // use application name as directory name
+            String directoryName = getApplicationName(context);
+            if (directoryName == null) return false;
+
             String filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                                      .getAbsoluteFile() + "/Feedsta/";
+                                      .getAbsoluteFile() + "/" + directoryName + "/";
             File dir = new File(filepath);
             dir.mkdir();
 
@@ -120,9 +126,13 @@ public class StorageHelper {
      */
     public static Boolean saveImage(Bitmap finalBitmap, String accountName, Context context) {
         if (finalBitmap != null && context != null && accountName != null) {
+            // use application name as directory name
+            String directoryName = getApplicationName(context);
+            if (directoryName == null) return false;
+
             OutputStream outputStream;
             String filepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                                      .getAbsoluteFile() + "/Feedsta/";
+                                      .getAbsoluteFile() + "/" + directoryName + "/";
             File dir = new File(filepath);
             dir.mkdir();
             File file = new File(dir, System.currentTimeMillis() + "_" + accountName + ".jpg");
@@ -1115,5 +1125,17 @@ public class StorageHelper {
         } catch (Exception e) {
             throw new Exception("GetImageFromUrlAsString when bookmarking post failed");
         }
+    }
+
+    /**
+     * Returns the name of the application
+     *
+     * @param context Context
+     * @return String
+     */
+    public static String getApplicationName(Context context) {
+        ApplicationInfo applicationInfo = context.getApplicationInfo();
+        int stringId = applicationInfo.labelRes;
+        return stringId == 0 ? applicationInfo.nonLocalizedLabel.toString() : context.getString(stringId);
     }
 }
