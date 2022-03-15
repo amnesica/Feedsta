@@ -5,8 +5,6 @@ import static androidx.core.content.ContextCompat.getSystemService;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,12 +26,12 @@ import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.GridViewAdapterPost;
+import com.amnesica.feedsta.asynctasks.DownloadImage;
 import com.amnesica.feedsta.helper.EndlessScrollListener;
 import com.amnesica.feedsta.helper.Error;
 import com.amnesica.feedsta.helper.FeedObject;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.NetworkHandler;
-import com.amnesica.feedsta.helper.StorageHelper;
 import com.amnesica.feedsta.models.Hashtag;
 import com.amnesica.feedsta.models.Post;
 import com.amnesica.feedsta.models.URL;
@@ -43,9 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -313,16 +309,16 @@ public class HashtagFragment extends Fragment {
     }
 
     /**
-     * Downloads the profile photo by calling async task DownloadProfilePhoto
+     * Starts async task to download a profile photo
      */
     private void downloadProfilePhoto() {
         if (hashtag == null) return;
 
         // start save image from url
-        DownloadProfilePhoto downloadProfilePhoto = new DownloadProfilePhoto(HashtagFragment.this,
-                                                                             hashtag.getProfile_pic_url(),
-                                                                             hashtag.getName());
-        downloadProfilePhoto.execute();
+        DownloadImage downloadImageAsyncTask = new DownloadImage(HashtagFragment.this,
+                                                                 hashtag.getProfile_pic_url(),
+                                                                 hashtag.getName());
+        downloadImageAsyncTask.execute();
     }
 
     /**
@@ -658,61 +654,6 @@ public class HashtagFragment extends Fragment {
             // create and set onScrollListener
             fragment.createEndlessScrollListener(fragment.gridViewHashtags);
             fragment.gridViewHashtags.setOnScrollListener(fragment.scrollListener);
-        }
-    }
-
-    /**
-     * Async task to download the profile photo of the hashtag
-     */
-    private static class DownloadProfilePhoto extends AsyncTask<Void, Void, Void> {
-
-        private final WeakReference<HashtagFragment> fragmentReference;
-        private final String photoUrl;
-        private final String nameAccountOrHashtag;
-
-        // constructor
-        public DownloadProfilePhoto(HashtagFragment fragment, String photoUrl, String nameAccountOrHashtag) {
-            this.fragmentReference = new WeakReference<>(fragment);
-            this.photoUrl = photoUrl;
-            this.nameAccountOrHashtag = nameAccountOrHashtag;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (isCancelled()) return null;
-
-            // get reference from fragment
-            final HashtagFragment fragment = fragmentReference.get();
-            if (fragment == null) return null;
-
-            try {
-                java.net.URL url = new java.net.URL(photoUrl);
-
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setDoInput(true);
-                connection.connect();
-                InputStream input = connection.getInputStream();
-                Bitmap myBitmap = BitmapFactory.decodeStream(input);
-
-                // save to storage
-                boolean saved = StorageHelper.saveImage(myBitmap, nameAccountOrHashtag,
-                                                        fragment.getContext());
-
-                input.close();
-
-                if (saved) {
-                    FragmentHelper.showToast(fragment.getResources().getString(R.string.image_saved),
-                                             fragment.requireActivity(), fragment.requireContext());
-                } else {
-                    throw new Exception();
-                }
-            } catch (Exception e) {
-                if (fragment.getActivity() != null) {
-                    FragmentHelper.showToast(fragment.getResources().getString(R.string.image_saved_failed),
-                                             fragment.requireActivity(), fragment.requireContext());
-                }
-            }
-            return null;
         }
     }
 }
