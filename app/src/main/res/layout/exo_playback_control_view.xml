@@ -34,11 +34,6 @@
         </FrameLayout>
 
         <ImageButton
-            android:id="@id/exo_prev"
-            style="@style/ExoMediaButton.Previous"
-            android:contentDescription="@string/previous_button" />
-
-        <ImageButton
             android:id="@id/exo_rew"
             style="@style/ExoMediaButton.Rewind"
             android:contentDescription="@string/rewind_button" />
@@ -62,11 +57,6 @@
             android:id="@id/exo_ffwd"
             style="@style/ExoMediaButton.FastForward"
             android:contentDescription="@string/fast_forward_button" />
-
-        <ImageButton
-            android:id="@id/exo_next"
-            style="@style/ExoMediaButton.Next"
-            android:contentDescription="@string/next_button" />
 
         <FrameLayout
             android:id="@+id/exo_fullscreen_button"
