@@ -10,7 +10,7 @@ import java.util.HashMap;
  */
 public class Post implements Serializable {
 
-    // serialVersionUID (same as computed! - use the one from the exception message)
+    // serialVersionUID
     private static final long serialVersionUID = 6519669658345894950L;
 
     private String id;
@@ -169,8 +169,8 @@ public class Post implements Serializable {
         this.ownerId = ownerId;
     }
 
-    public String getLikes() { // get likes as string
-        return String.valueOf(likes);
+    public int getLikes() {
+        return likes;
     }
 
     public void setLikes(int likes) {

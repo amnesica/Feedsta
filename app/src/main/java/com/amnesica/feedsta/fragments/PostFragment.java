@@ -1968,8 +1968,8 @@ public class PostFragment extends Fragment implements FragmentCallback {
                     fragment.imageProfilePicPostOwner);
 
             // set Likes
-            fragment.textLikes.setText(
-                    fragment.getResources().getString(R.string.likes, fragment.post.getLikes()));
+            fragment.textLikes.setText(fragment.getResources().getString(R.string.likes, String.valueOf(
+                    fragment.post.getLikes())));
 
             // set caption (with clickable links)
             if (fragment.post.getCaption() != null) {
