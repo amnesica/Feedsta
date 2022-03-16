@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public class Account implements Serializable {
 
-    // serialVersionUID (same as computed! - use the one from the exception message)
+    // serialVersionUID
     private static final long serialVersionUID = -1316217135523228502L;
 
     private String id;
