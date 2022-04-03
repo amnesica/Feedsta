@@ -20,10 +20,18 @@ public class PostStorage implements Serializable {
     private Boolean is_sideCar;
     private String category;
     private String imageThumbnail;
+    private String imageUrlProfilePicOwner;
+    private int likes;
+    private String ownerId;
+    private String username;
+    private String caption;
+    private int height;
 
     // constructor
     public PostStorage(String id, String shortcode, Date takenAtDate, Boolean is_video,
-                       String imageUrlThumbnail, Boolean is_sideCar, String category, String imageThumbnail) {
+                       String imageUrlThumbnail, Boolean is_sideCar, String category, String imageThumbnail,
+                       String imageUrlProfilePicOwner, int likes, String ownerId, String username,
+                       String caption, int height) {
         this.id = id;
         this.shortcode = shortcode;
         this.takenAtDate = takenAtDate;
@@ -32,6 +40,12 @@ public class PostStorage implements Serializable {
         this.is_sideCar = is_sideCar;
         this.category = category;
         this.imageThumbnail = imageThumbnail;
+        this.imageUrlProfilePicOwner = imageUrlProfilePicOwner;
+        this.likes = likes;
+        this.ownerId = ownerId;
+        this.username = username;
+        this.caption = caption;
+        this.height = height;
     }
 
     public static long getSerialVersionUID() {
@@ -102,21 +116,73 @@ public class PostStorage implements Serializable {
         this.imageThumbnail = imageThumbnail;
     }
 
+    public String getImageUrlProfilePicOwner() {
+        return imageUrlProfilePicOwner;
+    }
+
+    public void setImageUrlProfilePicOwner(String imageUrlProfilePicOwner) {
+        this.imageUrlProfilePicOwner = imageUrlProfilePicOwner;
+    }
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getCaption() {
+        return caption;
+    }
+
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PostStorage that = (PostStorage) o;
-        return Objects.equals(id, that.id) && Objects.equals(shortcode, that.shortcode) && Objects.equals(
-                takenAtDate, that.takenAtDate) && Objects.equals(is_video, that.is_video) && Objects.equals(
-                imageUrlThumbnail, that.imageUrlThumbnail) && Objects.equals(imageThumbnail,
-                                                                             that.imageThumbnail) &&
-               Objects.equals(is_sideCar, that.is_sideCar) && Objects.equals(category, that.category);
+        return likes == that.likes && height == that.height && Objects.equals(id, that.id) && Objects.equals(
+                shortcode, that.shortcode) && Objects.equals(takenAtDate, that.takenAtDate) && Objects.equals(
+                is_video, that.is_video) && Objects.equals(imageUrlThumbnail, that.imageUrlThumbnail) &&
+               Objects.equals(is_sideCar, that.is_sideCar) && Objects.equals(category, that.category) &&
+               Objects.equals(imageThumbnail, that.imageThumbnail) && Objects.equals(imageUrlProfilePicOwner,
+                                                                                     that.imageUrlProfilePicOwner) &&
+               Objects.equals(ownerId, that.ownerId) && Objects.equals(username, that.username) &&
+               Objects.equals(caption, that.caption);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, shortcode, takenAtDate, is_video, imageUrlThumbnail, imageThumbnail,
-                            is_sideCar, category);
+        return Objects.hash(id, shortcode, takenAtDate, is_video, imageUrlThumbnail, is_sideCar, category,
+                            imageThumbnail, imageUrlProfilePicOwner, likes, ownerId, username, caption,
+                            height);
     }
 }

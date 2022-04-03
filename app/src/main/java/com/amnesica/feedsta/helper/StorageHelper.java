@@ -382,7 +382,9 @@ public class StorageHelper {
             postStorages.add(new PostStorage(post.getId(), post.getShortcode(), post.getTakenAtDate(),
                                              post.getIs_video(), post.getImageUrlThumbnail(),
                                              post.getIs_sideCar(), post.getCategory(),
-                                             post.getImageThumbnail()));
+                                             post.getImageThumbnail(), post.getImageUrlProfilePicOwner(),
+                                             post.getLikes(), post.getOwnerId(), post.getUsername(),
+                                             post.getCaption(), post.getHeight()));
         }
 
         ObjectOutputStream out;
@@ -516,7 +518,10 @@ public class StorageHelper {
             readPosts.add(new PostStorage(postToStore.getId(), postToStore.getShortcode(),
                                           postToStore.getTakenAtDate(), postToStore.getIs_video(),
                                           postToStore.getImageUrlThumbnail(), postToStore.getIs_sideCar(),
-                                          postToStore.getCategory(), imageThumbnail));
+                                          postToStore.getCategory(), imageThumbnail,
+                                          postToStore.getImageUrlProfilePicOwner(), postToStore.getLikes(),
+                                          postToStore.getOwnerId(), postToStore.getUsername(),
+                                          postToStore.getCaption(), postToStore.getHeight()));
 
             ObjectOutputStream out;
             out = new ObjectOutputStream(bos);
