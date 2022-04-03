@@ -22,6 +22,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.method.LinkMovementMethod;
+import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -100,7 +101,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
     private TextView textCaption;
     private TextView textUsernameAppBar;
     private TextView textDate;
-    private ImageView imagePost;
+    private ImageView imageViewPost;
     private ImageView imageProfilePicPostOwner;
     private ListView listComments;
     private ImageButton buttonLoadMoreComments;
@@ -432,25 +433,29 @@ public class PostFragment extends Fragment implements FragmentCallback {
         textUsernameAppBar = header.findViewById(R.id.textUsernameInBarUnderAppBar);
         textDate = header.findViewById(R.id.date);
         imageProfilePicPostOwner = header.findViewById(R.id.imageProfilePicPostOwner);
-        imagePost = header.findViewById(R.id.singleImagePost);
+        imageViewPost = header.findViewById(R.id.singleImagePost);
         viewPager = header.findViewById(R.id.viewpagerPost);
 
         // make links highlighted and clickable in textView
         textCaption.setMovementMethod(LinkMovementMethod.getInstance());
 
         // on click listener to show post image fullscreen to zoom into image
-        imagePost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // start fullscreen image post fragment
-                FullscreenImagePostFragment fullscreenImagePostFragment =
-                        FullscreenImagePostFragment.newInstance(post.getImageUrl());
+        // (only enable listener for posts with no image as string saved, because
+        // BigImageViewer (for viewing image fullscreen) cannot handle that!)
+        if (!postHasThumbnailImageAsString()) {
+            imageViewPost.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // start fullscreen image post fragment
+                    FullscreenImagePostFragment fullscreenImagePostFragment =
+                            FullscreenImagePostFragment.newInstance(post.getImageUrl());
 
-                // add fullscreenImagePostFragment to FragmentManager
-                FragmentHelper.addFragmentToContainer(fullscreenImagePostFragment,
-                                                      requireActivity().getSupportFragmentManager());
-            }
-        });
+                    // add fullscreenImagePostFragment to FragmentManager
+                    FragmentHelper.addFragmentToContainer(fullscreenImagePostFragment,
+                                                          requireActivity().getSupportFragmentManager());
+                }
+            });
+        }
 
         setupBookmarkButton(header);
 
@@ -1526,14 +1531,149 @@ public class PostFragment extends Fragment implements FragmentCallback {
                 // set textFields and sidecar
                 fragment.getPostInfoAndContents();
             } else {
-                FragmentHelper.notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
-                try {
-                    fragment.progressBar.setVisibility(GONE);
-                } catch (Exception e) {
-                    Log.d("PostFragment", Log.getStackTraceString(e));
+                // check if post is bookmark and string imageThumbnail is available
+                if (fragment.postHasThumbnailImageAsString()) {
+                    fragment.showImageThumbnailOfBookmark();
+                } else {
+                    // disable all buttons if image as string could not get displayed
+                    fragment.disableButtons();
                 }
-                fragment.disableButtons();
+
+                FragmentHelper.notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
+
+                fragment.hideProgressBar();
             }
+        }
+    }
+
+    /**
+     * Checks if imageThumbnailUrl of post starts with "https://instagram". If so the post was not bookmarked
+     * regarding the url of the thumbnail, otherwise it would be saved as string
+     *
+     * @return boolean
+     */
+    private boolean postHasThumbnailImageAsString() {
+        // check if image thumbnail of post is available and is base64 encoded string
+        return post != null && post.getImageThumbnail() != null && !post.getImageThumbnail().startsWith(
+                "https://instagram");
+    }
+
+    /**
+     * Shows thumbnail of bookmark in imageViewPost. This might be useful when post/bookmark is not available
+     * anymore. Instead of image url the saved image string is displayed
+     */
+    private void showImageThumbnailOfBookmark() {
+        // check if image thumbnail of post is available and is base64 encoded string
+        if (post == null || imageViewPost == null || post.getImageThumbnail() == null) return;
+
+        // make progressBar gone
+        hideProgressBar();
+
+        // hide other layout elements
+        changeVisibilityOfUiElementsDependingOnPostType(true);
+
+        // set height of imageView
+        setHeightOfImageViewPost();
+
+        // set basic post info like likes, caption, username etc.
+        setBasicPostInfo();
+
+        // set up download Button
+        setupImageButtonDownload();
+
+        // load image into view
+        Glide.with(requireContext()).asBitmap().load(Base64.decode(post.getImageThumbnail(), Base64.DEFAULT))
+                .error(R.drawable.placeholder_image_post_error).diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true).dontAnimate().into(imageViewPost);
+
+        // add header and update view
+        listComments.addHeaderView(header);
+        ListAdapterComment adapter = new ListAdapterComment(getContext(), R.layout.list_item_comment,
+                                                            new ArrayList<Comment>(), this);
+        listComments.setAdapter(adapter);
+        buttonLoadMoreComments.setVisibility(GONE);
+    }
+
+    /**
+     * Sets the height of the imageViewPost. If no height is given the height is then set to 1000px
+     */
+    private void setHeightOfImageViewPost() {
+        if (post == null || imageViewPost == null) return;
+
+        if (post.getHeight() == 0) {
+            // set height value for bookmarks without this value (old bookmarks)
+            post.setHeight(1000);
+        }
+
+        // set height of imageView
+        imageViewPost.getLayoutParams().height = post.getHeight();
+        imageViewPost.requestLayout();
+        imageViewPost.invalidate();
+    }
+
+    /**
+     * Set basic post info like likes, caption, username etc.
+     */
+    private void setBasicPostInfo() {
+        if (getActivity() == null) return;
+
+        // load profile pic app bar
+        Glide.with(this).load(post.getImageUrlProfilePicOwner()).error(
+                R.drawable.placeholder_image_post_error).dontAnimate().into(imageProfilePicPostOwner);
+
+        // set Likes
+        textLikes.setText(getResources().getString(R.string.likes, String.valueOf(post.getLikes())));
+
+        // set caption (with clickable links)
+        if (post.getCaption() != null) {
+            textCaption.setText(
+                    FragmentHelper.createSpannableStringWithClickableLinks(post.getCaption(), this));
+        }
+
+        // set username or ownerId
+        if (post.getUsername() == null && post.getOwnerId() != null) {
+            textOwnerIdOrUsername.setText(post.getOwnerId());
+            textUsernameAppBar.setText(post.getOwnerId());
+        } else {
+            textOwnerIdOrUsername.setText(post.getUsername());
+            // set title in bar under app bar
+            textUsernameAppBar.setText(post.getUsername());
+        }
+
+        // set date
+        if (post.getTakenAtDate() != null) {
+            textDate.setText(DateFormat.getDateTimeInstance().format(post.getTakenAtDate()));
+        }
+    }
+
+    /**
+     * Makes UI elements visible depending on the type of the post. Parameter postIsBookmark is needed to make
+     * imageViewPost visible regardless of type
+     *
+     * @param postIsBookmark boolean
+     */
+    private void changeVisibilityOfUiElementsDependingOnPostType(boolean postIsBookmark) {
+        if (post == null) return;
+
+        if (postIsBookmark) {
+            // set viewpager to gone and make imageViewPost visible regardless of type
+            viewPager.setVisibility(GONE);
+            imageViewPost.setVisibility(VISIBLE);
+            return;
+        }
+
+        if (!post.getIs_sideCar() && !post.getIs_video()) {
+            // post is simple image
+            viewPager.setVisibility(GONE);
+            imageViewPost.setVisibility(VISIBLE);
+        }
+        if (!post.getIs_sideCar() && post.getIs_video()) {
+            // post is simple video
+            viewPager.setVisibility(GONE);
+            imageViewPost.setVisibility(GONE);
+
+            progressBarVideo = header.findViewById(R.id.singleProgress_bar);
+            progressBarVideo.setVisibility(VISIBLE);
         }
     }
 
@@ -1557,6 +1697,14 @@ public class PostFragment extends Fragment implements FragmentCallback {
             // get reference from fragment
             final PostFragment fragment = fragmentReference.get();
             if (fragment == null) return;
+
+            // make ui elements visible and gone depending on type of post
+            fragment.changeVisibilityOfUiElementsDependingOnPostType(false);
+
+            // initialize booleans for first fetching
+            fragment.bFirstFetch = true;
+            fragment.bFirstAdapterFetch = true;
+            fragment.scrolling = false;
 
             // make progressBar visible
             try {
@@ -1846,9 +1994,18 @@ public class PostFragment extends Fragment implements FragmentCallback {
             // set adapters
             if (fragment.post.getIs_sideCar()) {
                 if (fragment.postIsFromDeepLink) {
-                    fragment.imagePost.setVisibility(GONE);
+                    fragment.imageViewPost.setVisibility(GONE);
                     fragment.viewPager.setVisibility(VISIBLE);
                 }
+
+                // if sidecarUrls are null, try to show the post image as string if it exists (post to show
+                // might be
+                // bookmark)
+                if (fragment.post.getSidecarUrls() == null && fragment.postHasThumbnailImageAsString()) {
+                    fragment.showImageThumbnailOfBookmark();
+                    return;
+                }
+
                 try {
                     // set adapter for sidecars
                     fragment.statePagerAdapterSideCar = new StatePagerAdapterSideCar(
@@ -1878,6 +2035,14 @@ public class PostFragment extends Fragment implements FragmentCallback {
                     }
                 }
 
+                // if videoUrl is null, try to show the post image as string if it exists (post to show
+                // might be
+                // bookmark)
+                if (fragment.post.getVideoUrl() == null && fragment.postHasThumbnailImageAsString()) {
+                    fragment.showImageThumbnailOfBookmark();
+                    return;
+                }
+
                 // load video from url
                 fragment.loadVideoFromUrl(fragment.post.getVideoUrl());
 
@@ -1885,19 +2050,21 @@ public class PostFragment extends Fragment implements FragmentCallback {
                 // is only image
                 if (fragment.getContext() == null) return;
 
-                // set height of imageView and prevent OOM from previous option
-                try {
-                    fragment.imagePost.getLayoutParams().height = fragment.post.getHeight();
-                    fragment.imagePost.requestLayout();
-                } catch (Exception e) {
-                    Log.d("PostFragment", Log.getStackTraceString(e));
+                // set height of imageView
+                fragment.setHeightOfImageViewPost();
+
+                // if imageUrl is null, try to show the image as string if it exists (post to show might be
+                // bookmark)
+                if (fragment.postHasThumbnailImageAsString()) {
+                    fragment.showImageThumbnailOfBookmark();
+                    return;
                 }
 
                 // load image with glide (note: error retries loading the image from the url)
                 Glide.with(fragment.requireContext()).load(fragment.post.getImageUrl()).error(
                         Glide.with(fragment.requireContext()).load(fragment.post.getImageUrl()))
                         .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).dontAnimate().into(
-                        fragment.imagePost);
+                        fragment.imageViewPost);
             }
 
             // set basic post info like likes, caption, username etc.
