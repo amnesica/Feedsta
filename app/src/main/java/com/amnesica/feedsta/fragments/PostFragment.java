@@ -249,44 +249,6 @@ public class PostFragment extends Fragment implements FragmentCallback {
     }
 
     /**
-     * Get more info about the post (image, video, sidecar) and setup download button
-     */
-    private void getPostInfoAndContents() {
-        if (post == null) return;
-
-        if (post.getIs_sideCar()) {
-            // get all sidecar element urls
-            startGetMorePostInfoTask();
-        }
-        if (!post.getIs_sideCar() && !post.getIs_video()) {
-            viewPager.setVisibility(GONE);
-            imagePost.setVisibility(VISIBLE);
-
-            // more image info
-            startGetMorePostInfoTask();
-        }
-        if (!post.getIs_sideCar() && post.getIs_video()) {
-            viewPager.setVisibility(GONE);
-            imagePost.setVisibility(GONE);
-
-            // set progress bar to visible
-            progressBarVideo = header.findViewById(R.id.singleProgress_bar);
-            progressBarVideo.setVisibility(VISIBLE);
-
-            // get Video Url
-            startGetMorePostInfoTask();
-        }
-
-        // set up download Button
-        setupImageButtonDownload();
-
-        // initialize booleans for first fetching
-        bFirstFetch = true;
-        bFirstAdapterFetch = true;
-        scrolling = false;
-    }
-
-    /**
      * Sets up the download button and asks for storage permissions
      */
     private void setupImageButtonDownload() {
@@ -755,18 +717,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
             }
         });
 
-        // set background color based on theme
-        theme.resolveAttribute(R.attr.colorPrimary, typedValue, true);
-        @ColorInt final int backgroundColor = typedValue.data;
-
-        requireActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                relativeLayoutCustomSnackbar.setBackgroundColor(backgroundColor);
-            }
-        });
-
-        // set Texts
+        // set texts
         requireActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -1075,7 +1026,6 @@ public class PostFragment extends Fragment implements FragmentCallback {
     public void onHiddenChanged(boolean hidden) {
         if (hidden) {
             stopAllVideoTasksInRegisteredFragments();
-
         } else {
             // load video from url for normal video post
             if (post != null && post.getIs_video() && !post.getIs_sideCar()) {
@@ -1528,8 +1478,8 @@ public class PostFragment extends Fragment implements FragmentCallback {
             if (fragment == null) return;
 
             if (isInternetAvailable) {
-                // set textFields and sidecar
-                fragment.getPostInfoAndContents();
+                // get more info about post (sidecar, video, image)
+                fragment.startGetMorePostInfoTask();
             } else {
                 // check if post is bookmark and string imageThumbnail is available
                 if (fragment.postHasThumbnailImageAsString()) {
@@ -1993,6 +1943,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
             // set adapters
             if (fragment.post.getIs_sideCar()) {
+                // post is sidecar
                 if (fragment.postIsFromDeepLink) {
                     fragment.imageViewPost.setVisibility(GONE);
                     fragment.viewPager.setVisibility(VISIBLE);
@@ -2026,7 +1977,6 @@ public class PostFragment extends Fragment implements FragmentCallback {
             } else if (fragment.post.getIs_video()) {
                 // is only video
                 if (fragment.postIsFromDeepLink) {
-                    // set progress bar to visible
                     try {
                         fragment.progressBarVideo = fragment.header.findViewById(R.id.singleProgress_bar);
                         fragment.progressBarVideo.setVisibility(VISIBLE);
@@ -2068,15 +2018,20 @@ public class PostFragment extends Fragment implements FragmentCallback {
             }
 
             // set basic post info like likes, caption, username etc.
-            setBasicPostInfo();
+            fragment.setBasicPostInfo();
+
+            // set up download Button
+            fragment.setupImageButtonDownload();
 
             if (fragment.postIsFromDeepLink) {
                 // do bookmark button initialize again
                 fragment.initializeBookmarkedButton();
             }
 
-            // add header and update view
+            // add post header
             fragment.listComments.addHeaderView(fragment.header);
+
+            // update comment list view
             fragment.listComments.deferNotifyDataSetChanged();
             fragment.listComments.invalidateViews();
 
@@ -2100,6 +2055,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                     }
                 } else {
                     fragment.listComments.deferNotifyDataSetChanged();
+
                     fragment.progressBarComments.setVisibility(GONE);
                     fragment.buttonLoadMoreComments.setVisibility(GONE);
                 }
@@ -2115,49 +2071,6 @@ public class PostFragment extends Fragment implements FragmentCallback {
                 } catch (NullPointerException ee) {
                     Log.d("PostFragment", Log.getStackTraceString(e));
                 }
-            }
-        }
-
-
-        /**
-         * Set basic post info like likes, caption, username etc.
-         */
-        private void setBasicPostInfo() {
-            if (isCancelled()) return;
-
-            // get reference from fragment
-            final PostFragment fragment = fragmentReference.get();
-            if (fragment == null || fragment.getContext() == null) return;
-
-            // load profile pic app bar
-            Glide.with(fragment.requireContext()).load(fragment.post.getImageUrlProfilePicOwner()).error(
-                    R.drawable.placeholder_image_post_error).dontAnimate().into(
-                    fragment.imageProfilePicPostOwner);
-
-            // set Likes
-            fragment.textLikes.setText(fragment.getResources().getString(R.string.likes, String.valueOf(
-                    fragment.post.getLikes())));
-
-            // set caption (with clickable links)
-            if (fragment.post.getCaption() != null) {
-                fragment.textCaption.setText(FragmentHelper.createSpannableStringWithClickableLinks(
-                        fragment.post.getCaption(), fragment));
-            }
-
-            // set username or ownerId
-            if (fragment.post.getUsername() == null && fragment.post.getOwnerId() != null) {
-                fragment.textOwnerIdOrUsername.setText(fragment.post.getOwnerId());
-                fragment.textUsernameAppBar.setText(fragment.post.getOwnerId());
-            } else {
-                fragment.textOwnerIdOrUsername.setText(fragment.post.getUsername());
-                // set title in bar under app bar
-                fragment.textUsernameAppBar.setText(fragment.post.getUsername());
-            }
-
-            // set date
-            if (fragment.post.getTakenAtDate() != null) {
-                fragment.textDate.setText(
-                        DateFormat.getDateTimeInstance().format(fragment.post.getTakenAtDate()));
             }
         }
     }
