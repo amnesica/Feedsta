@@ -789,10 +789,13 @@ public class StorageHelper {
             // convert PostStorage posts to normal Posts
             if (readPosts != null && listPosts != null) {
                 for (PostStorage postStorage : readPosts) {
-                    listPosts.add(new Post(postStorage.getId(), postStorage.getShortcode(),
+                    listPosts.add(new Post(postStorage.getId(), postStorage.getImageUrlThumbnail(),
+                                           postStorage.getImageUrlProfilePicOwner(), postStorage.getLikes(),
+                                           postStorage.getOwnerId(), postStorage.getUsername(),
+                                           postStorage.getCaption(), postStorage.getShortcode(),
                                            postStorage.getTakenAtDate(), postStorage.getIs_video(),
-                                           postStorage.getImageUrlThumbnail(), postStorage.getIs_sideCar(),
-                                           postStorage.getCategory(), postStorage.getImageThumbnail()));
+                                           postStorage.getIs_sideCar(), postStorage.getCategory(),
+                                           postStorage.getHeight(), postStorage.getImageThumbnail()));
                 }
 
                 // for normal behaviour in feedFragment to display text

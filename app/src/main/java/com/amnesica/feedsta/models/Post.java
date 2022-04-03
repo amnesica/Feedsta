@@ -69,6 +69,26 @@ public class Post implements Serializable {
         this.imageThumbnail = imageThumbnail;
     }
 
+    // constructor (to create posts from PostStorage when loading bookmarks)
+    public Post(String id, String imageUrlThumbnail, String imageUrlProfilePicOwner, int likes,
+                String ownerId, String username, String caption, String shortcode, Date takenAtDate,
+                Boolean is_video, Boolean is_sideCar, String category, int height, String imageThumbnail) {
+        this.id = id;
+        this.imageUrlThumbnail = imageUrlThumbnail;
+        this.imageUrlProfilePicOwner = imageUrlProfilePicOwner;
+        this.likes = likes;
+        this.ownerId = ownerId;
+        this.username = username;
+        this.caption = caption;
+        this.shortcode = shortcode;
+        this.takenAtDate = takenAtDate;
+        this.is_video = is_video;
+        this.is_sideCar = is_sideCar;
+        this.category = category;
+        this.height = height;
+        this.imageThumbnail = imageThumbnail;
+    }
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
