@@ -67,7 +67,6 @@ import com.amnesica.feedsta.views.BtmSheetDialogSelectCollection;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -109,7 +108,6 @@ public class PostFragment extends Fragment implements FragmentCallback {
     private ProgressBar progressBarComments;
     private View header;
     private ViewPager viewPager;
-    private ProgressBar progressBarVideo;
     private ImageButton buttonBookmark;
     private StatePagerAdapterSideCar statePagerAdapterSideCar;
     private ProgressBar progressBar;
@@ -1110,16 +1108,6 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
         // new player instance
         player = ExoPlayerFactory.newSimpleInstance(requireActivity());
-        player.addListener(new ExoPlayer.EventListener() {
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                if (playbackState == ExoPlayer.STATE_BUFFERING) {
-                    progressBarVideo.setVisibility(VISIBLE);
-                } else {
-                    progressBarVideo.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
         playerView.setPlayer(player);
 
         // hide controller initially
@@ -1584,9 +1572,6 @@ public class PostFragment extends Fragment implements FragmentCallback {
             // post is simple video
             viewPager.setVisibility(GONE);
             imageViewPost.setVisibility(GONE);
-
-            progressBarVideo = header.findViewById(R.id.singleProgress_bar);
-            progressBarVideo.setVisibility(VISIBLE);
         }
     }
 
@@ -1939,18 +1924,8 @@ public class PostFragment extends Fragment implements FragmentCallback {
                 }
             } else if (fragment.post.getIs_video()) {
                 // is only video
-                if (fragment.postIsFromDeepLink) {
-                    try {
-                        fragment.progressBarVideo = fragment.header.findViewById(R.id.singleProgress_bar);
-                        fragment.progressBarVideo.setVisibility(VISIBLE);
-                    } catch (Exception e) {
-                        Log.d("PostFragment", Log.getStackTraceString(e));
-                    }
-                }
-
                 // if videoUrl is null, try to show the post image as string if it exists (post to show
-                // might be
-                // bookmark)
+                // might be bookmark)
                 if (fragment.post.getVideoUrl() == null && fragment.postHasThumbnailImageAsString()) {
                     fragment.showImageThumbnailOfBookmark();
                     return;

@@ -59,17 +59,8 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:visibility="gone"
-                app:show_buffering="never" />
+                app:show_buffering="always" />
         </FrameLayout>
-
-        <ProgressBar
-            android:id="@+id/singleProgress_bar"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_gravity="center"
-            android:visibility="gone" />
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/viewpagerPost"
