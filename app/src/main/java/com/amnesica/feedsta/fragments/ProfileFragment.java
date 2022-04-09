@@ -186,13 +186,8 @@ public class ProfileFragment extends Fragment {
         if (view == null) return;
 
         toolbar = view.findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24dp);
 
-        // set theme and arrow back
-        if (FragmentHelper.getThemeIsDarkTheme(requireContext())) {
-            toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
-        } else {
-            toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
-        }
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -593,6 +588,10 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        // Slide down bottom navigation view if necessary
+        FragmentHelper.slideDownBottomNavigationBar(getActivity());
+
         // button follow - unfollow
         if (!account.getIs_private()) {
             // check if account is in follow list

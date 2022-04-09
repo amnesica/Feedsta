@@ -1,129 +1,131 @@
 <resources>
     <!-- Colors for light mode -->
-    <style name="LightTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">#FFFFFF</item>
-        <item name="colorPrimaryDark">#FF434343</item>
-        <item name="colorAccent">#000000</item>
-        <item name="colorLightGrey">#EEEEEE</item>
-        <item name="colorDarkGrey">#B0B0B0</item>
-        <item name="colorVeryDarkGrey">#EEEEEE</item>
-        <item name="black">#000000</item>
-        <item name="colorTextSearch">#FF434343</item>
-        <item name="colorPrimarySearchPublic">#FFFFFF</item>
+    <style name="LightTheme" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/md_theme_light_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_light_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_light_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/md_theme_light_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
 
-        <item name="active_tab_color">#000000</item>
-        <item name="inactive_tab_color">#D8D8D8</item>
+        <!-- Background secondary containers like buttons in bottomNavBar -->
+        <item name="colorSecondaryContainer">@color/md_theme_light_secondaryContainer</item>
 
-        <item name="toolbarColoredBackArrow">#000000</item>
-        <item name="textColorToolbar">#000000</item>
-        <item name="toolbarBackgroundColor">#FFFFFF</item>
-        <item name="colorNavigationIcon">#000000</item>
-        <item name="toolbarColorControlNormal">#000000</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_light_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/md_theme_light_tertiary</item>
+        <item name="colorOnTertiary">@color/md_theme_light_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/md_theme_light_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/md_theme_light_onTertiaryContainer</item>
+        <item name="colorError">@color/md_theme_light_error</item>
+        <item name="colorErrorContainer">@color/md_theme_light_errorContainer</item>
+        <item name="colorOnError">@color/md_theme_light_onError</item>
+        <item name="colorOnErrorContainer">@color/md_theme_light_onErrorContainer</item>
 
+        <!-- Background color -->
+        <item name="android:colorBackground">@color/md_theme_light_background</item>
+        <item name="colorOnBackground">@color/md_theme_light_onBackground</item>
+
+        <!-- Background container -->
+        <item name="colorSurface">@color/md_theme_light_surface</item>
+        <item name="colorOnSurface">@color/md_theme_light_onSurface</item>
+        <item name="colorSurfaceVariant">@color/md_theme_light_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_light_onSurfaceVariant</item>
+        <item name="colorOutline">@color/md_theme_light_outline</item>
+
+        <item name="colorOnSurfaceInverse">@color/md_theme_light_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/md_theme_light_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/md_theme_light_primaryInverse</item>
+
+        <!-- text color in textViews-->
+        <item name="android:textColorSecondary">@color/md_theme_light_onSurface</item>
+
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <!-- Button style in settings -->
+        <item name="switchStyle">@style/App.Switches</item>
+
+        <!-- Toolbar back arrow color -->
+        <item name="android:textColorPrimary">@color/md_theme_light_onSurface</item>
+        <item name="colorControlNormal">@color/md_theme_light_onSurface</item>
+
+        <!-- Action mode and menu style-->
         <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeStyle">@style/styleActionMode</item>
-        <item name="closeItemLayout">@layout/abc_action_mode_close_item_material_custom_black</item>
-        <item name="icon_action_bar_download">@drawable/ic_file_download_black_outline_24dp</item>
-        <item name="icon_action_bar_remove">@drawable/ic_delete_forever_black_24</item>
-        <item name="icon_action_bar_move_to">@drawable/ic_baseline_arrow_move_24</item>
-        <item name="icon_action_bar_selectAll_bookmarks">@drawable/ic_baseline_select_all_black_24
-        </item>
-        <item name="icon_action_bar_reset_category_bookmarks">
-            @drawable/ic_baseline_remove_circle_black_24
-        </item>
-        <item name="icon_action_bar_rename_collection">@drawable/ic_baseline_edit_black_24</item>
-        <item name="icon_action_bar_remove_only_collection">
-            @drawable/ic_baseline_remove_circle_black_24
-        </item>
-
-        <item name="verifiedImageSearch">@drawable/ic_baseline_check_circle_black_24</item>
+        <item name="actionOverflowMenuStyle">@style/MyOptionsMenu</item>
     </style>
 
     <!-- Colors for dark mode -->
-    <style name="DarkTheme" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="colorPrimary">#000000</item>
-        <item name="colorPrimaryDark">#000000</item>
-        <item name="colorAccent">#FFFFFF</item>
-        <item name="colorLightGrey">#EEEEEE</item>
-        <item name="colorDarkGrey">#EEEEEE</item>
-        <item name="colorVeryDarkGrey">#3F3F3F</item>
-        <item name="black">#FFFFFF</item>
-        <item name="colorTextSearch">#FFFFFF</item>
-        <item name="colorPrimarySearchPublic">#121212</item>
+    <style name="DarkTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/md_theme_dark_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_dark_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_dark_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_dark_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/md_theme_dark_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_dark_onSecondary</item>
 
-        <item name="active_tab_color">#FFFFFF</item>
-        <item name="inactive_tab_color">#000000</item>
+        <!-- Background secondary containers like buttons in bottomNavBar -->
+        <item name="colorSecondaryContainer">@color/md_theme_dark_secondaryContainer</item>
 
-        <item name="toolbarColoredBackArrow">#FFFFFF</item>
-        <item name="textColorToolbar">#FFFFFF</item>
-        <item name="toolbarBackgroundColor">#000000</item>
-        <item name="colorNavigationIcon">#FFFFFF</item>
-        <item name="toolbarColorControlNormal">#FFFFFF</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_dark_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/md_theme_dark_tertiary</item>
+        <item name="colorOnTertiary">@color/md_theme_dark_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/md_theme_dark_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/md_theme_dark_onTertiaryContainer</item>
+        <item name="colorError">@color/md_theme_dark_error</item>
+        <item name="colorErrorContainer">@color/md_theme_dark_errorContainer</item>
+        <item name="colorOnError">@color/md_theme_dark_onError</item>
+        <item name="colorOnErrorContainer">@color/md_theme_dark_onErrorContainer</item>
 
+        <!-- Background color -->
+        <item name="android:colorBackground">@color/md_theme_dark_background</item>
+        <item name="colorOnBackground">@color/md_theme_dark_onBackground</item>
+
+        <!-- Background container -->
+        <item name="colorSurface">@color/md_theme_dark_surface</item>
+        <item name="colorOnSurface">@color/md_theme_dark_onSurface</item>
+        <item name="colorSurfaceVariant">@color/md_theme_dark_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_dark_onSurfaceVariant</item>
+        <item name="colorOutline">@color/md_theme_dark_outline</item>
+
+        <item name="colorOnSurfaceInverse">@color/md_theme_dark_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/md_theme_dark_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/md_theme_dark_primaryInverse</item>
+
+        <!-- text color in textViews-->
+        <item name="android:textColorSecondary">@color/md_theme_dark_onSurface</item>
+
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Button style in settings -->
+        <item name="switchStyle">@style/App.Switches</item>
+
+        <!-- Toolbar back arrow color -->
+        <item name="android:textColorPrimary">@color/md_theme_dark_onSurface</item>
+        <item name="colorControlNormal">@color/md_theme_dark_onSurface</item>
+
+        <!-- Action mode and menu style-->
         <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeStyle">@style/styleActionMode</item>
-        <item name="closeItemLayout">@layout/abc_action_mode_close_item_material_custom_white</item>
-        <item name="icon_action_bar_download">@drawable/ic_file_download_white_outline_24dp</item>
-        <item name="icon_action_bar_remove">@drawable/ic_delete_forever_white_24</item>
-        <item name="icon_action_bar_move_to">@drawable/ic_baseline_arrow_move_white_24</item>
-        <item name="icon_action_bar_selectAll_bookmarks">@drawable/ic_baseline_select_all_white_24
-        </item>
-        <item name="icon_action_bar_reset_category_bookmarks">
-            @drawable/ic_baseline_remove_circle_white_24
-        </item>
-        <item name="icon_action_bar_rename_collection">@drawable/ic_baseline_edit_white_24</item>
-        <item name="icon_action_bar_remove_only_collection">
-            @drawable/ic_baseline_remove_circle_white_24
-        </item>
-
-        <item name="verifiedImageSearch">@drawable/ic_baseline_check_circle_white_24</item>
+        <item name="actionOverflowMenuStyle">@style/MyOptionsMenu</item>
     </style>
 
-    <!-- Bottom Navigation View -->
-    <style name="MyBottomNavigationTheme">
-        <item name="colorPrimary">?attr/active_tab_color</item>
+    <!-- Style for buttons in settings -->
+    <style name="App.Switches" parent="Widget.Material3.CompoundButton.Switch">
+        <item name="track">@drawable/switch_track</item>
+        <item name="android:thumb">@drawable/switch_thumb</item>
     </style>
 
-    <!-- Toolbar -->
-    <style name="MyToolbar">
-        <item name="colorControlNormal">?attr/toolbarColorControlNormal</item>
-        <item name="android:textColorSecondary">?attr/toolbarColoredBackArrow</item>
-        <item name="titleTextColor">?attr/textColorToolbar</item>
-        <item name="background">?attr/toolbarBackgroundColor</item>
-        <item name="actionOverflowButtonStyle">@style/MyOverflowButton</item>
+    <!-- Style for contextual action bar -->
+    <style name="Widget.ActionMode" parent="@style/Widget.Material3.ActionMode">
+        <item name="background">?attr/colorSurface</item>
+        <item name="closeItemLayout">@layout/action_mode_close_item_custom</item>
+        <item name="android:tint">?attr/colorSurface</item>
     </style>
 
-    <!-- Overflow Button -->
-    <style name="MyOverflowButton" parent="Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:tint">?attr/colorNavigationIcon</item>
-    </style>
-
-    <!-- TabLayout -->
-    <style name="MyTabLayout" parent="android:Widget.TabWidget">
-        <item name="tabIndicatorColor">?attr/colorAccent</item>
-        <item name="tabIndicatorHeight">2dp</item>
-        <item name="tabPaddingStart">12dp</item>
-        <item name="tabPaddingEnd">12dp</item>
-        <item name="tabBackground">?attr/selectableItemBackground</item>
-        <item name="tabTextAppearance">@style/TextAppearance.Design.Tab</item>
-        <item name="tabSelectedTextColor">?attr/colorAccent</item>
-    </style>
-
-    <!-- Follow Button -->
-    <style name="MyFollowButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="strokeColor">?attr/colorAccent</item>
-        <item name="cornerRadius">16dp</item>
-    </style>
-
-    <!-- Remove Button with proper right padding like overflow menu -->
-    <style name="MyOverflowRemoveButton" parent="Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:tint">?attr/colorNavigationIcon</item>
-    </style>
-
-    <!-- Style for contextual action bar for downloading multiple posts-->
-    <style name="styleActionMode" parent="@style/Widget.AppCompat.ActionMode">
-        <item name="background">?attr/toolbarBackgroundColor</item>
-        <item name="actionMenuTextColor">?attr/textColorToolbar</item>
-        <item name="closeItemLayout">?attr/closeItemLayout</item>
+    <!-- Style for options menu -->
+    <style name="MyOptionsMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/popup_menu_round_corners</item>
     </style>
 </resources>

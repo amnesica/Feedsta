@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/bottom_sheet_title"
         style="?attr/textAppearanceHeadline5"
         android:textSize="20sp"
@@ -27,7 +27,7 @@
         android:paddingTop="0dp"
         android:textSize="20sp" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/bottom_sheet_cancel_button"
         android:layout_width="match_parent"
         android:layout_height="60dp"

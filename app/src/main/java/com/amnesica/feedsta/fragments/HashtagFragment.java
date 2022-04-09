@@ -135,13 +135,8 @@ public class HashtagFragment extends Fragment {
     private void setupToolbar(final View view) {
         if (view == null) return;
         toolbar = view.findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24dp);
 
-        // set theme and arrow back
-        if (FragmentHelper.getThemeIsDarkTheme(requireContext())) {
-            toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
-        } else {
-            toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
-        }
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -277,12 +272,11 @@ public class HashtagFragment extends Fragment {
     }
 
     @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        // set highlighted item on nav bar to "add" and refresh followed accounts
-        if (!hidden) {
-            FragmentHelper.setBottomNavViewSelectElem(getActivity(), R.id.navigation_search);
-        }
+    public void onResume() {
+        // Slide down bottom navigation view if necessary
+        FragmentHelper.slideDownBottomNavigationBar(getActivity());
+
+        super.onResume();
     }
 
     /**

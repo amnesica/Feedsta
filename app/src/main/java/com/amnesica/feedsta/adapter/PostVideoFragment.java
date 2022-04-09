@@ -140,8 +140,8 @@ public class PostVideoFragment extends Fragment {
                                                                        ViewGroup.LayoutParams.MATCH_PARENT));
 
             // set image to close fullscreen
-            fullScreenIcon.setImageDrawable(
-                    ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_exit_24));
+            fullScreenIcon.setImageDrawable(ContextCompat.getDrawable(requireActivity(),
+                                                                      R.drawable.ic_baseline_fullscreen_exit_24dp));
 
             fullScreenDialog.show();
         }
@@ -271,14 +271,14 @@ public class PostVideoFragment extends Fragment {
             public void onClick(View view) {
                 if (videoMuted) {
                     volumeButton.setImageDrawable(ContextCompat.getDrawable(requireActivity(),
-                                                                            R.drawable.ic_baseline_volume_up_24));
+                                                                            R.drawable.ic_baseline_volume_up_24dp));
                     if (player != null) {
                         player.setVolume(1f);
                     }
                     videoMuted = false;
                 } else {
                     volumeButton.setImageDrawable(ContextCompat.getDrawable(requireActivity(),
-                                                                            R.drawable.ic_baseline_volume_off_24));
+                                                                            R.drawable.ic_baseline_volume_off_24dp));
                     if (player != null) {
                         player.setVolume(0f);
                     }
@@ -347,7 +347,7 @@ public class PostVideoFragment extends Fragment {
                                         new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                    ViewGroup.LayoutParams.MATCH_PARENT));
         fullScreenIcon.setImageDrawable(
-                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_exit_24));
+                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_exit_24dp));
         exoPlayerIsInFullscreenMode = true;
         fullScreenDialog.show();
     }
@@ -372,7 +372,7 @@ public class PostVideoFragment extends Fragment {
 
         // set image to open fullscreen again
         fullScreenIcon.setImageDrawable(
-                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_24));
+                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_24dp));
     }
 
     /**

@@ -23,6 +23,7 @@ import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.helper.FileUtil;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.StorageHelper;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.File;
 import java.util.Objects;
@@ -147,10 +148,10 @@ public class SettingsFragment extends PreferenceFragmentCompat
      * @param path String
      */
     private void showImportConfirmationDialog(final String path) {
-        AlertDialog.Builder alertDialogBuilder;
+        MaterialAlertDialogBuilder alertDialogBuilder;
 
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+        alertDialogBuilder = new MaterialAlertDialogBuilder(requireContext()).setTitle(
                 R.string.dialog_confirm_import_title).setMessage(R.string.dialog_confirm_import_message)
                 .setPositiveButton(R.string.dialog_confirm_import_positive_button,
                                    new DialogInterface.OnClickListener() {
@@ -175,7 +176,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     }
                 });
 
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
         // get color for button texts
         TypedValue typedValue = new TypedValue();
@@ -352,9 +353,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
      * Show dialog to restart app
      */
     private void showRestartAppDialog() {
-        AlertDialog.Builder alertDialogBuilder;
+        MaterialAlertDialogBuilder alertDialogBuilder;
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+        alertDialogBuilder = new MaterialAlertDialogBuilder(requireContext()).setTitle(
                 R.string.dialog_dark_mode_changed_title).setMessage(R.string.dialog_dark_mode_changed_message)
                 .setPositiveButton(R.string.dialog_dark_mode_changed_positive_button,
                                    new DialogInterface.OnClickListener() {
@@ -379,7 +380,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     }
                 });
 
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
         // get color for button texts
         TypedValue typedValue = new TypedValue();
@@ -404,9 +405,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
      * Show dialog to restart phone (needed for updated shared preferences to be used by the app)
      */
     private void showRestartPhoneDialog() {
-        AlertDialog.Builder alertDialogBuilder;
+        MaterialAlertDialogBuilder alertDialogBuilder;
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+        alertDialogBuilder = new MaterialAlertDialogBuilder(requireContext()).setTitle(
                 R.string.dialog_restart_phone_title).setMessage(R.string.dialog_restart_phone_message)
                 .setPositiveButton(R.string.dialog_restart_phone_positive_button,
                                    new DialogInterface.OnClickListener() {
@@ -430,7 +431,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     }
                 });
 
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
         // get color for button texts
         TypedValue typedValue = new TypedValue();
@@ -471,9 +472,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
      * @param pickedDir Uri
      */
     private void showExportConfirmationDialog(final Uri pickedDir) {
-        AlertDialog.Builder alertDialogBuilder;
+        MaterialAlertDialogBuilder alertDialogBuilder;
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+        alertDialogBuilder = new MaterialAlertDialogBuilder(requireContext()).setTitle(
                 R.string.dialog_confirm_export_title).setMessage(R.string.dialog_confirm_export_message)
                 .setPositiveButton(R.string.dialog_confirm_export_positive_button,
                                    new DialogInterface.OnClickListener() {
@@ -498,7 +499,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     }
                 });
 
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
         // get color for button texts
         TypedValue typedValue = new TypedValue();

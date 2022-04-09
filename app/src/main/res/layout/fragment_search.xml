@@ -6,19 +6,18 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/inputTagToolbar"
-        android:theme="@style/MyToolbar">
+        android:layout_height="?attr/actionBarSize"
+        android:id="@+id/inputTagToolbar">
 
         <EditText
             android:id="@+id/inputTag"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
             android:paddingTop="20dp"
             android:hint="@string/hint_inputField_search"
             android:imeOptions="actionSearch"
             android:inputType="text"
-            android:textColor="?attr/colorTextSearch"
             android:textSize="20sp"
             android:autofillHints="Search" />
     </com.google.android.material.appbar.AppBarLayout>
@@ -37,7 +36,7 @@
         android:id="@+id/relLayTextNoResults"
         android:visibility="gone">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/textNoResults"

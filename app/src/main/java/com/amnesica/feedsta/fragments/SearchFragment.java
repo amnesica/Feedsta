@@ -2,12 +2,17 @@ package com.amnesica.feedsta.fragments;
 
 import static android.view.View.GONE;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -20,6 +25,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
@@ -41,6 +47,7 @@ import java.util.ArrayList;
 /**
  * Fragment for searching accounts
  */
+@SuppressLint("ClickableViewAccessibility")
 public class SearchFragment extends Fragment {
 
     // view stuff
@@ -65,17 +72,20 @@ public class SearchFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // listener to get inputString and start search
-        setOnEditorActionListenerInputField();
+        // listener to get inputString and start search from keyboard
+        setListenerInputFieldToStartFromKeyboard();
+
+        // listener to clear input string with clear icon
+        setOnTouchListenerToUseClearIcon();
 
         // listener to get listView element and show profile page
         setItemClickListenerListView();
     }
 
     /**
-     * Sets up listener to get inputString and start search
+     * Sets up listener to get inputString and start search from keyboard search icon
      */
-    private void setOnEditorActionListenerInputField() {
+    private void setListenerInputFieldToStartFromKeyboard() {
         // when clicking on search key in keyboard start CheckConnectionAndStartSearch async task
         textInputField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -111,6 +121,56 @@ public class SearchFragment extends Fragment {
                     return true;
                 }
                 return false;
+            }
+        });
+    }
+
+    /**
+     * Set up clear icon to remove input string
+     */
+    private void setOnTouchListenerToUseClearIcon() {
+        String inputString = "";
+
+        textInputField.setText(inputString);
+        final Drawable clearDrawable = ContextCompat.getDrawable(requireContext(),
+                                                                 R.drawable.ic_baseline_clear_24dp);
+
+        if (clearDrawable == null) return;
+        clearDrawable.setBounds(0, 0, clearDrawable.getIntrinsicWidth(), clearDrawable.getIntrinsicHeight());
+
+        textInputField.setCompoundDrawables(null, null, inputString.equals("") ? null : clearDrawable, null);
+        textInputField.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (textInputField.getCompoundDrawables()[2] == null) {
+                    return false;
+                }
+                if (event.getAction() != MotionEvent.ACTION_UP) {
+                    return false;
+                }
+                if (event.getX() > textInputField.getWidth() - textInputField.getPaddingRight() -
+                                   clearDrawable.getIntrinsicWidth()) {
+                    textInputField.setText("");
+                    textInputField.setCompoundDrawables(null, null, null, null);
+                }
+                return false;
+            }
+        });
+
+        textInputField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                textInputField.setCompoundDrawables(null, null,
+                                                    textInputField.getText().toString().equals("") ? null :
+                                                            clearDrawable, null);
+            }
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
         });
     }

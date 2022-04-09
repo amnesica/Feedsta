@@ -48,11 +48,12 @@
     <string name="title_closing_application_dialog">Closing Application</string>
     <string name="message_closing_application_dialog">Are you sure you want to close this application?</string>
     <string name="okay">OKAY</string>
-    <string name="positive_button_closing_application_dialog">Yes</string>
-    <string name="negative_button_closing_application_dialog">No</string>
+    <string name="positive_button_closing_application_dialog">YES</string>
+    <string name="negative_button_closing_application_dialog">NO</string>
     <string name="posts_updated">Updating posts successful</string>
     <string name="accounts_updated">Updating accounts successful</string>
-    <string name="made_with_love_from_hh">Made with ❤ in Hamburg, Germany</string>
+    <string name="made_with_love_from_hh_light_theme">Made with &#128420; in Hamburg, Germany</string>
+    <string name="made_with_love_from_hh_dark_theme">Made with &#129293; in Hamburg, Germany</string>
     <string name="title_dialog_refresh_bookmarks">Refresh bookmarks</string>
     <string name="message_dialog_refresh_bookmarks">The thumbnails of the bookmarks and the bookmarks itself will be refreshed. This might take several minutes! Please do not close the window or shut down the app.</string>
     <string name="button_continue">CONTINUE</string>
@@ -148,7 +149,7 @@
     <string name="menu_bookmarks_show_all">Show all bookmarks</string>
     <string name="menu_bookmarks_show_categories">Show categories</string>
     <string name="snackbar_bookmark_saved">Saved</string>
-    <string name="snackbar_action_save_to_collection">Save to collection</string>
+    <string name="snackbar_action_save_to_collection">SAVE TO COLLECTION</string>
     <string name="bottom_sheet_title_new_collection">Save bookmark to new collection</string>
     <string name="bottom_sheet_hint_editText">Name of collection..</string>
     <string name="updating_bookmarked_post_category_failed">Updating the bookmarked post failed</string>

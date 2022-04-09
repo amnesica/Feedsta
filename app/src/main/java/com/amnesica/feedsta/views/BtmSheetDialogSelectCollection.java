@@ -131,12 +131,7 @@ public class BtmSheetDialogSelectCollection extends BottomSheetDialogFragment {
         if (view == null) return;
 
         ImageView imageAddCollection = view.findViewById(R.id.imageAddCollection);
-
-        if (FragmentHelper.getThemeIsDarkTheme(getContext())) {
-            imageAddCollection.setBackgroundResource(R.drawable.ic_baseline_add_white_24);
-        } else {
-            imageAddCollection.setBackgroundResource(R.drawable.ic_baseline_add_black_24);
-        }
+        imageAddCollection.setBackgroundResource(R.drawable.ic_baseline_add_24dp);
 
         imageAddCollection.setOnClickListener(new View.OnClickListener() {
             @Override

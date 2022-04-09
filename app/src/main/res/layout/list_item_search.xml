@@ -23,11 +23,10 @@
         android:layout_toEndOf="@+id/accountOrHashtagProfilePic"
         android:orientation="vertical">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textUsernameOrHashtagName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="?attr/black"
             android:textSize="15sp" />
 
         <ImageView
@@ -35,17 +34,16 @@
             android:layout_height="wrap_content"
             android:id="@+id/imageVerifiedAccount"
             android:visibility="invisible"
-            android:background="?attr/verifiedImageSearch"
+            android:background="@drawable/ic_baseline_check_circle_24dp"
             android:layout_toEndOf="@id/textUsernameOrHashtagName"
             android:layout_marginStart="5dp"
             android:contentDescription="@string/verified_profile_image" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:layout_below="@id/textUsernameOrHashtagName"
             android:id="@+id/textFullNameOrResultSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="?attr/black"
             android:textSize="15sp" />
     </RelativeLayout>
 
@@ -54,8 +52,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:theme="@style/MyOverflowRemoveButton"
         android:layout_centerVertical="true"
+        android:paddingEnd="10dp"
         android:visibility="gone"
         android:contentDescription="@string/remove_account_button"
         tools:ignore="RtlSymmetry" />

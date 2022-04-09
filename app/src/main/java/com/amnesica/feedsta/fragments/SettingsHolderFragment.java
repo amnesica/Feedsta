@@ -43,7 +43,6 @@ public class SettingsHolderFragment extends Fragment {
         return view;
     }
 
-
     /**
      * Sets up the toolbar with menu
      *
@@ -77,5 +76,15 @@ public class SettingsHolderFragment extends Fragment {
                 return false;
             }
         });
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        if (!hidden) {
+            // Slide down bottom navigation view if necessary
+            FragmentHelper.makeBottomNavigationBarInvisible(getActivity());
+        }
     }
 }

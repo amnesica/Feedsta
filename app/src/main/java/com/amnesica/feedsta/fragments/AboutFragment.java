@@ -44,7 +44,11 @@ public class AboutFragment extends Fragment {
 
         // set text "made with love"
         TextView textMadeWithLove = view.findViewById(R.id.textMadeWithLove);
-        textMadeWithLove.setText(getResources().getString(R.string.made_with_love_from_hh));
+        if (FragmentHelper.getThemeIsDarkTheme(requireContext())) {
+            textMadeWithLove.setText(getResources().getString(R.string.made_with_love_from_hh_dark_theme));
+        } else {
+            textMadeWithLove.setText(getResources().getString(R.string.made_with_love_from_hh_light_theme));
+        }
 
         // set text to rate the app
         TextView textRatingInfo = view.findViewById(R.id.textAppInfoRating);
@@ -116,9 +120,13 @@ public class AboutFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        // set highlighted item on nav bar to "feed"
+
         if (!hidden) {
+            // set highlighted item on nav bar to "feed"
             FragmentHelper.setBottomNavViewSelectElem(getActivity(), R.id.navigation_feed);
+
+            // Slide down bottom navigation view if necessary
+            FragmentHelper.slideDownBottomNavigationBar(getActivity());
         }
     }
 }

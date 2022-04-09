@@ -6,7 +6,7 @@
         android:id="@+id/menu_download_multiple"
         android:orderInCategory="100"
         android:title="@string/title_download_multiple_posts"
-        android:icon="?attr/icon_action_bar_download"
+        android:icon="@drawable/ic_file_download_outline_24dp"
         tools:ignore="AppCompatResource"
         app:showAsAction="ifRoom" />
 </menu>

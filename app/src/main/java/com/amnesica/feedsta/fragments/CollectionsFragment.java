@@ -40,6 +40,7 @@ import com.amnesica.feedsta.interfaces.OnItemClickListenerColl;
 import com.amnesica.feedsta.models.Collection;
 import com.amnesica.feedsta.models.Post;
 import com.amnesica.feedsta.views.BtmSheetDialogAddCollection;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -204,9 +205,9 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
      * Shows a dialog to confirm the refreshing of thumbnails -> starts refreshing of bookmarks
      */
     private void showDialogAndStartFetching() {
-        AlertDialog.Builder alertDialogBuilder;
+        MaterialAlertDialogBuilder alertDialogBuilder;
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+        alertDialogBuilder = new MaterialAlertDialogBuilder(requireContext()).setTitle(
                 getResources().getString(R.string.title_dialog_refresh_bookmarks)).setMessage(
                 getResources().getString(R.string.message_dialog_refresh_bookmarks)).setPositiveButton(
                 getResources().getString(R.string.button_continue), new DialogInterface.OnClickListener() {
@@ -233,7 +234,7 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
                     }
                 });
 
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
         // get color for button texts
         TypedValue typedValue = new TypedValue();
@@ -438,9 +439,9 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
      */
     private void showConfirmationDialogAndRemoveBookmarksRefresh() {
         try {
-            AlertDialog.Builder alertDialogBuilder;
+            MaterialAlertDialogBuilder alertDialogBuilder;
             // create alertDialog
-            alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+            alertDialogBuilder = new MaterialAlertDialogBuilder(requireContext()).setTitle(
                     R.string.dialog_refresh_bookmarks_problems_title).setMessage(
                     listPostFailedRefresh.size() + "/" + listPostsBookmarked.size() + " " +
                     getString(R.string.dialog_refresh_bookmarks_problems_message)).setPositiveButton(
@@ -474,7 +475,7 @@ public class CollectionsFragment extends Fragment implements FragmentCallback, F
                         }
                     });
 
-            final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+            final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
             // get color for button texts
             TypedValue typedValue = new TypedValue();

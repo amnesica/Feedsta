@@ -31,6 +31,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Predicate;
 import com.bumptech.glide.Glide;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -216,9 +217,10 @@ public class RecViewAdapterSingleCollection
      * Dialog confirm remove bookmarks after using contextual menu
      */
     private void removeBookmarksWithDialogFirst() {
-        AlertDialog.Builder alertDialogBuilder;
+        MaterialAlertDialogBuilder alertDialogBuilder;
+
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(context).setTitle(
+        alertDialogBuilder = new MaterialAlertDialogBuilder(context).setTitle(
                 R.string.remove_bookmarks_confirm_dialog_title).setMessage(
                 R.string.remove_bookmarks_confirm_dialog_message).setPositiveButton(
                 context.getResources().getString(R.string.button_continue),
@@ -254,7 +256,7 @@ public class RecViewAdapterSingleCollection
                     }
                 });
 
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
         // get color for button texts
         TypedValue typedValue = new TypedValue();
@@ -349,7 +351,7 @@ public class RecViewAdapterSingleCollection
                 if (post.isChecked()) {
                     // set checked icon
                     frameLayout.setForeground(
-                            ContextCompat.getDrawable(context, R.drawable.ic_baseline_check_circle_white_24));
+                            ContextCompat.getDrawable(context, R.drawable.ic_baseline_check_circle_24dp));
 
                     // top right corner
                     frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);
@@ -357,14 +359,14 @@ public class RecViewAdapterSingleCollection
                     if (post.getIs_sideCar()) {
                         // sidecar overlay thumbnail
                         frameLayout.setForeground(
-                                ContextCompat.getDrawable(context, R.drawable.ic_sidecar_black_24dp));
+                                ContextCompat.getDrawable(context, R.drawable.ic_sidecar_24dp));
 
                         // top right corner
                         frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);
                     } else if (post.getIs_video()) {
                         // video overlay thumbnail
-                        frameLayout.setForeground(ContextCompat.getDrawable(context,
-                                                                            R.drawable.ic_play_circle_outline_black_24dp));
+                        frameLayout.setForeground(
+                                ContextCompat.getDrawable(context, R.drawable.ic_play_circle_outline_24dp));
 
                         // top right corner
                         frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);

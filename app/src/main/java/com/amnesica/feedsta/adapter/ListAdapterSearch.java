@@ -59,7 +59,7 @@ public class ListAdapterSearch extends ArrayAdapter<Object> {
             LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(
                     Activity.LAYOUT_INFLATER_SERVICE);
             assert layoutInflater != null;
-            convertView = layoutInflater.inflate(R.layout.list_item_search, null, true);
+            convertView = layoutInflater.inflate(R.layout.list_item_search, null, false);
         }
 
         // if element is account
@@ -132,7 +132,7 @@ public class ListAdapterSearch extends ArrayAdapter<Object> {
                                      .getString(R.string.full_name_private_account, account.getUsername()));
 
             // light grey background for private accounts
-            relLayoutSearchAccount.setBackgroundColor(getColor(context, R.attr.colorVeryDarkGrey));
+            relLayoutSearchAccount.setBackgroundColor(getColor(context, R.attr.colorSurfaceVariant));
 
         } else { // public account
             // set fullName of account
@@ -141,7 +141,7 @@ public class ListAdapterSearch extends ArrayAdapter<Object> {
             }
 
             // set background color for public account;
-            relLayoutSearchAccount.setBackgroundColor(getColor(context, R.attr.colorPrimarySearchPublic));
+            relLayoutSearchAccount.setBackgroundColor(getColor(context, R.attr.colorPrimary));
         }
 
         // load popup menu to remove account if calling fragment is FollowingFragment
@@ -187,7 +187,7 @@ public class ListAdapterSearch extends ArrayAdapter<Object> {
             RelativeLayout relLayoutSearchAccount = convertView.findViewById(R.id.relLayoutSearchAccount);
             TypedValue typedValue = new TypedValue();
             Resources.Theme theme = context.getTheme();
-            theme.resolveAttribute(R.attr.colorPrimarySearchPublic, typedValue, true);
+            theme.resolveAttribute(R.attr.colorPrimary, typedValue, true);
             @ColorInt int color = typedValue.data;
             relLayoutSearchAccount.setBackgroundColor(color);
 
@@ -243,8 +243,7 @@ public class ListAdapterSearch extends ArrayAdapter<Object> {
         ImageView imageRemoveAccount;
         imageRemoveAccount = convertView.findViewById(R.id.imageRemoveAccount);
         imageRemoveAccount.setVisibility(View.VISIBLE);
-        imageRemoveAccount.setImageDrawable(
-                ContextCompat.getDrawable(context, R.drawable.ic_more_vert_black_24dp));
+        imageRemoveAccount.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_more_vert_24dp));
         imageRemoveAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

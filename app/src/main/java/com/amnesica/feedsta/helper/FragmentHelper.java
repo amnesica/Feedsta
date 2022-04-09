@@ -3,6 +3,7 @@ package com.amnesica.feedsta.helper;
 import static android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
 import static android.view.View.GONE;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.text.SpannableString;
@@ -21,6 +23,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -43,7 +47,10 @@ import com.amnesica.feedsta.models.Post;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Predicate;
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -88,11 +95,8 @@ public class FragmentHelper {
     public static void setupToolbarWithBackButton(Toolbar toolbar, WeakReference fragmentReference) {
         final Fragment weakReferenceFragment = (Fragment) fragmentReference.get();
         if (weakReferenceFragment != null) {
-            if (getThemeIsDarkTheme(weakReferenceFragment.getContext())) {
-                toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
-            } else {
-                toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
-            }
+            toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24dp);
+
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -141,10 +145,12 @@ public class FragmentHelper {
         if (fragmentToShow != null) {
             // get active fragment to hide
             Fragment active = getTopFragment(fm);
+
             if (active != null) {
-                // show fragment
-                fm.beginTransaction().hide(active).show(fragmentToShow).addToBackStack(
-                        fragmentToShow.getClass().getSimpleName()).commit();
+                // show fragment with animation
+                fm.beginTransaction().setCustomAnimations(R.anim.nav_enter, R.anim.nav_exit, R.anim.nav_enter,
+                                                          R.anim.nav_exit).hide(active).show(fragmentToShow)
+                        .addToBackStack(fragmentToShow.getClass().getSimpleName()).commit();
                 return true;
             }
         }
@@ -161,13 +167,15 @@ public class FragmentHelper {
         if (fragmentToAdd != null && fm != null) {
             // get unique tag with class name of fragmentToAdd and incrementing counter
             String tag = fragmentToAdd.getClass().getSimpleName() + FragmentHelper.getTransactionCounter();
+
             // get active fragment
             Fragment active = getTopFragment(fm);
 
             try {
-                // add fragment to container
-                fm.beginTransaction().hide(active).add(R.id.main_container, fragmentToAdd, tag)
-                        .addToBackStack(tag).commit();
+                // add fragment to container with animation
+                fm.beginTransaction().setCustomAnimations(R.anim.frag_enter, R.anim.frag_exit,
+                                                          R.anim.frag_pop_enter, R.anim.frag_pop_exit).hide(
+                        active).add(R.id.main_container, fragmentToAdd, tag).addToBackStack(tag).commit();
             } catch (Exception e) {
                 Log.d("FragmentHelper", Log.getStackTraceString(e));
             }
@@ -175,17 +183,89 @@ public class FragmentHelper {
     }
 
     /**
-     * Sets highlighted element in navigation bar
+     * Sets highlighted element in navigation bar and makes navigation bar visible
      *
      * @param activity FragmentActivity
      * @param resource int
      */
     public static void setBottomNavViewSelectElem(FragmentActivity activity, int resource) {
+        if (activity == null) return;
+
         BottomNavigationView bottomNavigationView = Objects.requireNonNull(activity).findViewById(
                 R.id.nav_view);
+        if (bottomNavigationView == null) return;
+
+        // select item in bottom navigation view
         Menu menu = bottomNavigationView.getMenu();
         menu.findItem(resource).setCheckable(true);
         menu.findItem(resource).setChecked(true);
+
+        // Slide up bottom navigation view if necessary
+        slideUpBottomNavigationBar(activity);
+    }
+
+    /**
+     * Slides up the bottom navigation view and thus makes it visible
+     *
+     * @param activity FragmentActivity
+     */
+    public static void slideUpBottomNavigationBar(FragmentActivity activity) {
+        if (activity == null) return;
+
+        BottomNavigationView bottomNavigationView = Objects.requireNonNull(activity).findViewById(
+                R.id.nav_view);
+        if (bottomNavigationView == null) return;
+        bottomNavigationView.setVisibility(View.VISIBLE);
+
+        ViewGroup.LayoutParams layoutParams = bottomNavigationView.getLayoutParams();
+        if (layoutParams instanceof CoordinatorLayout.LayoutParams) {
+            CoordinatorLayout.Behavior behavior =
+                    ((CoordinatorLayout.LayoutParams) layoutParams).getBehavior();
+            if (behavior instanceof HideBottomViewOnScrollBehavior) {
+                HideBottomViewOnScrollBehavior<BottomNavigationView> hideShowBehavior =
+                        (HideBottomViewOnScrollBehavior<BottomNavigationView>) behavior;
+                hideShowBehavior.slideUp(bottomNavigationView);
+            }
+        }
+    }
+
+    /**
+     * Slides down the bottom navigation view and thus makes it invisible
+     *
+     * @param activity FragmentActivity
+     */
+    public static void slideDownBottomNavigationBar(FragmentActivity activity) {
+        if (activity == null) return;
+
+        BottomNavigationView bottomNavigationView = Objects.requireNonNull(activity).findViewById(
+                R.id.nav_view);
+        if (bottomNavigationView == null) return;
+        bottomNavigationView.setVisibility(View.VISIBLE);
+
+        ViewGroup.LayoutParams layoutParams = bottomNavigationView.getLayoutParams();
+        if (layoutParams instanceof CoordinatorLayout.LayoutParams) {
+            CoordinatorLayout.Behavior behavior =
+                    ((CoordinatorLayout.LayoutParams) layoutParams).getBehavior();
+            if (behavior instanceof HideBottomViewOnScrollBehavior) {
+                HideBottomViewOnScrollBehavior<BottomNavigationView> hideShowBehavior =
+                        (HideBottomViewOnScrollBehavior<BottomNavigationView>) behavior;
+                hideShowBehavior.slideDown(bottomNavigationView);
+            }
+        }
+    }
+
+    /**
+     * Makes the bottom navigation view disappear by setting it to invisible
+     *
+     * @param activity FragmentActivity
+     */
+    public static void makeBottomNavigationBarInvisible(FragmentActivity activity) {
+        if (activity == null) return;
+
+        BottomNavigationView bottomNavigationView = Objects.requireNonNull(activity).findViewById(
+                R.id.nav_view);
+        if (bottomNavigationView == null) return;
+        bottomNavigationView.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -374,7 +454,7 @@ public class FragmentHelper {
             // set text color based on theme
             TypedValue typedValue = new TypedValue();
             Resources.Theme theme = fragment.requireContext().getTheme();
-            theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
+            theme.resolveAttribute(R.attr.colorError, typedValue, true);
             @ColorInt final int textColor = typedValue.data;
 
             fragment.requireActivity().runOnUiThread(new Runnable() {
@@ -385,15 +465,13 @@ public class FragmentHelper {
                 }
             });
 
-            // set background color based on theme
-            theme.resolveAttribute(R.attr.colorPrimary, typedValue, true);
-            @ColorInt final int backgroundColor = typedValue.data;
-
+            // make error container visible
             if (fragment.isAdded()) {
                 fragment.requireActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        conLayCustomSnackBarAlert.setBackgroundColor(backgroundColor);
+                        adjustMarginsOfSnackBarDependingOnFragment(conLayCustomSnackBarAlert, fragment);
+                        conLayCustomSnackBarAlert.setVisibility(View.VISIBLE);
                     }
                 });
             }
@@ -473,6 +551,55 @@ public class FragmentHelper {
     }
 
     /**
+     * Adjusts the margins of the snackbar for showing an error depending on the fragment
+     *
+     * @param conLayCustomSnackBarAlert ConstraintLayout
+     * @param fragment                  Fragment
+     */
+    private static void adjustMarginsOfSnackBarDependingOnFragment(ConstraintLayout conLayCustomSnackBarAlert,
+                                                                   Fragment fragment) {
+        if (conLayCustomSnackBarAlert == null || fragment == null) return;
+
+        String fragmentName = fragment.getClass().getSimpleName();
+
+        int marginBottom, marginHorizontal;
+        CoordinatorLayout.LayoutParams layoutParams =
+                (CoordinatorLayout.LayoutParams) conLayCustomSnackBarAlert.getLayoutParams();
+
+        if (fragmentName.equals("FeedFragment") || fragmentName.equals("SearchFragment") ||
+            fragmentName.equals("CollectionsFragment")) {
+            // calc margins depending on fragment with nav bar visible
+            marginBottom = convertDpToPixel(112f, fragment.requireContext());
+            marginHorizontal = convertDpToPixel(8f, fragment.requireContext());
+        } else {
+            // calc margins depending on fragment with nav bar not visible
+            marginBottom = convertDpToPixel(8f, fragment.requireContext());
+            marginHorizontal = convertDpToPixel(8f, fragment.requireContext());
+        }
+
+        // adjust margins
+        layoutParams.setMargins(marginHorizontal, 0, marginHorizontal, marginBottom);
+        conLayCustomSnackBarAlert.setLayoutParams(layoutParams);
+    }
+
+    /**
+     * This method converts dp unit to equivalent pixels, depending on device density. Source:
+     * https://stackoverflow.com/questions/4605527/converting-pixels-to-dp
+     *
+     * @param dp      int
+     * @param context Context
+     * @return int
+     */
+    public static int convertDpToPixel(float dp, Context context) {
+        //return dp * (context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics
+        // .DENSITY_DEFAULT);
+        //getResources().getDisplayMetrics().density; // Convert the dps to pixels, based on density scale
+        // return (int) (input * scale + 0.5f);
+        Resources r = context.getResources();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());
+    }
+
+    /**
      * Shows an alert dialog with a alertText over a fragment
      *
      * @param fragment  Fragment
@@ -485,9 +612,9 @@ public class FragmentHelper {
                 // make alertText final
                 final String finalAlertText = alertText;
 
-                AlertDialog.Builder alertDialogBuilder;
+                MaterialAlertDialogBuilder alertDialogBuilder;
                 // create alertDialog
-                alertDialogBuilder = new AlertDialog.Builder(fragment.requireContext()).setMessage(
+                alertDialogBuilder = new MaterialAlertDialogBuilder(fragment.requireContext()).setMessage(
                         finalAlertText).setPositiveButton(
                         fragment.requireContext().getResources().getString(R.string.okay),
                         new DialogInterface.OnClickListener() {
@@ -510,7 +637,7 @@ public class FragmentHelper {
                             }
                         });
 
-                final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+                final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
                 TypedValue typedValue = new TypedValue();
                 Resources.Theme theme = fragment.requireContext().getTheme();
@@ -591,8 +718,8 @@ public class FragmentHelper {
         String message = "Followed Accounts: " + amountFollowedAccounts + "\nBookmarks: " + amountBookmarks;
 
         // create alertDialog
-        AlertDialog.Builder alertDialogBuilder;
-        alertDialogBuilder = new AlertDialog.Builder(fragment.requireContext()).setTitle("Statistics")
+        MaterialAlertDialogBuilder alertDialogBuilder;
+        alertDialogBuilder = new MaterialAlertDialogBuilder(fragment.requireContext()).setTitle("Statistics")
                 .setMessage(message).setPositiveButton(
                         fragment.requireContext().getResources().getString(R.string.okay),
                         new DialogInterface.OnClickListener() {
@@ -602,7 +729,7 @@ public class FragmentHelper {
                             }
                         });
 
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
         // change text color based on theme
         TypedValue typedValue = new TypedValue();
@@ -889,11 +1016,18 @@ public class FragmentHelper {
                     SpannableString spannableString = new SpannableString(word);
 
                     ClickableSpan clickableSpan = new ClickableSpan() {
+                        @SuppressLint("ResourceType")
                         @Override
                         public void updateDrawState(@NonNull TextPaint ds) {
                             super.updateDrawState(ds);
                             // underline text
                             ds.setUnderlineText(true);
+
+                            // set color to textColorSecondary
+                            int secondaryColor = MaterialColors.getColor(fragment.requireContext(),
+                                                                         android.R.attr.textColorSecondary,
+                                                                         Color.BLUE);
+                            ds.setColor(secondaryColor);
                         }
 
                         @Override
@@ -903,8 +1037,7 @@ public class FragmentHelper {
                             ProfileFragment profileFragment = ProfileFragment.newInstance(accountName);
 
                             // add fragment to container
-                            FragmentHelper.addFragmentToContainer(profileFragment, fragment.requireActivity()
-                                    .getSupportFragmentManager());
+                            FragmentHelper.addFragmentToContainer(profileFragment, fragment.requireActivity().getSupportFragmentManager());
                         }
                     };
 
@@ -927,11 +1060,18 @@ public class FragmentHelper {
                     SpannableString spannableString = new SpannableString(word);
 
                     ClickableSpan clickableSpan = new ClickableSpan() {
+                        @SuppressLint("ResourceType")
                         @Override
                         public void updateDrawState(@NonNull TextPaint ds) {
                             super.updateDrawState(ds);
                             // underline text
                             ds.setUnderlineText(true);
+
+                            // set color to textColorSecondary
+                            int secondaryColor = MaterialColors.getColor(fragment.requireContext(),
+                                                                         android.R.attr.textColorSecondary,
+                                                                         Color.BLUE);
+                            ds.setColor(secondaryColor);
                         }
 
                         @Override
@@ -941,8 +1081,8 @@ public class FragmentHelper {
                             HashtagFragment hashtagFragment = HashtagFragment.newInstance(hashtagName);
 
                             // add fragment to container
-                            FragmentHelper.addFragmentToContainer(hashtagFragment, fragment.requireActivity()
-                                    .getSupportFragmentManager());
+                            FragmentHelper.addFragmentToContainer(hashtagFragment,
+                                                                  fragment.requireActivity().getSupportFragmentManager());
                         }
                     };
 

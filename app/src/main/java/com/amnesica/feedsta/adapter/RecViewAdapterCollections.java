@@ -32,6 +32,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.annimon.stream.function.Predicate;
 import com.bumptech.glide.Glide;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -235,9 +236,9 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
      * Shows a dialog when trying to remove selected collections
      */
     private void removeCollectionWithDialogFirst() {
-        AlertDialog.Builder alertDialogBuilder;
+        MaterialAlertDialogBuilder alertDialogBuilder;
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(context).setTitle(
+        alertDialogBuilder = new MaterialAlertDialogBuilder(context).setTitle(
                 R.string.remove_collection_confirm_dialog_title).setMessage(
                 R.string.remove_collection_confirm_dialog_message).setPositiveButton(
                 context.getResources().getString(R.string.button_continue),
@@ -275,7 +276,7 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
                     }
                 });
 
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
         // get color for button texts
         TypedValue typedValue = new TypedValue();
@@ -420,7 +421,7 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
 
                 // set checked icon
                 frameLayout.setForeground(
-                        ContextCompat.getDrawable(context, R.drawable.ic_baseline_check_circle_white_24));
+                        ContextCompat.getDrawable(context, R.drawable.ic_baseline_check_circle_24dp));
 
                 // top right corner
                 frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);

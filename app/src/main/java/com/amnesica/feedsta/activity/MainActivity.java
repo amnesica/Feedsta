@@ -33,6 +33,8 @@ import com.amnesica.feedsta.fragments.SettingsHolderFragment;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.color.DynamicColors;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -82,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
 
         // set theme (dark or light)
         setAppTheme();
+
+        // apply dynamic color
+        DynamicColors.applyToActivitiesIfAvailable(getApplication());
 
         setContentView(R.layout.activity_main);
 
@@ -167,10 +172,10 @@ public class MainActivity extends AppCompatActivity {
      */
     private void showUsageNote() {
         // alert dialog
-        AlertDialog.Builder alertDialogBuilder;
+        MaterialAlertDialogBuilder alertDialogBuilder;
 
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(MainActivity.this).setTitle(
+        alertDialogBuilder = new MaterialAlertDialogBuilder(MainActivity.this).setTitle(
                 R.string.dialog_usage_note_title).setMessage(R.string.dialog_usage_note_message)
                 .setPositiveButton(R.string.dialog_usage_note_yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -193,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                                          }
                                      });
 
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
         // get color for button texts
         TypedValue typedValue = new TypedValue();
@@ -354,9 +359,9 @@ public class MainActivity extends AppCompatActivity {
             // check if backStack is empty, then show exit dialog
             //  (DO NOT CALL super.onBackPressed AFTER THIS!)
             if (fm.getBackStackEntryCount() == 0) {
-                AlertDialog.Builder alertDialogBuilder;
+                MaterialAlertDialogBuilder alertDialogBuilder;
                 // create alertDialog
-                alertDialogBuilder = new AlertDialog.Builder(this).setTitle(
+                alertDialogBuilder = new MaterialAlertDialogBuilder(this).setTitle(
                         getResources().getString(R.string.title_closing_application_dialog)).setMessage(
                         getResources().getString(R.string.message_closing_application_dialog))
                         .setPositiveButton(R.string.positive_button_closing_application_dialog,
@@ -370,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
                                            }).setNegativeButton(
                                 R.string.negative_button_closing_application_dialog, null);
 
-                final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+                final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
                 AlertDialog alertDialog = finalAlertDialogBuilder.create();
                 alertDialog.show();

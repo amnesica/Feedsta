@@ -3,31 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_remove_collection_bookmarks"
-        android:icon="?attr/icon_action_bar_remove"
+        android:icon="@drawable/ic_delete_forever_24dp"
         android:orderInCategory="100"
         android:title="@string/title_menu_remove_collection_bookmarks"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menu_rename_category_bookmarks"
-        android:icon="?attr/icon_action_bar_rename_collection"
+        android:icon="@drawable/ic_baseline_edit_24dp"
         android:orderInCategory="200"
         android:title="@string/menu_rename_collection_bookmarks_title"
         app:showAsAction="never" />
     <item
         android:id="@+id/menu_download_collection_bookmarks"
-        android:icon="?attr/icon_action_bar_download"
+        android:icon="@drawable/ic_file_download_outline_24dp"
         android:orderInCategory="300"
         android:title="@string/menu_download_bookmarks_title"
         app:showAsAction="never" />
     <item
         android:id="@+id/menu_remove_only_collection"
-        android:icon="?attr/icon_action_bar_remove_only_collection"
+        android:icon="@drawable/ic_baseline_remove_circle_24dp"
         android:orderInCategory="400"
         android:title="@string/menu_remove_only_collection_title"
         app:showAsAction="never" />
     <item
         android:id="@+id/menu_select_all_bookmarks"
-        android:icon="?attr/icon_action_bar_selectAll_bookmarks"
+        android:icon="@drawable/ic_baseline_select_all_24dp"
         android:orderInCategory="500"
         android:title="@string/menu_select_all_bookmarks"
         app:showAsAction="never" />

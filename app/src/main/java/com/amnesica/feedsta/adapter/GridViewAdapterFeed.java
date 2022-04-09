@@ -61,15 +61,14 @@ public class GridViewAdapterFeed extends ArrayAdapter<Post> {
             if (frameLayout != null) {
                 if (post.getIs_sideCar()) {
                     // sidecar overlay thumbnail
-                    frameLayout.setForeground(
-                            ContextCompat.getDrawable(context, R.drawable.ic_sidecar_black_24dp));
+                    frameLayout.setForeground(ContextCompat.getDrawable(context, R.drawable.ic_sidecar_24dp));
 
                     // top right corner
                     frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);
                 } else if (post.getIs_video()) {
                     // video overlay thumbnail
                     frameLayout.setForeground(
-                            ContextCompat.getDrawable(context, R.drawable.ic_play_circle_outline_black_24dp));
+                            ContextCompat.getDrawable(context, R.drawable.ic_play_circle_outline_24dp));
 
                     // top right corner
                     frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);

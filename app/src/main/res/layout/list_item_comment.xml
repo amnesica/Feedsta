@@ -20,26 +20,23 @@
         android:layout_marginTop="5dp"
         android:layout_marginStart="10dp">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="13sp"
-            android:textStyle="bold"
-            android:textColor="?attr/black" />
+            android:textStyle="bold" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textTextComment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:textColor="?attr/black" />
+            android:textSize="13sp" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="?attr/colorDarkGrey" />
+            android:textSize="12sp" />
     </LinearLayout>
 </LinearLayout>

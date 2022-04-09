@@ -40,6 +40,7 @@ import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
@@ -264,11 +265,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
         });
 
         // set downloadButton to theme
-        if (FragmentHelper.getThemeIsDarkTheme(getContext())) {
-            imageButtonDownload.setBackgroundResource(R.drawable.ic_file_download_white_outline_24dp);
-        } else {
-            imageButtonDownload.setBackgroundResource(R.drawable.ic_file_download_black_outline_24dp);
-        }
+        imageButtonDownload.setBackgroundResource(R.drawable.ic_file_download_outline_24dp);
     }
 
     /**
@@ -372,12 +369,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
         // find button and set load more comments background resource
         buttonLoadMoreComments = footer.findViewById(R.id.buttonLoadMoreComments);
-
-        if (FragmentHelper.getThemeIsDarkTheme(getContext())) {
-            buttonLoadMoreComments.setBackgroundResource(R.drawable.ic_add_circle_outline_white_48dp);
-        } else {
-            buttonLoadMoreComments.setBackgroundResource(R.drawable.ic_add_circle_outline_black_48dp);
-        }
+        buttonLoadMoreComments.setBackgroundResource(R.drawable.ic_add_circle_outline_48dp);
 
         progressBarComments = footer.findViewById(R.id.progressbarComments);
     }
@@ -467,12 +459,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
         // set button copyLink
         buttonCopyLink = header.findViewById(R.id.buttonCopyLink);
-
-        if (FragmentHelper.getThemeIsDarkTheme(getContext())) {
-            buttonCopyLink.setBackgroundResource(R.drawable.ic_content_copy_white_24dp);
-        } else {
-            buttonCopyLink.setBackgroundResource(R.drawable.ic_content_copy_black_24dp);
-        }
+        buttonCopyLink.setBackgroundResource(R.drawable.ic_content_copy_24dp);
 
         buttonCopyLink.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -497,13 +484,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                         }
 
                         // change icon to copied
-                        if (FragmentHelper.getThemeIsDarkTheme(getContext())) {
-                            buttonCopyLink.setBackgroundResource(
-                                    R.drawable.ic_content_copy_white_pressed_24dp);
-                        } else {
-                            buttonCopyLink.setBackgroundResource(
-                                    R.drawable.ic_content_copy_black_pressed_24dp);
-                        }
+                        buttonCopyLink.setBackgroundResource(R.drawable.ic_content_copy_pressed_24dp);
                     }
                 }
             }
@@ -653,22 +634,14 @@ public class PostFragment extends Fragment implements FragmentCallback {
      * Sets the button for bookmarked post to state "saved"
      */
     private void setButtonBookmarkedToSaved() {
-        if (FragmentHelper.getThemeIsDarkTheme(getContext())) {
-            buttonBookmark.setBackgroundResource(R.drawable.ic_bookmark_white_24dp);
-        } else {
-            buttonBookmark.setBackgroundResource(R.drawable.ic_bookmark_black_24dp);
-        }
+        buttonBookmark.setBackgroundResource(R.drawable.ic_bookmark_24dp);
     }
 
     /**
      * Sets the button for bookmarked post to state "not saved"
      */
     private void setButtonBookmarkedToNotSaved() {
-        if (FragmentHelper.getThemeIsDarkTheme(getContext())) {
-            buttonBookmark.setBackgroundResource(R.drawable.ic_bookmark_border_white_24dp);
-        } else {
-            buttonBookmark.setBackgroundResource(R.drawable.ic_bookmark_border_black_24dp);
-        }
+        buttonBookmark.setBackgroundResource(R.drawable.ic_bookmark_border_24dp);
     }
 
     /**
@@ -677,7 +650,8 @@ public class PostFragment extends Fragment implements FragmentCallback {
     private void showSnackBarToSaveInCollection() {
         if (header == null) return;
 
-        final RelativeLayout relativeLayoutCustomSnackbar = header.findViewById(R.id.relLayCustomSnackBar);
+        final ConstraintLayout constraintLayoutCustomSnackbar = header.findViewById(
+                R.id.conLayCustomSnackBar);
         final TextView textViewLabel = header.findViewById(R.id.textViewLabel);
         final TextView textViewAction = header.findViewById(R.id.textViewAction);
 
@@ -697,7 +671,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                 runnable[0] = new Runnable() {
                     @Override
                     public void run() {
-                        relativeLayoutCustomSnackbar.setVisibility(GONE);
+                        constraintLayoutCustomSnackbar.setVisibility(GONE);
                     }
                 };
             }
@@ -734,7 +708,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                     @Override
                     public void run() {
                         handler[0].removeCallbacks(runnable[0]);
-                        relativeLayoutCustomSnackbar.setVisibility(GONE);
+                        constraintLayoutCustomSnackbar.setVisibility(GONE);
                     }
                 });
             }
@@ -750,7 +724,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                         @Override
                         public void run() {
                             handler[0].removeCallbacks(runnable[0]);
-                            relativeLayoutCustomSnackbar.setVisibility(GONE);
+                            constraintLayoutCustomSnackbar.setVisibility(GONE);
                         }
                     });
 
@@ -783,7 +757,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                         @Override
                         public void run() {
                             handler[0].removeCallbacks(runnable[0]);
-                            relativeLayoutCustomSnackbar.setVisibility(GONE);
+                            constraintLayoutCustomSnackbar.setVisibility(GONE);
                         }
                     });
 
@@ -811,7 +785,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
         requireActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                relativeLayoutCustomSnackbar.setVisibility(VISIBLE);
+                constraintLayoutCustomSnackbar.setVisibility(VISIBLE);
                 handler[0].postDelayed(runnable[0], 4000);
             }
         });
@@ -825,7 +799,8 @@ public class PostFragment extends Fragment implements FragmentCallback {
     public void showCustomSnackBarWithSpecificText(final String specificText) {
         if (header == null) return;
 
-        final RelativeLayout relativeLayoutCustomSnackbar = header.findViewById(R.id.relLayCustomSnackBar);
+        final ConstraintLayout constraintLayoutCustomSnackbar = header.findViewById(
+                R.id.conLayCustomSnackBar);
         final TextView textViewLabel = header.findViewById(R.id.textViewLabel);
         final TextView textViewAction = header.findViewById(R.id.textViewAction);
 
@@ -845,7 +820,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                 runnable[0] = new Runnable() {
                     @Override
                     public void run() {
-                        relativeLayoutCustomSnackbar.setVisibility(GONE);
+                        constraintLayoutCustomSnackbar.setVisibility(GONE);
                     }
                 };
             }
@@ -862,17 +837,6 @@ public class PostFragment extends Fragment implements FragmentCallback {
             public void run() {
                 textViewLabel.setTextColor(textColor);
                 textViewAction.setTextColor(textColor);
-            }
-        });
-
-        // set background color based on theme
-        theme.resolveAttribute(R.attr.colorPrimary, typedValue, true);
-        @ColorInt final int backgroundColor = typedValue.data;
-
-        requireActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                relativeLayoutCustomSnackbar.setBackgroundColor(backgroundColor);
             }
         });
 
@@ -893,7 +857,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                     @Override
                     public void run() {
                         handler[0].removeCallbacks(runnable[0]);
-                        relativeLayoutCustomSnackbar.setVisibility(GONE);
+                        constraintLayoutCustomSnackbar.setVisibility(GONE);
                     }
                 });
             }
@@ -902,7 +866,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
         requireActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                relativeLayoutCustomSnackbar.setVisibility(VISIBLE);
+                constraintLayoutCustomSnackbar.setVisibility(VISIBLE);
                 handler[0].postDelayed(runnable[0], 4000);
             }
         });
@@ -986,6 +950,9 @@ public class PostFragment extends Fragment implements FragmentCallback {
             post != null && post.getVideoUrl() != null) {
             loadVideoFromUrl(post.getVideoUrl());
         }
+
+        // Slide down bottom navigation view if necessary
+        FragmentHelper.slideDownBottomNavigationBar(getActivity());
 
         super.onResume();
     }
@@ -1121,8 +1088,8 @@ public class PostFragment extends Fragment implements FragmentCallback {
                                                                        ViewGroup.LayoutParams.MATCH_PARENT));
 
             // set image to close fullscreen
-            fullScreenIcon.setImageDrawable(
-                    ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_exit_24));
+            fullScreenIcon.setImageDrawable(ContextCompat.getDrawable(requireActivity(),
+                                                                      R.drawable.ic_baseline_fullscreen_exit_24dp));
             fullScreenDialog.show();
         }
     }
@@ -1251,14 +1218,14 @@ public class PostFragment extends Fragment implements FragmentCallback {
             public void onClick(View view) {
                 if (videoMuted) {
                     volumeButton.setImageDrawable(ContextCompat.getDrawable(requireActivity(),
-                                                                            R.drawable.ic_baseline_volume_up_24));
+                                                                            R.drawable.ic_baseline_volume_up_24dp));
                     if (player != null) {
                         player.setVolume(1f);
                     }
                     videoMuted = false;
                 } else {
                     volumeButton.setImageDrawable(ContextCompat.getDrawable(requireActivity(),
-                                                                            R.drawable.ic_baseline_volume_off_24));
+                                                                            R.drawable.ic_baseline_volume_off_24dp));
                     if (player != null) {
                         player.setVolume(0f);
                     }
@@ -1327,7 +1294,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
                                         new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                                    ViewGroup.LayoutParams.MATCH_PARENT));
         fullScreenIcon.setImageDrawable(
-                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_exit_24));
+                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_exit_24dp));
         exoPlayerIsInFullscreenMode = true;
         fullScreenDialog.show();
     }
@@ -1352,7 +1319,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
         // set image to open fullscreen again
         fullScreenIcon.setImageDrawable(
-                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_24));
+                ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_fullscreen_24dp));
     }
 
     /**
@@ -1422,11 +1389,7 @@ public class PostFragment extends Fragment implements FragmentCallback {
             @Override
             public void run() {
                 try {
-                    if (FragmentHelper.getThemeIsDarkTheme(requireContext())) {
-                        imageButtonDownload.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
-                    } else {
-                        imageButtonDownload.setBackgroundResource(R.drawable.ic_file_download_black_24dp);
-                    }
+                    imageButtonDownload.setBackgroundResource(R.drawable.ic_file_download_24dp);
                 } catch (Exception e) {
                     Log.d("PostFragment", Log.getStackTraceString(e));
                 }

@@ -3,7 +3,9 @@ package com.amnesica.feedsta.fragments;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.graphics.text.LineBreaker;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -30,6 +32,7 @@ import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
 import com.amnesica.feedsta.interfaces.AdapterCallback;
 import com.amnesica.feedsta.models.Account;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,7 +75,11 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
         setupSwipeRefreshLayout(view);
 
         listViewFollowedAccounts = view.findViewById(R.id.listFollowedAccounts);
+
         textNoAccounts = view.findViewById(R.id.textNoAccounts);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            textNoAccounts.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD);
+        }
 
         // read accounts from internal storage
         readDataFromInternalStorage();
@@ -171,10 +178,16 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        // set highlighted item on nav bar to "feed" and refresh followed accounts
+
         if (!hidden) {
+            // set highlighted item on nav bar to "feed"
             FragmentHelper.setBottomNavViewSelectElem(getActivity(), R.id.navigation_feed);
+
+            // Refresh followed accounts
             readDataFromInternalStorage();
+
+            // Slide down bottom navigation view if necessary
+            FragmentHelper.slideDownBottomNavigationBar(getActivity());
 
             // setup ListView with Adapter
             checkInternetConnectionAndUpdateThumbnailUrl(false);
@@ -230,9 +243,9 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
      */
     @Override
     public void removeAccountFromStorage(final Account account) {
-        AlertDialog.Builder alertDialogBuilder;
+        MaterialAlertDialogBuilder alertDialogBuilder;
         // create alertDialog
-        alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+        alertDialogBuilder = new MaterialAlertDialogBuilder(requireContext()).setTitle(
                 R.string.dialog_remove_accounts_title).setMessage(R.string.dialog_remove_accounts_message)
                 .setPositiveButton(getResources().getString(R.string.button_continue),
                                    new DialogInterface.OnClickListener() {
@@ -283,7 +296,7 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
                     }
                 });
 
-        final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
         // get color for button texts
         TypedValue typedValue = new TypedValue();
@@ -312,10 +325,10 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
      */
     private void checkInternetConnectionAndUpdateThumbnailUrl(boolean bLoadUpdatedUrls) {
         if (bLoadUpdatedUrls && followedAccounts != null && !followedAccounts.isEmpty()) {
-            AlertDialog.Builder alertDialogBuilder;
+            MaterialAlertDialogBuilder alertDialogBuilder;
 
             // create alertDialog
-            alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+            alertDialogBuilder = new MaterialAlertDialogBuilder(requireContext()).setTitle(
                     getResources().getString(R.string.title_dialog_refresh_accounts)).setMessage(
                     getResources().getString(R.string.message_dialog_refresh_accounts)).setPositiveButton(
                     getResources().getString(R.string.button_continue),
@@ -343,7 +356,7 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
                         }
                     });
 
-            final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+            final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
             // get color for button texts
             TypedValue typedValue = new TypedValue();
@@ -375,10 +388,10 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
      */
     private void showConfirmationDialogAndOverrideAccountsRefresh(final FollowingFragment fragment) {
         try {
-            AlertDialog.Builder alertDialogBuilder;
+            MaterialAlertDialogBuilder alertDialogBuilder;
 
             // create alertDialog
-            alertDialogBuilder = new AlertDialog.Builder(requireContext()).setTitle(
+            alertDialogBuilder = new MaterialAlertDialogBuilder(requireContext()).setTitle(
                     R.string.dialog_refreshing_accounts_failed_title).setMessage(
                     listAccountFailedRefresh.size() + "/" + followedAccounts.size() + " " +
                     getString(R.string.dialog_refreshing_accounts_failed_message)).setPositiveButton(
@@ -413,7 +426,7 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
                         }
                     });
 
-            final AlertDialog.Builder finalAlertDialogBuilder = alertDialogBuilder;
+            final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
             // get color for button texts
             TypedValue typedValue = new TypedValue();

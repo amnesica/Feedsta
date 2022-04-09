@@ -11,11 +11,10 @@
         android:layout_height="wrap_content"
         tools:ignore="MissingConstraints">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:theme="@style/MyToolbar">
+            android:layout_height="?attr/actionBarSize">
 
             <ImageView
                 android:id="@+id/verifiedBadge"
@@ -23,10 +22,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:adjustViewBounds="true"
-                android:background="?attr/verifiedImageSearch"
+                android:background="@drawable/ic_baseline_check_circle_24dp"
                 android:contentDescription="@string/verified_account"
                 android:visibility="gone" />
-        </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <ProgressBar
@@ -37,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -46,7 +45,7 @@
         android:textStyle="bold"
         android:visibility="gone" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
         android:id="@+id/textAccountIsPrivate"
         android:layout_height="wrap_content"
@@ -55,7 +54,7 @@
         android:layout_centerHorizontal="true"
         android:text="@string/private_account"
         android:textStyle="bold"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <in.srain.cube.views.GridViewWithHeaderAndFooter
         android:id="@+id/grid_view"
