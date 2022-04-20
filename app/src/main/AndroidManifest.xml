@@ -14,7 +14,7 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_feedsta_round"
         android:supportsRtl="true"
-        android:theme="@style/LightTheme"
+        android:theme="@style/MyTheme"
         android:allowBackup="true"
         android:largeHeap="true"
         tools:targetApi="q"
@@ -24,7 +24,7 @@
             android:label="@string/title_activity_main"
             android:screenOrientation="portrait"
             android:launchMode="singleTop"
-            android:theme="@style/LightTheme"
+            android:theme="@style/MyTheme"
             android:configChanges="orientation|keyboardHidden|screenSize|uiMode"
             tools:ignore="AllowBackup,LockedOrientationActivity">
             <intent-filter>

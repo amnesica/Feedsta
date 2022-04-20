@@ -37,6 +37,7 @@ import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
@@ -147,7 +148,8 @@ public class ProfileFragment extends Fragment {
         // load profilePic
         try {
             Glide.with(this).load(account.getImageProfilePicUrl()).error(
-                    R.drawable.placeholder_image_post_error).dontAnimate().into(imageProfilePic);
+                    ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
+                    .dontAnimate().into(imageProfilePic);
         } catch (Exception e) {
             Log.d("ProfileFragment", Log.getStackTraceString(e));
         }
@@ -1020,7 +1022,9 @@ public class ProfileFragment extends Fragment {
                         ImageView imageView = fragment.headerView.findViewById(
                                 R.id.accountOrHashtagProfilePic);
                         Glide.with(fragment.headerView).load(fragment.account.getImageProfilePicUrl()).error(
-                                R.drawable.placeholder_image_post_error).dontAnimate().into(imageView);
+                                ContextCompat.getDrawable(fragment.requireContext(),
+                                                          R.drawable.placeholder_image_error)).dontAnimate()
+                                .into(imageView);
                     }
                 } else {
                     // after first fetch

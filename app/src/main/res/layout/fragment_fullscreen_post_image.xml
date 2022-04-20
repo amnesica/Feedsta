@@ -8,7 +8,7 @@
         android:id="@+id/imagePostFullscreen"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:failureImage="@drawable/placeholder_image_post_error"
+        app:failureImage="@drawable/placeholder_image_error"
         app:failureImageInitScaleType="center"
         android:contentDescription="@string/image_post_fullscreen" />
 

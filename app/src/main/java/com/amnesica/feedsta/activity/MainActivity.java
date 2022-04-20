@@ -311,12 +311,19 @@ public class MainActivity extends AppCompatActivity {
         // check if system is in android night mode -> DarkTheme
         int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
 
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
-            //  Night mode is active, we're using dark theme
-            setTheme(R.style.DarkTheme);
+        switch (currentNightMode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                // night mode is not active, we're in day time
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            case Configuration.UI_MODE_NIGHT_YES:
+                // night mode is active, we're at night!
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
-            // set value darkMode in SharedPreferences to true
-            setBooleanInSharedPreferences(getResources().getString(R.string.dark_mode), true);
+                // set value darkMode in SharedPreferences to true
+                setBooleanInSharedPreferences(getResources().getString(R.string.dark_mode), true);
+            case Configuration.UI_MODE_NIGHT_UNDEFINED:
+                // assume notnight
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
     }
 
@@ -330,9 +337,9 @@ public class MainActivity extends AppCompatActivity {
             boolean bDarkMode;
             bDarkMode = preferences.getBoolean(getResources().getString(R.string.dark_mode), false);
             if (bDarkMode) {
-                setTheme(R.style.DarkTheme);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             } else {
-                setTheme(R.style.LightTheme);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             }
         }
     }

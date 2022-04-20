@@ -8,13 +8,13 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.fragments.FullscreenImagePostFragment;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 /**
  * Displays an image in a sidecar post
@@ -45,9 +45,11 @@ public class PostImageFragment extends Fragment {
         }
 
         // load image in imageView but don't cache or store it
-        Glide.with(view).load(imageUrl).error(R.drawable.placeholder_image_post_error).centerInside()
-                .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).dontAnimate().into(
-                imagePost);
+        Glide.with(view).load(imageUrl).error(
+                ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error)).fallback(
+                ContextCompat.getDrawable(requireContext(),
+                                          R.drawable.placeholder_image_error)) // if load was null
+                .centerCrop().dontAnimate().into(imageView);
 
         // copy imageUrl to temp final variable
         final String finalImageUrl = imageUrl;

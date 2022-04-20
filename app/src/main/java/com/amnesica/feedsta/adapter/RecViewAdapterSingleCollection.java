@@ -182,13 +182,15 @@ public class RecViewAdapterSingleCollection
         if (post.getImageThumbnail() != null) {
             // load image into view
             Glide.with(context).asBitmap().load(Base64.decode(post.getImageThumbnail(), Base64.DEFAULT))
-                    .placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image_post_error)
+                    .placeholder(ContextCompat.getDrawable(context, R.drawable.placeholder_image)).error(
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image_error))
                     .dontAnimate().centerCrop().into(holder.imageView);
         } else {
             // load image with url into view
-            Glide.with(context).load(post.getImageUrlThumbnail()).placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.placeholder_image_post_error).dontAnimate().centerCrop().into(
-                    holder.imageView);
+            Glide.with(context).load(post.getImageUrlThumbnail()).placeholder(
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image)).error(
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image_error)).dontAnimate()
+                    .centerCrop().into(holder.imageView);
         }
         holder.update(listPostsInCollectionBookmarked.get(position));
     }

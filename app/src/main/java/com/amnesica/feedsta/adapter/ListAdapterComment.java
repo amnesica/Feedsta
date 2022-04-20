@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
@@ -58,8 +59,8 @@ public class ListAdapterComment extends ArrayAdapter<Comment> {
                 // set profile picture of author/owner
                 if (comment.getOwnerProfilePicUrl() != null) {
                     Glide.with(convertView).load(comment.getOwnerProfilePicUrl()).error(
-                            R.drawable.placeholder_image_post_error).dontAnimate().diskCacheStrategy(
-                            DiskCacheStrategy.NONE).skipMemoryCache(true).into(imageView);
+                            ContextCompat.getDrawable(getContext(), R.drawable.placeholder_image_error))
+                            .dontAnimate().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(imageView);
                 } else {
                     imageView.setVisibility(GONE);
                 }

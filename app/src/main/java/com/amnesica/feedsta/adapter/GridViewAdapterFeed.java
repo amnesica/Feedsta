@@ -79,9 +79,10 @@ public class GridViewAdapterFeed extends ArrayAdapter<Post> {
             }
 
             // load image into view
-            Glide.with(row).load(post.getImageUrlThumbnail()).placeholder(R.drawable.placeholder_image).error(
-                    R.drawable.placeholder_image_post_error).centerCrop().dontAnimate().into(
-                    holder.item_imageView);
+            Glide.with(row).load(post.getImageUrlThumbnail()).placeholder(
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image)).error(
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image_error)).centerCrop()
+                    .dontAnimate().into(holder.item_imageView);
         } catch (Exception e) {
             Log.d("GridViewAdapterFeed", Log.getStackTraceString(e));
         }

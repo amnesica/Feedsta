@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
@@ -611,7 +612,9 @@ public class HashtagFragment extends Fragment {
 
                 // set profile pic
                 Glide.with(fragment.requireContext()).load(fragment.hashtag.getProfile_pic_url()).error(
-                        R.drawable.placeholder_image_post_error).dontAnimate().into(fragment.imageHashtagPic);
+                        ContextCompat
+                                .getDrawable(fragment.requireContext(), R.drawable.placeholder_image_error))
+                        .dontAnimate().into(fragment.imageHashtagPic);
             } else {
                 if (fragment.adapter != null) {
                     fragment.adapter.notifyDataSetChanged();

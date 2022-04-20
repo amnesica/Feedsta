@@ -94,13 +94,13 @@ public class ListAdapterSearch extends ArrayAdapter<Object> {
             // load image into view
             Glide.with(convertView).asBitmap().load(
                     Base64.decode(account.getImageThumbnail(), Base64.DEFAULT)).error(
-                    R.drawable.placeholder_image_post_error).dontAnimate().diskCacheStrategy(
-                    DiskCacheStrategy.NONE).skipMemoryCache(true).into(imageView);
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image_error)).dontAnimate()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(imageView);
         } else {
             // load image with url into view
             Glide.with(convertView).load(account.getImageProfilePicUrl()).error(
-                    R.drawable.placeholder_image_post_error).dontAnimate().diskCacheStrategy(
-                    DiskCacheStrategy.NONE).skipMemoryCache(true).into(imageView);
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image_error)).dontAnimate()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(imageView);
         }
 
         // set up OnClickListener on profile picture for showing profile picture fullscreen
@@ -170,8 +170,8 @@ public class ListAdapterSearch extends ArrayAdapter<Object> {
             // set hashtag profile picture
             ImageView imageView = convertView.findViewById(R.id.accountOrHashtagProfilePic);
             Glide.with(convertView).load(hashtag.getProfile_pic_url()).error(
-                    R.drawable.placeholder_image_post_error).dontAnimate().diskCacheStrategy(
-                    DiskCacheStrategy.NONE).skipMemoryCache(true).into(imageView);
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image_error)).dontAnimate()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(imageView);
 
             // set hashtag name
             TextView hashtagName = convertView.findViewById(R.id.textUsernameOrHashtagName);

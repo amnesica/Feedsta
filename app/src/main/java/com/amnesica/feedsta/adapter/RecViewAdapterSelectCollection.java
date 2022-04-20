@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amnesica.feedsta.R;
@@ -61,13 +62,15 @@ public class RecViewAdapterSelectCollection
         if (collection.getImageThumbnail() != null) {
             // load image into view
             Glide.with(context).asBitmap().load(Base64.decode(collection.getImageThumbnail(), Base64.DEFAULT))
-                    .placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image_post_error)
+                    .placeholder(ContextCompat.getDrawable(context, R.drawable.placeholder_image)).error(
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image_error))
                     .dontAnimate().centerCrop().into(holder.imageViewDir);
         } else {
             // load image with url into view
-            Glide.with(context).load(collection.getThumbnailUrl()).placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.placeholder_image_post_error).dontAnimate().centerCrop().into(
-                    holder.imageViewDir);
+            Glide.with(context).load(collection.getThumbnailUrl()).placeholder(
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image)).error(
+                    ContextCompat.getDrawable(context, R.drawable.placeholder_image_error)).dontAnimate()
+                    .centerCrop().into(holder.imageViewDir);
         }
     }
 

@@ -1484,7 +1484,8 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
         // load image into view
         Glide.with(requireContext()).asBitmap().load(Base64.decode(post.getImageThumbnail(), Base64.DEFAULT))
-                .error(R.drawable.placeholder_image_post_error).diskCacheStrategy(DiskCacheStrategy.NONE)
+                .error(ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true).dontAnimate().into(imageViewPost);
 
         // add header and update view
@@ -1520,7 +1521,8 @@ public class PostFragment extends Fragment implements FragmentCallback {
 
         // load profile pic app bar
         Glide.with(this).load(post.getImageUrlProfilePicOwner()).error(
-                R.drawable.placeholder_image_post_error).dontAnimate().into(imageProfilePicPostOwner);
+                ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error)).dontAnimate()
+                .into(imageProfilePicPostOwner);
 
         // set Likes
         textLikes.setText(getResources().getString(R.string.likes, String.valueOf(post.getLikes())));

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
@@ -45,10 +46,12 @@ public class FullscreenProfileImageFragment extends Fragment {
         if (!profileImageUrl.startsWith("https://instagram")) {
             // load image into view
             Glide.with(this).asBitmap().load(Base64.decode(profileImageUrl, Base64.DEFAULT)).error(
-                    R.drawable.placeholder_image_post_error).dontAnimate().into(imageProfilePicFullscreen);
+                    ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
+                    .dontAnimate().into(imageProfilePicFullscreen);
         } else {
             // load image with url into view (url starts with "https://instagram")
-            Glide.with(this).load(profileImageUrl).error(R.drawable.placeholder_image_post_error)
+            Glide.with(this).load(profileImageUrl).error(
+                    ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
                     .dontAnimate().into(imageProfilePicFullscreen);
         }
 
