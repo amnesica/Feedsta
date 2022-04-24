@@ -86,7 +86,7 @@ public class ListAdapterSearch extends ArrayAdapter<Object> {
         final Account account = (Account) getItem(position);
         assert account != null;
 
-        // put account profile picture into CircularImageView
+        // put account profile picture into round image view
         final ImageView imageView = convertView.findViewById(R.id.accountOrHashtagProfilePic);
 
         // load base64 encoded image into view

@@ -78,7 +78,6 @@ The app does not use a special API provided by Instagram for developers.
 
 ## Thanks to
 
--   [CircleImageView](https://github.com/hdodenhof/CircleImageView)
 -   [Exoplayer](https://github.com/google/ExoPlayer)
 -   [GridViewWithHeaderAndFooter](https://github.com/liaohuqiu/android-GridViewWithHeaderAndFooter)
 -   [Glide](https://github.com/bumptech/glide)

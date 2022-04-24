@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/AppBarLayout"
@@ -21,13 +22,22 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/AppBarLayout">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/imageAppInfo"
-            android:paddingTop="20dp"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardViewProfilePic"
             android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_centerHorizontal="true">
-        </de.hdodenhof.circleimageview.CircleImageView>
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp"
+            android:layout_centerHorizontal="true"
+            app:cardCornerRadius="25dp"
+            app:cardElevation="0dp"
+            app:cardPreventCornerOverlap="false"
+            app:strokeWidth="0dp">
+
+            <ImageView
+                android:id="@+id/imageAppInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp" />
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textAppName"
@@ -36,7 +46,7 @@
             android:textStyle="bold"
             android:textSize="30sp"
             android:layout_centerHorizontal="true"
-            android:layout_below="@+id/imageAppInfo"></com.google.android.material.textview.MaterialTextView>
+            android:layout_below="@+id/cardViewProfilePic" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textAppVersion"
