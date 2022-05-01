@@ -23,12 +23,10 @@ import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.interfaces.FragmentCallback;
 import com.amnesica.feedsta.interfaces.OnItemClickListenerSelectColl;
 import com.amnesica.feedsta.models.Collection;
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
-import com.annimon.stream.function.Predicate;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Fragment for selecting a collection of bookmarks (used in PostFragment and SingleCollectionFragment)
@@ -152,12 +150,8 @@ public class BtmSheetDialogSelectCollection extends BottomSheetDialogFragment {
                 requireContext());
 
         // get all collections except "All"-collection
-        return Stream.of(listCollectionsBookmarked).filter(new Predicate<Collection>() {
-            @Override
-            public boolean test(Collection c) {
-                return !c.getName().equals("All");
-            }
-        }).collect(Collectors.<Collection>toList());
+        return listCollectionsBookmarked.stream().filter(collection -> !collection.getName().equals("All"))
+                .collect(Collectors.toList());
     }
 
     /**

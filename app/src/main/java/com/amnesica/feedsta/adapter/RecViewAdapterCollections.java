@@ -28,14 +28,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.interfaces.OnItemClickListenerColl;
 import com.amnesica.feedsta.models.Collection;
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
-import com.annimon.stream.function.Predicate;
 import com.bumptech.glide.Glide;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Adapter for the RecyclerView which shows all collections
@@ -92,13 +90,9 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
 
                     // get all collections and see if collection "All" is selected
                     List<Collection> listWithoutAllCollection;
-                    listWithoutAllCollection = Stream.of(listTmpSelectedCollections).filter(
-                            new Predicate<Collection>() {
-                                @Override
-                                public boolean test(Collection c) {
-                                    return (c.getName() != null) && c.getName().equals("All");
-                                }
-                            }).collect(Collectors.<Collection>toList());
+                    listWithoutAllCollection = listTmpSelectedCollections.stream().filter(
+                            collection -> (collection.getName() != null) &&
+                                          collection.getName().equals("All")).collect(Collectors.toList());
 
                     if (listWithoutAllCollection != null && !listWithoutAllCollection.isEmpty()) {
                         if (context != null) {
@@ -151,13 +145,9 @@ public class RecViewAdapterCollections extends RecyclerView.Adapter<RecViewAdapt
                     // if "All" collection is selected -> cancel operation
                     // (will result in loss of all collections)
                     List<Collection> listWithAllCollection;
-                    listWithAllCollection = Stream.of(listTmpSelectedCollections).filter(
-                            new Predicate<Collection>() {
-                                @Override
-                                public boolean test(Collection c) {
-                                    return (c.getName() != null) && c.getName().equals("All");
-                                }
-                            }).collect(Collectors.<Collection>toList());
+                    listWithAllCollection = listTmpSelectedCollections.stream().filter(
+                            collection -> collection.getName() != null && collection.getName().equals("All"))
+                            .collect(Collectors.toList());
 
                     if (listWithAllCollection != null && !listWithAllCollection.isEmpty()) {
                         if (context != null) {

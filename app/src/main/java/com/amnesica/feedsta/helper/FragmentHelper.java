@@ -44,9 +44,6 @@ import com.amnesica.feedsta.fragments.HashtagFragment;
 import com.amnesica.feedsta.fragments.ProfileFragment;
 import com.amnesica.feedsta.models.Collection;
 import com.amnesica.feedsta.models.Post;
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
-import com.annimon.stream.function.Predicate;
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.color.MaterialColors;
@@ -64,6 +61,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Helper class for fragments with various methods
@@ -833,13 +831,9 @@ public class FragmentHelper {
             // show all bookmarks if category is null or show specific category
             if (!category.equals("All")) {
                 // get all posts with specific category
-                listPostsInCollectionBookmarked = Stream.of(listPostsInCollectionBookmarked).filter(
-                        new Predicate<Post>() {
-                            @Override
-                            public boolean test(Post c) {
-                                return (c.getCategory() != null) && c.getCategory().equals(category);
-                            }
-                        }).collect(Collectors.<Post>toList());
+                listPostsInCollectionBookmarked = listPostsInCollectionBookmarked.stream().filter(
+                        post -> (post.getCategory() != null) && post.getCategory().equals(category)).collect(
+                        Collectors.toList());
             }
         }
 
@@ -857,12 +851,9 @@ public class FragmentHelper {
         List<Collection> listCollections = FragmentHelper.createCollectionsFromBookmarks(context);
 
         // get all collections with specific category
-        listCollections = Stream.of(listCollections).filter(new Predicate<Collection>() {
-            @Override
-            public boolean test(Collection c) {
-                return (c.getName() != null) && c.getName().equals(category);
-            }
-        }).collect(Collectors.<Collection>toList());
+        listCollections = listCollections.stream().filter(
+                collection -> collection.getName() != null && collection.getName().equals(category)).collect(
+                Collectors.toList());
 
         return !listCollections.isEmpty();
     }

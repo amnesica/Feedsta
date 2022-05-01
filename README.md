@@ -82,5 +82,4 @@ The app does not use a special API provided by Instagram for developers.
 -   [GridViewWithHeaderAndFooter](https://github.com/liaohuqiu/android-GridViewWithHeaderAndFooter)
 -   [Glide](https://github.com/bumptech/glide)
 -   [BigImageViewer](https://github.com/Piasy/BigImageViewer)
--   [Lightweight-Stream-API](https://github.com/aNNiMON/Lightweight-Stream-API)
 -   [Commons IO](https://github.com/apache/commons-io)

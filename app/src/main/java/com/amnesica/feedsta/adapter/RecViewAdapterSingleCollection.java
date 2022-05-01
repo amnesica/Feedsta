@@ -27,14 +27,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.interfaces.OnItemClickListSingleColl;
 import com.amnesica.feedsta.models.Post;
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
-import com.annimon.stream.function.Predicate;
 import com.bumptech.glide.Glide;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Adapter for the RecyclerView which shows the bookmarks of a single collection
@@ -102,12 +100,8 @@ public class RecViewAdapterSingleCollection
 
                 // if bookmarks in 'All'-collection are selected -> cancel operation
                 List<Post> listWithPostsInAllCollection;
-                listWithPostsInAllCollection = Stream.of(listTmpSelectedPosts).filter(new Predicate<Post>() {
-                    @Override
-                    public boolean test(Post p) {
-                        return (p != null) && p.getCategory() == null;
-                    }
-                }).collect(Collectors.<Post>toList());
+                listWithPostsInAllCollection = listTmpSelectedPosts.stream().filter(
+                        post -> post != null && post.getCategory() == null).collect(Collectors.toList());
 
                 if (listWithPostsInAllCollection != null && !listWithPostsInAllCollection.isEmpty()) {
                     if (context != null) {
