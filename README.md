@@ -1,12 +1,13 @@
 <p align="center">
-<img src="/static/logo/Logo_Feedsta_final_small.png" height="150" title="Feedsta Logo">
+<img src="/static/logo/Logo_Feedsta.png" height="150" title="Feedsta Logo">
 </p>
 
 <h1 align="center">Feedsta - Viewer for Instagram</h1>
 
-![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=2.1.5&x2=0)
+![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=2.2.0&x2=0)
 
-It allows people to follow their favorite (public) profiles on Instagram and view their posts without having Instagram and being registered there.
+It allows people to follow their favorite (public) profiles on Instagram and view their posts without having
+Instagram and being registered there.
 
 ## Screenshots
 
