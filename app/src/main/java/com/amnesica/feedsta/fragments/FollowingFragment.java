@@ -30,7 +30,7 @@ import com.amnesica.feedsta.helper.Error;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
-import com.amnesica.feedsta.interfaces.AdapterCallback;
+import com.amnesica.feedsta.interfaces.AccountsListCallback;
 import com.amnesica.feedsta.models.Account;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -41,10 +41,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/**
- * Fragment for displaying followed accounts
- */
-public class FollowingFragment extends Fragment implements AdapterCallback {
+/** Fragment for displaying followed accounts */
+public class FollowingFragment extends Fragment implements AccountsListCallback {
 
     // view stuff
     private ListView listViewFollowedAccounts;
@@ -764,11 +762,13 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
 
             if (fragment.followedAccountsUpdatedToAccountList != null && fragment.getContext() != null) {
                 try {
-                    // store accounts in storage in proper storage representation in
-                    // filename_accounts_updated
-                    storingSuccessful = StorageHelper.storeAccountListInInternalStorage(
-                            fragment.followedAccountsUpdatedToAccountList, fragment.requireContext(),
-                            StorageHelper.filename_accounts_updated);
+          // store accounts in storage in proper storage representation in
+          // filename_accounts_updated
+          storingSuccessful =
+              StorageHelper.storeAccountListInInternalStorage(
+                  fragment.followedAccountsUpdatedToAccountList,
+                  fragment.requireContext(),
+                  StorageHelper.FILENAME_ACCOUNTS_UPDATED);
                 } catch (Exception e) {
                     storingSuccessful = false;
                     Log.d("FollowingFragment", Log.getStackTraceString(e));
@@ -787,14 +787,17 @@ public class FollowingFragment extends Fragment implements AdapterCallback {
             final FollowingFragment fragment = fragmentReference.get();
             if (fragment == null) return;
 
-            // check if storing filename_accounts_updated was successful and if the
-            // file exists and rename filename_accounts_updated to old filename_accounts
-            if (storingSuccessful && fragment.getContext() != null && StorageHelper.checkIfFileExists(
-                    StorageHelper.filename_accounts_updated, fragment.requireContext())) {
+      // check if storing filename_accounts_updated was successful and if the
+      // file exists and rename filename_accounts_updated to old filename_accounts
+      if (storingSuccessful
+          && fragment.getContext() != null
+          && StorageHelper.checkIfFileExists(
+              StorageHelper.FILENAME_ACCOUNTS_UPDATED, fragment.requireContext())) {
                 try {
-                    StorageHelper.renameSpecificFileTo(fragment.requireContext(),
-                                                       StorageHelper.filename_accounts,
-                                                       StorageHelper.filename_accounts_updated);
+          StorageHelper.renameSpecificFileTo(
+              fragment.requireContext(),
+              StorageHelper.FILENAME_ACCOUNTS,
+              StorageHelper.FILENAME_ACCOUNTS_UPDATED);
                     renamingFilesSuccessful = true;
                 } catch (NullPointerException e) {
                     renamingFilesSuccessful = false;

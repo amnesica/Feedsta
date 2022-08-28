@@ -219,10 +219,10 @@ public class SettingsFragment extends PreferenceFragmentCompat
         // path of app files
         String inputPath = requireContext().getFilesDir().getPath();
 
-        // copy account_prefs.txt
-        if (StorageHelper.checkIfFileExists(StorageHelper.filename_accounts, requireContext())) {
+    // copy account_prefs.txt
+    if (StorageHelper.checkIfFileExists(StorageHelper.FILENAME_ACCOUNTS, requireContext())) {
 
-            String inputFilename = StorageHelper.filename_accounts;
+      String inputFilename = StorageHelper.FILENAME_ACCOUNTS;
             successful = StorageHelper.copyFileExport(inputPath, inputFilename, pickedDir, requireContext());
 
             if (!successful) {
@@ -232,10 +232,10 @@ public class SettingsFragment extends PreferenceFragmentCompat
             }
         }
 
-        // copy bookmark_prefs.txt
-        if (StorageHelper.checkIfFileExists(StorageHelper.filename_bookmarks, requireContext())) {
+    // copy bookmark_prefs.txt
+    if (StorageHelper.checkIfFileExists(StorageHelper.FILENAME_BOOKMARKS, requireContext())) {
 
-            String inputFilename = StorageHelper.filename_bookmarks;
+      String inputFilename = StorageHelper.FILENAME_BOOKMARKS;
             successful = StorageHelper.copyFileExport(inputPath, inputFilename, pickedDir, requireContext());
 
             if (!successful) {
@@ -289,14 +289,15 @@ public class SettingsFragment extends PreferenceFragmentCompat
         String pathToSharedPrefs = "/data".concat("/data/com.amnesica.").concat(applicationName).concat(
                 "/shared_prefs/com.amnesica.").concat(applicationName).concat("_preferences.xml");
 
-        // source and destination paths
-        String accountsPathToImportFrom = importPath + File.separator + StorageHelper.filename_accounts;
-        String accountsPathDestination =
-                requireContext().getFilesDir() + File.separator + StorageHelper.filename_accounts;
+    // source and destination paths
+    String accountsPathToImportFrom = importPath + File.separator + StorageHelper.FILENAME_ACCOUNTS;
+    String accountsPathDestination =
+        requireContext().getFilesDir() + File.separator + StorageHelper.FILENAME_ACCOUNTS;
 
-        String bookmarksPathToImportFrom = importPath + File.separator + StorageHelper.filename_bookmarks;
-        String bookmarksPathDestination =
-                requireContext().getFilesDir() + File.separator + StorageHelper.filename_bookmarks;
+    String bookmarksPathToImportFrom =
+        importPath + File.separator + StorageHelper.FILENAME_BOOKMARKS;
+    String bookmarksPathDestination =
+        requireContext().getFilesDir() + File.separator + StorageHelper.FILENAME_BOOKMARKS;
 
         String sharedPrefsPathToImportFrom = importPath + File.separator + nameSharedPreferences + ".xml";
 

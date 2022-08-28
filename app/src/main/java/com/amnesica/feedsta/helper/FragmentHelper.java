@@ -849,7 +849,7 @@ public class FragmentHelper {
      * @return ArrayList<Post>
      */
     private static ArrayList<Post> readAllBookmarksFromStorage(Context context) {
-        return StorageHelper.readPostsFromInternalStorage(context, StorageHelper.filename_bookmarks);
+    return StorageHelper.readPostsFromInternalStorage(context, StorageHelper.FILENAME_BOOKMARKS);
     }
 
     /**

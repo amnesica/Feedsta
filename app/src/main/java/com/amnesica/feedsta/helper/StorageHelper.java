@@ -38,19 +38,18 @@ import java.util.ArrayList;
  */
 public class StorageHelper {
 
-    // filename for file storing followed accounts
-    public static final String filename_accounts = "account_prefs.txt";
-    // filename for file storing followed accounts (updated thumbnail urls)
-    public static final String filename_accounts_updated = "account_prefs_updated.txt";
+  // filename for file storing followed accounts
+  public static final String FILENAME_ACCOUNTS = "account_prefs.txt";
+  // filename for file storing followed accounts (updated thumbnail urls)
+  public static final String FILENAME_ACCOUNTS_UPDATED = "account_prefs_updated.txt";
 
-    // filename for file storing bookmarked posts
-    public static final String filename_bookmarks = "bookmarked_posts.txt";
-    // filename for file storing bookmarked posts (updated thumbnail urls)
-    public static final String filename_bookmarks_updated = "bookmarked_posts_updated.txt";
+  // filename for file storing bookmarked posts
+  public static final String FILENAME_BOOKMARKS = "bookmarked_posts.txt";
+  // filename for file storing bookmarked posts (updated thumbnail urls)
+  public static final String FILENAME_BOOKMARKS_UPDATED = "bookmarked_posts_updated.txt";
 
-    // filename for file storing posts in feed
-    public static final String filename_posts = "feed_posts.txt";
-
+  // filename for file storing posts in feed
+  public static final String FILENAME_POSTS = "feed_posts.txt";
 
     /**
      * Save video in internal storage
@@ -214,7 +213,7 @@ public class StorageHelper {
      */
     public static Boolean removeAccountFromInternalStorage(Account account, Context context) {
         boolean removed = false;
-        String filename = filename_accounts;
+    String filename = FILENAME_ACCOUNTS;
         ArrayList<AccountStorage> readAccounts = new ArrayList<>();
         AccountStorage accountStorageToDelete = null;
 
@@ -433,7 +432,7 @@ public class StorageHelper {
      */
     public static Boolean storeAccountInInternalStorage(Account accountToStore, Context context)
             throws Exception {
-        String filename = filename_accounts;
+    String filename = FILENAME_ACCOUNTS;
         ArrayList<AccountStorage> readAccounts = null;
 
         File file = new File(context.getFilesDir(), filename);
@@ -582,7 +581,7 @@ public class StorageHelper {
             throws IOException {
         ArrayList<PostStorage> readPosts = null;
 
-        String filename = filename_bookmarks;
+    String filename = FILENAME_BOOKMARKS;
         File file = new File(context.getFilesDir(), filename);
         byte[] bytesToWrite = null;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -630,7 +629,7 @@ public class StorageHelper {
      * @return ArrayList<Account>
      */
     public static ArrayList<Account> readAccountsFromInternalStorage(Context context) {
-        String filename = filename_accounts;
+    String filename = FILENAME_ACCOUNTS;
         ArrayList<Account> listAccounts = null;
         File file = new File(context.getFilesDir(), filename);
 
@@ -691,7 +690,7 @@ public class StorageHelper {
      * @return ArrayList<AccountStorage>
      */
     private static ArrayList<AccountStorage> readAccountStorageListFromInternalStorage(Context context) {
-        String filename = filename_accounts;
+    String filename = FILENAME_ACCOUNTS;
         ArrayList<AccountStorage> readAccounts = new ArrayList<>();
         File file = new File(context.getFilesDir(), filename);
 
@@ -967,8 +966,8 @@ public class StorageHelper {
         bytesToWrite = bos.toByteArray();
         bos.close();
 
-        // writes directly to filename_accounts
-        File file = new File(context.getFilesDir(), filename_accounts);
+    // writes directly to filename_accounts
+    File file = new File(context.getFilesDir(), FILENAME_ACCOUNTS);
         try (FileOutputStream fos = new FileOutputStream(file)) {
             if (bytesToWrite != null) {
                 fos.write(bytesToWrite);
@@ -997,11 +996,11 @@ public class StorageHelper {
         // filename for temporary new post list (bookmarks or posts) -> will be renamed in filename_posts
         // after successful converting
         String newFilename = null;
-        if (filenamePara.equals(filename_bookmarks)) {
-            newFilename = filename_bookmarks;
+    if (filenamePara.equals(FILENAME_BOOKMARKS)) {
+      newFilename = FILENAME_BOOKMARKS;
         }
-        if (filenamePara.equals(filename_posts)) {
-            newFilename = filename_posts;
+    if (filenamePara.equals(FILENAME_POSTS)) {
+      newFilename = FILENAME_POSTS;
         }
 
         byte[] bytesToWrite;
@@ -1054,8 +1053,8 @@ public class StorageHelper {
      */
     static int amountBookmarks(Context context) {
         if (context != null) {
-            ArrayList<PostStorage> postList = readPostStorageListFromInternalStorage(context,
-                                                                                     filename_bookmarks);
+      ArrayList<PostStorage> postList =
+          readPostStorageListFromInternalStorage(context, FILENAME_BOOKMARKS);
             if (postList != null) {
                 return postList.size();
             }

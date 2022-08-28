@@ -473,8 +473,8 @@ public class ProfileFragment extends Fragment {
     private void followAccount() {
         if (getContext() == null) return;
 
-        if (!StorageHelper.checkIfAccountOrPostIsInFile(account, StorageHelper.filename_accounts,
-                                                        requireContext())) {
+    if (!StorageHelper.checkIfAccountOrPostIsInFile(
+        account, StorageHelper.FILENAME_ACCOUNTS, requireContext())) {
             // insert account in internal storage on device
             boolean saved = false;
 
@@ -596,9 +596,9 @@ public class ProfileFragment extends Fragment {
 
         // button follow - unfollow
         if (!account.getIs_private()) {
-            // check if account is in follow list
-            if (StorageHelper.checkIfAccountOrPostIsInFile(account, StorageHelper.filename_accounts,
-                                                           getContext())) {
+      // check if account is in follow list
+      if (StorageHelper.checkIfAccountOrPostIsInFile(
+          account, StorageHelper.FILENAME_ACCOUNTS, getContext())) {
                 // set text to "unfollow"
                 followButtonToUnfollow();
             } else { //account is not followed yet
