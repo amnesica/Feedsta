@@ -62,111 +62,116 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-/**
- * Helper class for fragments with various methods
- */
+/** Helper class for fragments with various methods */
 public class FragmentHelper {
 
-    // map for only showing one alert at a time from a fragment
-    private static final HashMap<String, Boolean> mapErrorWasShown = new HashMap<>();
+  // map for only showing one alert at a time from a fragment
+  private static final HashMap<String, Boolean> mapErrorWasShown = new HashMap<>();
 
-    // counter for getting unique tag for fragments
-    private static int transactionCounter = 0;
+  // counter for getting unique tag for fragments
+  private static int transactionCounter = 0;
 
-    /**
-     * Returns the transactionCounter for getting unique tags
-     *
-     * @return int
-     */
-    private static int getTransactionCounter() {
-        return transactionCounter += 1;
+  /**
+   * Returns the transactionCounter for getting unique tags
+   *
+   * @return int
+   */
+  private static int getTransactionCounter() {
+    return transactionCounter += 1;
+  }
+
+  /**
+   * Sets up the toolbar of the weakReference fragment with a backButton and a clickListener to go
+   * back on click
+   *
+   * @param toolbar Toolbar
+   * @param fragmentReference WeakReference
+   */
+  public static void setupToolbarWithBackButton(Toolbar toolbar, WeakReference fragmentReference) {
+    final Fragment weakReferenceFragment = (Fragment) fragmentReference.get();
+    if (weakReferenceFragment != null) {
+      toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24dp);
+
+      toolbar.setNavigationOnClickListener(
+          new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              weakReferenceFragment.requireActivity().onBackPressed();
+            }
+          });
     }
+  }
 
-    /**
-     * Sets up the toolbar of the weakReference fragment with a backButton and a clickListener to go back on
-     * click
-     *
-     * @param toolbar           Toolbar
-     * @param fragmentReference WeakReference
-     */
-    public static void setupToolbarWithBackButton(Toolbar toolbar, WeakReference fragmentReference) {
-        final Fragment weakReferenceFragment = (Fragment) fragmentReference.get();
-        if (weakReferenceFragment != null) {
-            toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24dp);
-
-            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    weakReferenceFragment.requireActivity().onBackPressed();
-                }
-            });
+  /**
+   * Returns the top fragment from backStack. If FragmentManager is null, return currently visible
+   * fragment
+   *
+   * @param fm FragmentManager
+   * @return Fragment
+   */
+  private static Fragment getTopFragment(FragmentManager fm) {
+    if (fm != null) {
+      if (fm.getBackStackEntryCount() == 0) {
+        // no backStack, return the fragment which is currently visible to user
+        Fragment active;
+        for (Fragment frag : fm.getFragments()) {
+          if (frag.isVisible()) {
+            active = frag;
+            return active;
+          }
         }
-    }
-
-    /**
-     * Returns the top fragment from backStack. If FragmentManager is null, return currently visible fragment
-     *
-     * @param fm FragmentManager
-     * @return Fragment
-     */
-    private static Fragment getTopFragment(FragmentManager fm) {
-        if (fm != null) {
-            if (fm.getBackStackEntryCount() == 0) {
-                // no backStack, return the fragment which is currently visible to user
-                Fragment active;
-                for (Fragment frag : fm.getFragments()) {
-                    if (frag.isVisible()) {
-                        active = frag;
-                        return active;
-                    }
-                }
 
         // only for deep linking (before: nothing here)
         return fm.findFragmentByTag(FeedFragment.class.getSimpleName());
-            }
-            // get top fragment from backStack
-            String fragmentTag = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName();
-            return fm.findFragmentByTag(fragmentTag);
-        }
-        return null;
+      }
+      // get top fragment from backStack
+      String fragmentTag = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName();
+      return fm.findFragmentByTag(fragmentTag);
     }
+    return null;
+  }
 
-    /**
-     * Loads and shows fragmentToShow from FragmentManager into container
-     *
-     * @param fragmentToShow Fragment
-     * @param fm             FragmentManager
-     * @return Boolean
-     */
-    public static Boolean loadAndShowFragment(Fragment fragmentToShow, FragmentManager fm) {
-        if (fragmentToShow != null) {
-            // get active fragment to hide
-            Fragment active = getTopFragment(fm);
+  /**
+   * Loads and shows fragmentToShow from FragmentManager into container
+   *
+   * @param fragmentToShow Fragment
+   * @param fm FragmentManager
+   * @return Boolean
+   */
+  public static Boolean loadAndShowFragment(Fragment fragmentToShow, FragmentManager fm) {
+    if (fragmentToShow != null) {
+      // get active fragment to hide
+      Fragment active = getTopFragment(fm);
 
-            if (active != null) {
-                // show fragment with animation
-                fm.beginTransaction().setCustomAnimations(R.anim.nav_enter, R.anim.nav_exit, R.anim.nav_enter,
-                                                          R.anim.nav_exit).hide(active).show(fragmentToShow)
-                        .addToBackStack(fragmentToShow.getClass().getSimpleName()).commit();
-                return true;
-            }
-        }
-        return false;
+      if (active != null) {
+        // show fragment with animation
+        fm.beginTransaction()
+            .setCustomAnimations(
+                R.anim.nav_enter, R.anim.nav_exit, R.anim.nav_enter, R.anim.nav_exit)
+            .hide(active)
+            .show(fragmentToShow)
+            .addToBackStack(fragmentToShow.getClass().getSimpleName())
+            .commit();
+        return true;
+      }
     }
+    return false;
+  }
 
-    /**
-     * Adds a fragment to the container and to the backStack
-     *
-     * @param fragmentToAdd Fragment
-     * @param fm            FragmentManager
-     */
-    public static void addFragmentToContainer(Fragment fragmentToAdd, FragmentManager fm) {
-        if (fragmentToAdd != null && fm != null) {
-            // get unique tag with class name of fragmentToAdd and incrementing counter
-            String tag = fragmentToAdd.getClass().getSimpleName() + FragmentHelper.getTransactionCounter();
+  /**
+   * Adds a fragment to the container and to the backStack
+   *
+   * @param fragmentToAdd Fragment
+   * @param fm FragmentManager
+   */
+  public static void addFragmentToContainer(Fragment fragmentToAdd, FragmentManager fm) {
+    if (fragmentToAdd != null && fm != null) {
+      // get unique tag with class name of fragmentToAdd and incrementing counter
+      String tag =
+          fragmentToAdd.getClass().getSimpleName() + FragmentHelper.getTransactionCounter();
 
-            // get active fragment
-            Fragment active = getTopFragment(fm);
+      // get active fragment
+      Fragment active = getTopFragment(fm);
 
       // add fragment to container with animation
       try {
@@ -192,491 +197,582 @@ public class FragmentHelper {
               .commit();
         }
 
-            } catch (Exception e) {
-                Log.d("FragmentHelper", Log.getStackTraceString(e));
-            }
-        }
+      } catch (Exception e) {
+        Log.d("FragmentHelper", Log.getStackTraceString(e));
+      }
     }
+  }
 
-    /**
-     * Sets highlighted element in navigation bar and makes navigation bar visible
-     *
-     * @param activity FragmentActivity
-     * @param resource int
-     */
-    public static void setBottomNavViewSelectElem(FragmentActivity activity, int resource) {
-        if (activity == null) return;
+  /**
+   * Sets highlighted element in navigation bar and makes navigation bar visible
+   *
+   * @param activity FragmentActivity
+   * @param resource int
+   */
+  public static void setBottomNavViewSelectElem(FragmentActivity activity, int resource) {
+    if (activity == null) return;
 
-        BottomNavigationView bottomNavigationView = Objects.requireNonNull(activity).findViewById(
-                R.id.nav_view);
-        if (bottomNavigationView == null) return;
+    BottomNavigationView bottomNavigationView =
+        Objects.requireNonNull(activity).findViewById(R.id.nav_view);
+    if (bottomNavigationView == null) return;
 
-        // select item in bottom navigation view
-        Menu menu = bottomNavigationView.getMenu();
-        menu.findItem(resource).setCheckable(true);
-        menu.findItem(resource).setChecked(true);
+    // select item in bottom navigation view
+    Menu menu = bottomNavigationView.getMenu();
+    menu.findItem(resource).setCheckable(true);
+    menu.findItem(resource).setChecked(true);
 
-        // Slide up bottom navigation view if necessary
-        slideUpBottomNavigationBar(activity);
+    // Slide up bottom navigation view if necessary
+    slideUpBottomNavigationBar(activity);
+  }
+
+  /**
+   * Slides up the bottom navigation view and thus makes it visible
+   *
+   * @param activity FragmentActivity
+   */
+  public static void slideUpBottomNavigationBar(FragmentActivity activity) {
+    if (activity == null) return;
+
+    BottomNavigationView bottomNavigationView =
+        Objects.requireNonNull(activity).findViewById(R.id.nav_view);
+    if (bottomNavigationView == null) return;
+    bottomNavigationView.setVisibility(View.VISIBLE);
+
+    ViewGroup.LayoutParams layoutParams = bottomNavigationView.getLayoutParams();
+    if (layoutParams instanceof CoordinatorLayout.LayoutParams) {
+      CoordinatorLayout.Behavior behavior =
+          ((CoordinatorLayout.LayoutParams) layoutParams).getBehavior();
+      if (behavior instanceof HideBottomViewOnScrollBehavior) {
+        HideBottomViewOnScrollBehavior<BottomNavigationView> hideShowBehavior =
+            (HideBottomViewOnScrollBehavior<BottomNavigationView>) behavior;
+        hideShowBehavior.slideUp(bottomNavigationView);
+      }
     }
+  }
 
-    /**
-     * Slides up the bottom navigation view and thus makes it visible
-     *
-     * @param activity FragmentActivity
-     */
-    public static void slideUpBottomNavigationBar(FragmentActivity activity) {
-        if (activity == null) return;
+  /**
+   * Slides down the bottom navigation view and thus makes it invisible
+   *
+   * @param activity FragmentActivity
+   */
+  public static void slideDownBottomNavigationBar(FragmentActivity activity) {
+    if (activity == null) return;
 
-        BottomNavigationView bottomNavigationView = Objects.requireNonNull(activity).findViewById(
-                R.id.nav_view);
-        if (bottomNavigationView == null) return;
-        bottomNavigationView.setVisibility(View.VISIBLE);
+    BottomNavigationView bottomNavigationView =
+        Objects.requireNonNull(activity).findViewById(R.id.nav_view);
+    if (bottomNavigationView == null) return;
+    bottomNavigationView.setVisibility(View.VISIBLE);
 
-        ViewGroup.LayoutParams layoutParams = bottomNavigationView.getLayoutParams();
-        if (layoutParams instanceof CoordinatorLayout.LayoutParams) {
-            CoordinatorLayout.Behavior behavior =
-                    ((CoordinatorLayout.LayoutParams) layoutParams).getBehavior();
-            if (behavior instanceof HideBottomViewOnScrollBehavior) {
-                HideBottomViewOnScrollBehavior<BottomNavigationView> hideShowBehavior =
-                        (HideBottomViewOnScrollBehavior<BottomNavigationView>) behavior;
-                hideShowBehavior.slideUp(bottomNavigationView);
-            }
-        }
+    ViewGroup.LayoutParams layoutParams = bottomNavigationView.getLayoutParams();
+    if (layoutParams instanceof CoordinatorLayout.LayoutParams) {
+      CoordinatorLayout.Behavior behavior =
+          ((CoordinatorLayout.LayoutParams) layoutParams).getBehavior();
+      if (behavior instanceof HideBottomViewOnScrollBehavior) {
+        HideBottomViewOnScrollBehavior<BottomNavigationView> hideShowBehavior =
+            (HideBottomViewOnScrollBehavior<BottomNavigationView>) behavior;
+        hideShowBehavior.slideDown(bottomNavigationView);
+      }
     }
+  }
 
-    /**
-     * Slides down the bottom navigation view and thus makes it invisible
-     *
-     * @param activity FragmentActivity
-     */
-    public static void slideDownBottomNavigationBar(FragmentActivity activity) {
-        if (activity == null) return;
+  /**
+   * Makes the bottom navigation view disappear by setting it to invisible
+   *
+   * @param activity FragmentActivity
+   */
+  public static void makeBottomNavigationBarInvisible(FragmentActivity activity) {
+    if (activity == null) return;
 
-        BottomNavigationView bottomNavigationView = Objects.requireNonNull(activity).findViewById(
-                R.id.nav_view);
-        if (bottomNavigationView == null) return;
-        bottomNavigationView.setVisibility(View.VISIBLE);
+    BottomNavigationView bottomNavigationView =
+        Objects.requireNonNull(activity).findViewById(R.id.nav_view);
+    if (bottomNavigationView == null) return;
+    bottomNavigationView.setVisibility(View.INVISIBLE);
+  }
 
-        ViewGroup.LayoutParams layoutParams = bottomNavigationView.getLayoutParams();
-        if (layoutParams instanceof CoordinatorLayout.LayoutParams) {
-            CoordinatorLayout.Behavior behavior =
-                    ((CoordinatorLayout.LayoutParams) layoutParams).getBehavior();
-            if (behavior instanceof HideBottomViewOnScrollBehavior) {
-                HideBottomViewOnScrollBehavior<BottomNavigationView> hideShowBehavior =
-                        (HideBottomViewOnScrollBehavior<BottomNavigationView>) behavior;
-                hideShowBehavior.slideDown(bottomNavigationView);
-            }
-        }
-    }
+  /**
+   * Notifies the user that no account or not all but some accounts could be queried and shows a
+   * dialog. Method handles the NOT_ALL_ACCOUNTS_COULD_BE_QUERIED error
+   *
+   * @param fragment Fragment
+   * @param actualFetchedAccounts int
+   * @param amountAccountsToFetch int
+   */
+  public static void notifyUserOfIncompleteFetchProblem(
+      final Fragment fragment, int actualFetchedAccounts, int amountAccountsToFetch) {
+    final Enum<Error> error = Error.NOT_ALL_ACCOUNTS_COULD_BE_QUERIED;
 
-    /**
-     * Makes the bottom navigation view disappear by setting it to invisible
-     *
-     * @param activity FragmentActivity
-     */
-    public static void makeBottomNavigationBarInvisible(FragmentActivity activity) {
-        if (activity == null) return;
+    if (!mapErrorWasShown.containsKey(error.toString())) {
 
-        BottomNavigationView bottomNavigationView = Objects.requireNonNull(activity).findViewById(
-                R.id.nav_view);
-        if (bottomNavigationView == null) return;
-        bottomNavigationView.setVisibility(View.INVISIBLE);
-    }
+      // put fragment into map to eliminate error duplicates
+      mapErrorWasShown.put(error.toString(), true);
 
-    /**
-     * Notifies the user that no account or not all but some accounts could be queried and shows a dialog.
-     * Method handles the NOT_ALL_ACCOUNTS_COULD_BE_QUERIED error
-     *
-     * @param fragment              Fragment
-     * @param actualFetchedAccounts int
-     * @param amountAccountsToFetch int
-     */
-    public static void notifyUserOfIncompleteFetchProblem(final Fragment fragment, int actualFetchedAccounts,
-                                                          int amountAccountsToFetch) {
-        final Enum<Error> error = Error.NOT_ALL_ACCOUNTS_COULD_BE_QUERIED;
+      // text for dialog
+      String alertText;
 
-        if (!mapErrorWasShown.containsKey(error.toString())) {
+      // text for label at snackbar's left
+      String textViewLabel;
 
-            // put fragment into map to eliminate error duplicates
-            mapErrorWasShown.put(error.toString(), true);
+      // label for action of snackbar
+      String textViewLabelAction;
 
-            // text for dialog
-            String alertText;
-
-            // text for label at snackbar's left
-            String textViewLabel;
-
-            // label for action of snackbar
-            String textViewLabelAction;
-
-            // fixing "Fragment not attached to a context"
-            if (fragment != null && fragment.getContext() != null) {
-                if (actualFetchedAccounts > 0) {
-                    // not all accounts cound be queried
-                    textViewLabel = fragment.requireContext().getResources().getString(
-                            R.string.not_all_accounts_could_be_queried) + " " + "(" + actualFetchedAccounts +
-                                    "/" + amountAccountsToFetch + ")";
-                    // get proper response
-                    alertText = fragment.requireContext().getResources().getString(
-                            R.string.not_all_accounts_could_be_queried_more_info);
-                } else {
-                    // nothing could be querid
-                    textViewLabel = fragment.requireContext().getResources().getString(
-                            R.string.no_account_could_be_queried) + " " + "(" + actualFetchedAccounts + "/" +
-                                    amountAccountsToFetch + ")";
-                    // get proper response
-                    alertText = fragment.requireContext().getResources().getString(
-                            R.string.no_account_could_be_queried_more_info);
-                }
-
-                textViewLabelAction = fragment.requireContext().getResources().getString(R.string.more_info);
-
-                // show alert as custom snackBar
-                showCustomSnackBarForAlert(fragment, alertText, error.toString(), textViewLabel,
-                                           textViewLabelAction);
-            }
-        }
-    }
-
-    /**
-     * Shows network error or something wrong error to user. Calls notifyUserOfProblem internally
-     *
-     * @param fragment Fragment
-     */
-    public static void showNetworkOrSomethingWrongErrorToUser(Fragment fragment) {
-        if (!NetworkHandler.isInternetAvailable()) {
-            notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
+      // fixing "Fragment not attached to a context"
+      if (fragment != null && fragment.getContext() != null) {
+        if (actualFetchedAccounts > 0) {
+          // not all accounts cound be queried
+          textViewLabel =
+              fragment
+                      .requireContext()
+                      .getResources()
+                      .getString(R.string.not_all_accounts_could_be_queried)
+                  + " "
+                  + "("
+                  + actualFetchedAccounts
+                  + "/"
+                  + amountAccountsToFetch
+                  + ")";
+          // get proper response
+          alertText =
+              fragment
+                  .requireContext()
+                  .getResources()
+                  .getString(R.string.not_all_accounts_could_be_queried_more_info);
         } else {
-            notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
+          // nothing could be querid
+          textViewLabel =
+              fragment
+                      .requireContext()
+                      .getResources()
+                      .getString(R.string.no_account_could_be_queried)
+                  + " "
+                  + "("
+                  + actualFetchedAccounts
+                  + "/"
+                  + amountAccountsToFetch
+                  + ")";
+          // get proper response
+          alertText =
+              fragment
+                  .requireContext()
+                  .getResources()
+                  .getString(R.string.no_account_could_be_queried_more_info);
         }
-    }
 
-    /**
-     * Notifies the user that there is a problem and shows a dialog. Hint: NOT_ALL_ACCOUNTS_COULD_BE_QUERIED
-     * is supposed to be handled in notifyUserOfIncompleteFetchProblem()!
-     *
-     * @param fragment Fragment
-     * @param error    Enum<Error>
-     */
-    public static void notifyUserOfProblem(final Fragment fragment, final Enum<Error> error) {
-        if (!mapErrorWasShown.containsKey(error.toString())) {
+        textViewLabelAction =
+            fragment.requireContext().getResources().getString(R.string.more_info);
+
+        // show alert as custom snackBar
+        showCustomSnackBarForAlert(
+            fragment, alertText, error.toString(), textViewLabel, textViewLabelAction);
+      }
+    }
+  }
+
+  /**
+   * Shows network error or something wrong error to user. Calls notifyUserOfProblem internally
+   *
+   * @param fragment Fragment
+   */
+  public static void showNetworkOrSomethingWrongErrorToUser(Fragment fragment) {
+    if (!NetworkHandler.isInternetAvailable()) {
+      notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
+    } else {
+      notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
+    }
+  }
+
+  /**
+   * Notifies the user that there is a problem and shows a dialog. Hint:
+   * NOT_ALL_ACCOUNTS_COULD_BE_QUERIED is supposed to be handled in
+   * notifyUserOfIncompleteFetchProblem()!
+   *
+   * @param fragment Fragment
+   * @param error Enum<Error>
+   */
+  public static void notifyUserOfProblem(final Fragment fragment, final Enum<Error> error) {
+    if (!mapErrorWasShown.containsKey(error.toString())) {
 
       // TODO Replace custom snackbar with actual snackbar and SnackbarHelper
 
       // put fragment into map to eliminate error duplicates
       mapErrorWasShown.put(error.toString(), true);
-            String errorMessage = error.toString();
+      String errorMessage = error.toString();
 
-            // text for dialog
-            String alertText = null;
+      // text for dialog
+      String alertText = null;
 
-            // text for label at snackbar's left
-            String textViewLabel = null;
+      // text for label at snackbar's left
+      String textViewLabel = null;
 
-            // label for action of snackbar
-            String textViewLabelAction = null;
+      // label for action of snackbar
+      String textViewLabelAction = null;
 
-            // fixing "Fragment not attached to a context"
-            if (fragment != null && fragment.getContext() != null) {
-                // get proper response
-                if (errorMessage.equals(Error.NO_INTERNET_CONNECTION.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(
-                            R.string.no_internet_connection);
-                    textViewLabel = fragment.requireContext().getResources().getString(
-                            R.string.no_internet_connection);
-                    textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
-                } else if (errorMessage.equals(Error.UPDATING_BOOKMARKS_CATEGORY_FAILED.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(
-                            R.string.updating_bookmarked_post_category_failed);
-                    textViewLabel = fragment.requireContext().getResources().getString(
-                            R.string.updating_bookmarked_post_category_failed_label);
-                    textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
-                } else if (errorMessage.equals(Error.SOMETHINGS_WRONG.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(
-                            R.string.something_went_wrong_more_info);
-                    textViewLabel = fragment.requireContext().getResources().getString(
-                            R.string.something_has_gone_wrong);
-                    textViewLabelAction = fragment.requireContext().getResources().getString(
-                            R.string.more_info);
-                } else if (errorMessage.equals(Error.POST_NOT_AVAILABLE_ANYMORE.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(
-                            R.string.post_not_available_anymore);
-                    textViewLabel = fragment.requireContext().getResources().getString(
-                            R.string.post_not_available_anymore_label);
-                    textViewLabelAction = fragment.requireContext().getResources().getString(
-                            R.string.more_info);
-                } else if (errorMessage.equals(Error.ACCOUNT_COULD_NOT_BE_FOLLOWED.toString())) {
-                    alertText = fragment.requireContext().getResources().getString(
-                            R.string.account_could_not_be_followed);
-                    textViewLabel = fragment.requireContext().getResources().getString(
-                            R.string.account_could_not_be_followed);
-                    textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
-                }
-
-                // show alert as custom snackBar
-                showCustomSnackBarForAlert(fragment, alertText, error.toString(), textViewLabel,
-                                           textViewLabelAction);
-            }
+      // fixing "Fragment not attached to a context"
+      if (fragment != null && fragment.getContext() != null) {
+        // get proper response
+        if (errorMessage.equals(Error.NO_INTERNET_CONNECTION.toString())) {
+          alertText =
+              fragment.requireContext().getResources().getString(R.string.no_internet_connection);
+          textViewLabel =
+              fragment.requireContext().getResources().getString(R.string.no_internet_connection);
+          textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
+        } else if (errorMessage.equals(Error.UPDATING_BOOKMARKS_CATEGORY_FAILED.toString())) {
+          alertText =
+              fragment
+                  .requireContext()
+                  .getResources()
+                  .getString(R.string.updating_bookmarked_post_category_failed);
+          textViewLabel =
+              fragment
+                  .requireContext()
+                  .getResources()
+                  .getString(R.string.updating_bookmarked_post_category_failed_label);
+          textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
+        } else if (errorMessage.equals(Error.SOMETHINGS_WRONG.toString())) {
+          alertText =
+              fragment
+                  .requireContext()
+                  .getResources()
+                  .getString(R.string.something_went_wrong_more_info);
+          textViewLabel =
+              fragment.requireContext().getResources().getString(R.string.something_has_gone_wrong);
+          textViewLabelAction =
+              fragment.requireContext().getResources().getString(R.string.more_info);
+        } else if (errorMessage.equals(Error.POST_NOT_AVAILABLE_ANYMORE.toString())) {
+          alertText =
+              fragment
+                  .requireContext()
+                  .getResources()
+                  .getString(R.string.post_not_available_anymore);
+          textViewLabel =
+              fragment
+                  .requireContext()
+                  .getResources()
+                  .getString(R.string.post_not_available_anymore_label);
+          textViewLabelAction =
+              fragment.requireContext().getResources().getString(R.string.more_info);
+        } else if (errorMessage.equals(Error.ACCOUNT_COULD_NOT_BE_FOLLOWED.toString())) {
+          alertText =
+              fragment
+                  .requireContext()
+                  .getResources()
+                  .getString(R.string.account_could_not_be_followed);
+          textViewLabel =
+              fragment
+                  .requireContext()
+                  .getResources()
+                  .getString(R.string.account_could_not_be_followed);
+          textViewLabelAction = fragment.requireContext().getResources().getString(R.string.okay);
         }
+
+        // show alert as custom snackBar
+        showCustomSnackBarForAlert(
+            fragment, alertText, error.toString(), textViewLabel, textViewLabelAction);
+      }
     }
+  }
 
-    /**
-     * Shows a custom snackBar to show option to save post to collection above the bottom navigation view
-     *
-     * @param fragment            Fragment
-     * @param alertText           String
-     * @param error               String
-     * @param textViewLabel       String
-     * @param textViewLabelAction String
-     */
-    private static void showCustomSnackBarForAlert(final Fragment fragment, final String alertText,
-                                                   final String error, final String textViewLabel,
-                                                   final String textViewLabelAction) {
-        if (fragment != null && fragment.getContext() != null) {
-            final ConstraintLayout conLayCustomSnackBarAlert = fragment.requireActivity().findViewById(
-                    R.id.conLayCustomSnackBarAlert);
-            final TextView textViewLabelAlert = fragment.requireActivity().findViewById(
-                    R.id.textViewLabelAlert);
-            final TextView textViewActionAlert = fragment.requireActivity().findViewById(
-                    R.id.textViewActionAlert);
+  /**
+   * Shows a custom snackBar to show option to save post to collection above the bottom navigation
+   * view
+   *
+   * @param fragment Fragment
+   * @param alertText String
+   * @param error String
+   * @param textViewLabel String
+   * @param textViewLabelAction String
+   */
+  private static void showCustomSnackBarForAlert(
+      final Fragment fragment,
+      final String alertText,
+      final String error,
+      final String textViewLabel,
+      final String textViewLabelAction) {
+    if (fragment != null && fragment.getContext() != null) {
+      final ConstraintLayout conLayCustomSnackBarAlert =
+          fragment.requireActivity().findViewById(R.id.conLayCustomSnackBarAlert);
+      final TextView textViewLabelAlert =
+          fragment.requireActivity().findViewById(R.id.textViewLabelAlert);
+      final TextView textViewActionAlert =
+          fragment.requireActivity().findViewById(R.id.textViewActionAlert);
 
-            final Runnable[] runnable = new Runnable[1];
+      final Runnable[] runnable = new Runnable[1];
 
-            // Fixed: Can't create handler inside thread Thread[AsyncTask #2,5,main]
-            // that has not called Looper.prepare()
-            if (fragment.isAdded()) {
-                fragment.requireActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        final Handler handler = new Handler();
-                    }
+      // Fixed: Can't create handler inside thread Thread[AsyncTask #2,5,main]
+      // that has not called Looper.prepare()
+      if (fragment.isAdded()) {
+        fragment
+            .requireActivity()
+            .runOnUiThread(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    final Handler handler = new Handler();
+                  }
                 });
-            }
+      }
 
-            if (fragment.isAdded()) {
-                fragment.requireActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        runnable[0] = new Runnable() {
-                            @Override
-                            public void run() {
-                                mapErrorWasShown.remove(error);
-                                conLayCustomSnackBarAlert.setVisibility(GONE);
-                            }
+      if (fragment.isAdded()) {
+        fragment
+            .requireActivity()
+            .runOnUiThread(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    runnable[0] =
+                        new Runnable() {
+                          @Override
+                          public void run() {
+                            mapErrorWasShown.remove(error);
+                            conLayCustomSnackBarAlert.setVisibility(GONE);
+                          }
                         };
-                    }
+                  }
                 });
-            }
+      }
 
-            // set text color based on theme
-            TypedValue typedValue = new TypedValue();
-            Resources.Theme theme = fragment.requireContext().getTheme();
-            theme.resolveAttribute(R.attr.colorError, typedValue, true);
-            @ColorInt final int textColor = typedValue.data;
+      // set text color based on theme
+      TypedValue typedValue = new TypedValue();
+      Resources.Theme theme = fragment.requireContext().getTheme();
+      theme.resolveAttribute(R.attr.colorError, typedValue, true);
+      @ColorInt final int textColor = typedValue.data;
 
-            fragment.requireActivity().runOnUiThread(new Runnable() {
+      fragment
+          .requireActivity()
+          .runOnUiThread(
+              new Runnable() {
                 @Override
                 public void run() {
-                    textViewLabelAlert.setTextColor(textColor);
-                    textViewActionAlert.setTextColor(textColor);
+                  textViewLabelAlert.setTextColor(textColor);
+                  textViewActionAlert.setTextColor(textColor);
                 }
+              });
+
+      // make error container visible
+      if (fragment.isAdded()) {
+        fragment
+            .requireActivity()
+            .runOnUiThread(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    adjustMarginsOfSnackBarDependingOnFragment(conLayCustomSnackBarAlert, fragment);
+                    conLayCustomSnackBarAlert.setVisibility(View.VISIBLE);
+                  }
+                });
+      }
+
+      // set action with action "OK" and no dialog afterwards
+      if (error.equals(Error.NO_INTERNET_CONNECTION.toString())
+          || error.equals(Error.UPDATING_BOOKMARKS_CATEGORY_FAILED.toString())
+          || error.equals(Error.ACCOUNT_COULD_NOT_BE_FOLLOWED.toString())) {
+        if (fragment.isAdded()) {
+          fragment
+              .requireActivity()
+              .runOnUiThread(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      textViewLabelAlert.setText(textViewLabel);
+                      textViewActionAlert.setText(textViewLabelAction);
+                    }
+                  });
+        }
+
+        textViewActionAlert.setOnClickListener(
+            new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+                mapErrorWasShown.remove(error);
+
+                if (fragment.isAdded()) {
+                  fragment
+                      .requireActivity()
+                      .runOnUiThread(
+                          new Runnable() {
+                            @Override
+                            public void run() {
+                              conLayCustomSnackBarAlert.removeCallbacks(runnable[0]);
+                              conLayCustomSnackBarAlert.setVisibility(GONE);
+                            }
+                          });
+                }
+              }
             });
-
-            // make error container visible
-            if (fragment.isAdded()) {
-                fragment.requireActivity().runOnUiThread(new Runnable() {
+      } else {
+        // set labels with action "MORE INFO" and dialog afterwards
+        if (fragment.isAdded()) {
+          fragment
+              .requireActivity()
+              .runOnUiThread(
+                  new Runnable() {
                     @Override
                     public void run() {
-                        adjustMarginsOfSnackBarDependingOnFragment(conLayCustomSnackBarAlert, fragment);
-                        conLayCustomSnackBarAlert.setVisibility(View.VISIBLE);
+                      textViewLabelAlert.setText(textViewLabel);
+                      textViewActionAlert.setText(textViewLabelAction);
                     }
-                });
-            }
+                  });
+        }
 
-            // set action with action "OK" and no dialog afterwards
-            if (error.equals(Error.NO_INTERNET_CONNECTION.toString()) || error.equals(
-                    Error.UPDATING_BOOKMARKS_CATEGORY_FAILED.toString()) || error.equals(
-                    Error.ACCOUNT_COULD_NOT_BE_FOLLOWED.toString())) {
+        textViewActionAlert.setOnClickListener(
+            new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+                mapErrorWasShown.remove(error);
+                showAlertDialog(fragment, alertText, error);
+
                 if (fragment.isAdded()) {
-                    fragment.requireActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            textViewLabelAlert.setText(textViewLabel);
-                            textViewActionAlert.setText(textViewLabelAction);
-                        }
-                    });
-                }
-
-                textViewActionAlert.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mapErrorWasShown.remove(error);
-
-                        if (fragment.isAdded()) {
-                            fragment.requireActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    conLayCustomSnackBarAlert.removeCallbacks(runnable[0]);
-                                    conLayCustomSnackBarAlert.setVisibility(GONE);
-                                }
-                            });
-                        }
-                    }
-                });
-            } else {
-                // set labels with action "MORE INFO" and dialog afterwards
-                if (fragment.isAdded()) {
-                    fragment.requireActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            textViewLabelAlert.setText(textViewLabel);
-                            textViewActionAlert.setText(textViewLabelAction);
-                        }
-                    });
-                }
-
-                textViewActionAlert.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mapErrorWasShown.remove(error);
-                        showAlertDialog(fragment, alertText, error);
-
-                        if (fragment.isAdded()) {
-                            fragment.requireActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    conLayCustomSnackBarAlert.removeCallbacks(runnable[0]);
-                                    conLayCustomSnackBarAlert.setVisibility(GONE);
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-
-            // make custom snackbar visible and trigger postDelay
-            if (fragment.isAdded()) {
-                fragment.requireActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        conLayCustomSnackBarAlert.setVisibility(View.VISIBLE);
-                        conLayCustomSnackBarAlert.postDelayed(runnable[0], 3000);
-                    }
-                });
-            }
-        }
-    }
-
-    /**
-     * Adjusts the margins of the snackbar for showing an error depending on the fragment
-     *
-     * @param conLayCustomSnackBarAlert ConstraintLayout
-     * @param fragment                  Fragment
-     */
-    private static void adjustMarginsOfSnackBarDependingOnFragment(ConstraintLayout conLayCustomSnackBarAlert,
-                                                                   Fragment fragment) {
-        if (conLayCustomSnackBarAlert == null || fragment == null) return;
-
-        String fragmentName = fragment.getClass().getSimpleName();
-
-        int marginBottom, marginHorizontal;
-        CoordinatorLayout.LayoutParams layoutParams =
-                (CoordinatorLayout.LayoutParams) conLayCustomSnackBarAlert.getLayoutParams();
-
-        if (fragmentName.equals("FeedFragment") || fragmentName.equals("SearchFragment") ||
-            fragmentName.equals("CollectionsFragment")) {
-            // calc margins depending on fragment with nav bar visible
-            marginBottom = convertDpToPixel(112f, fragment.requireContext());
-            marginHorizontal = convertDpToPixel(8f, fragment.requireContext());
-        } else {
-            // calc margins depending on fragment with nav bar not visible
-            marginBottom = convertDpToPixel(8f, fragment.requireContext());
-            marginHorizontal = convertDpToPixel(8f, fragment.requireContext());
-        }
-
-        // adjust margins
-        layoutParams.setMargins(marginHorizontal, 0, marginHorizontal, marginBottom);
-        conLayCustomSnackBarAlert.setLayoutParams(layoutParams);
-    }
-
-    /**
-     * This method converts dp unit to equivalent pixels, depending on device density. Source:
-     * https://stackoverflow.com/questions/4605527/converting-pixels-to-dp
-     *
-     * @param dp      int
-     * @param context Context
-     * @return int
-     */
-    public static int convertDpToPixel(float dp, Context context) {
-        //return dp * (context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics
-        // .DENSITY_DEFAULT);
-        //getResources().getDisplayMetrics().density; // Convert the dps to pixels, based on density scale
-        // return (int) (input * scale + 0.5f);
-        Resources r = context.getResources();
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());
-    }
-
-    /**
-     * Shows an alert dialog with a alertText over a fragment
-     *
-     * @param fragment  Fragment
-     * @param alertText String
-     * @param error     String
-     */
-    private static void showAlertDialog(final Fragment fragment, String alertText, final String error) {
-        if (fragment != null && fragment.isAdded()) {
-            try {
-                // make alertText final
-                final String finalAlertText = alertText;
-
-                MaterialAlertDialogBuilder alertDialogBuilder;
-                // create alertDialog
-                alertDialogBuilder = new MaterialAlertDialogBuilder(fragment.requireContext()).setMessage(
-                        finalAlertText).setPositiveButton(
-                        fragment.requireContext().getResources().getString(R.string.okay),
-                        new DialogInterface.OnClickListener() {
+                  fragment
+                      .requireActivity()
+                      .runOnUiThread(
+                          new Runnable() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                mapErrorWasShown.remove(error);
-                                assert finalAlertText != null;
-                                if (finalAlertText.equals(fragment.requireContext().getResources().getString(
-                                        R.string.post_not_available_anymore))) {
-                                    fragment.requireActivity().onBackPressed();
-                                }
+                            public void run() {
+                              conLayCustomSnackBarAlert.removeCallbacks(runnable[0]);
+                              conLayCustomSnackBarAlert.setVisibility(GONE);
                             }
-                        })
-                        // get the click outside the dialog to set the behaviour like the positive button
-                        // was clicked
-                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                            @Override
-                            public void onCancel(DialogInterface dialog) {
-                                mapErrorWasShown.remove(error);
-                            }
-                        });
+                          });
+                }
+              }
+            });
+      }
 
-                final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
-
-                TypedValue typedValue = new TypedValue();
-                Resources.Theme theme = fragment.requireContext().getTheme();
-                theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-                @ColorInt final int color = typedValue.data;
-
-                // create alertDialog
-                fragment.requireActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        AlertDialog alertDialog = finalAlertDialogBuilder.create();
-                        alertDialog.setCanceledOnTouchOutside(true);
-                        alertDialog.show();
-                        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
-                    }
+      // make custom snackbar visible and trigger postDelay
+      if (fragment.isAdded()) {
+        fragment
+            .requireActivity()
+            .runOnUiThread(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    conLayCustomSnackBarAlert.setVisibility(View.VISIBLE);
+                    conLayCustomSnackBarAlert.postDelayed(runnable[0], 3000);
+                  }
                 });
-            } catch (Exception e) {
-                Log.d("FragmentHelper", Log.getStackTraceString(e));
-            }
-        }
+      }
     }
+  }
+
+  /**
+   * Adjusts the margins of the snackbar for showing an error depending on the fragment
+   *
+   * @param conLayCustomSnackBarAlert ConstraintLayout
+   * @param fragment Fragment
+   */
+  private static void adjustMarginsOfSnackBarDependingOnFragment(
+      ConstraintLayout conLayCustomSnackBarAlert, Fragment fragment) {
+    if (conLayCustomSnackBarAlert == null || fragment == null) return;
+
+    String fragmentName = fragment.getClass().getSimpleName();
+
+    int marginBottom, marginHorizontal;
+    CoordinatorLayout.LayoutParams layoutParams =
+        (CoordinatorLayout.LayoutParams) conLayCustomSnackBarAlert.getLayoutParams();
+
+    if (fragmentName.equals("FeedFragment")
+        || fragmentName.equals("SearchFragment")
+        || fragmentName.equals("CollectionsFragment")) {
+      // calc margins depending on fragment with nav bar visible
+      marginBottom = convertDpToPixel(112f, fragment.requireContext());
+      marginHorizontal = convertDpToPixel(8f, fragment.requireContext());
+    } else {
+      // calc margins depending on fragment with nav bar not visible
+      marginBottom = convertDpToPixel(8f, fragment.requireContext());
+      marginHorizontal = convertDpToPixel(8f, fragment.requireContext());
+    }
+
+    // adjust margins
+    layoutParams.setMargins(marginHorizontal, 0, marginHorizontal, marginBottom);
+    conLayCustomSnackBarAlert.setLayoutParams(layoutParams);
+  }
+
+  /**
+   * This method converts dp unit to equivalent pixels, depending on device density. Source:
+   * https://stackoverflow.com/questions/4605527/converting-pixels-to-dp
+   *
+   * @param dp int
+   * @param context Context
+   * @return int
+   */
+  public static int convertDpToPixel(float dp, Context context) {
+    // return dp * (context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics
+    // .DENSITY_DEFAULT);
+    // getResources().getDisplayMetrics().density; // Convert the dps to pixels, based on density
+    // scale
+    // return (int) (input * scale + 0.5f);
+    Resources r = context.getResources();
+    return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());
+  }
+
+  /**
+   * Shows an alert dialog with a alertText over a fragment
+   *
+   * @param fragment Fragment
+   * @param alertText String
+   * @param error String
+   */
+  private static void showAlertDialog(
+      final Fragment fragment, String alertText, final String error) {
+    if (fragment != null && fragment.isAdded()) {
+      try {
+        // make alertText final
+        final String finalAlertText = alertText;
+
+        MaterialAlertDialogBuilder alertDialogBuilder;
+        // create alertDialog
+        alertDialogBuilder =
+            new MaterialAlertDialogBuilder(fragment.requireContext())
+                .setMessage(finalAlertText)
+                .setPositiveButton(
+                    fragment.requireContext().getResources().getString(R.string.okay),
+                    new DialogInterface.OnClickListener() {
+                      @Override
+                      public void onClick(DialogInterface dialog, int which) {
+                        mapErrorWasShown.remove(error);
+                        assert finalAlertText != null;
+                        if (finalAlertText.equals(
+                            fragment
+                                .requireContext()
+                                .getResources()
+                                .getString(R.string.post_not_available_anymore))) {
+                          fragment.requireActivity().onBackPressed();
+                        }
+                      }
+                    })
+                // get the click outside the dialog to set the behaviour like the positive button
+                // was clicked
+                .setOnCancelListener(
+                    new DialogInterface.OnCancelListener() {
+                      @Override
+                      public void onCancel(DialogInterface dialog) {
+                        mapErrorWasShown.remove(error);
+                      }
+                    });
+
+        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
+
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = fragment.requireContext().getTheme();
+        theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
+        @ColorInt final int color = typedValue.data;
+
+        // create alertDialog
+        fragment
+            .requireActivity()
+            .runOnUiThread(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    AlertDialog alertDialog = finalAlertDialogBuilder.create();
+                    alertDialog.setCanceledOnTouchOutside(true);
+                    alertDialog.show();
+                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
+                  }
+                });
+      } catch (Exception e) {
+        Log.d("FragmentHelper", Log.getStackTraceString(e));
+      }
+    }
+  }
 
   /**
    * Gets the colorId of the color with the resIdColor
@@ -694,412 +790,432 @@ public class FragmentHelper {
     return color;
   }
 
-    /**
-     * Validates a jsonStr and shows error message in snackBar if error was found
-     *
-     * @param jsonStr  String
-     * @param fragment Fragment
-     */
-    public static boolean checkIfJsonStrIsValid(String jsonStr, Fragment fragment) {
-        if (jsonStr != null && fragment != null) {
-            if (jsonStr.startsWith("<!DOCTYPE html>") || jsonStr.isEmpty()) {
+  /**
+   * Validates a jsonStr and shows error message in snackBar if error was found
+   *
+   * @param jsonStr String
+   * @param fragment Fragment
+   */
+  public static boolean checkIfJsonStrIsValid(String jsonStr, Fragment fragment) {
+    if (jsonStr != null && fragment != null) {
+      if (jsonStr.startsWith("<!DOCTYPE html>") || jsonStr.isEmpty()) {
 
-                // only throw error when fragment is not FeedFragment
-                if (fragment.getTag() != null && !fragment.getTag().equals("FeedFragment")) {
-                    FragmentHelper.notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
-                }
-
-                return false;
-            } else {
-                // no errors
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns true, if theme is darkTheme
-     *
-     * @param context Context
-     * @return boolean
-     */
-    public static boolean getThemeIsDarkTheme(Context context) {
-        if (context == null) return false;
-
-        // get the amount of columns from settings
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        if (preferences != null) {
-            if (preferences.contains("darkMode")) {
-                return preferences.getBoolean("darkMode", false);
-            }
+        // only throw error when fragment is not FeedFragment
+        if (fragment.getTag() != null && !fragment.getTag().equals("FeedFragment")) {
+          FragmentHelper.notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
         }
 
         return false;
+      } else {
+        // no errors
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns true, if theme is darkTheme
+   *
+   * @param context Context
+   * @return boolean
+   */
+  public static boolean getThemeIsDarkTheme(Context context) {
+    if (context == null) return false;
+
+    // get the amount of columns from settings
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    if (preferences != null) {
+      if (preferences.contains("darkMode")) {
+        return preferences.getBoolean("darkMode", false);
+      }
     }
 
-    /**
-     * Shows a dialog with information about followed accounts and amount of bookmarks
-     *
-     * @param fragment Fragment
-     */
-    public static void showStatisticsDialog(Fragment fragment) {
-        // get statistics
-        int amountFollowedAccounts = StorageHelper.amountFollowedAccounts(fragment.getContext());
-        int amountBookmarks = StorageHelper.amountBookmarks(fragment.getContext());
+    return false;
+  }
 
-        // create message
-        String message = "Followed Accounts: " + amountFollowedAccounts + "\nBookmarks: " + amountBookmarks;
+  /**
+   * Shows a dialog with information about followed accounts and amount of bookmarks
+   *
+   * @param fragment Fragment
+   */
+  public static void showStatisticsDialog(Fragment fragment) {
+    // get statistics
+    int amountFollowedAccounts = StorageHelper.amountFollowedAccounts(fragment.getContext());
+    int amountBookmarks = StorageHelper.amountBookmarks(fragment.getContext());
 
-        // create alertDialog
-        MaterialAlertDialogBuilder alertDialogBuilder;
-        alertDialogBuilder = new MaterialAlertDialogBuilder(fragment.requireContext()).setTitle("Statistics")
-                .setMessage(message).setPositiveButton(
-                        fragment.requireContext().getResources().getString(R.string.okay),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
+    // create message
+    String message =
+        "Followed Accounts: " + amountFollowedAccounts + "\nBookmarks: " + amountBookmarks;
 
-        final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
+    // create alertDialog
+    MaterialAlertDialogBuilder alertDialogBuilder;
+    alertDialogBuilder =
+        new MaterialAlertDialogBuilder(fragment.requireContext())
+            .setTitle("Statistics")
+            .setMessage(message)
+            .setPositiveButton(
+                fragment.requireContext().getResources().getString(R.string.okay),
+                new DialogInterface.OnClickListener() {
+                  @Override
+                  public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                  }
+                });
 
-        // change text color based on theme
-        TypedValue typedValue = new TypedValue();
-        Resources.Theme theme = fragment.requireContext().getTheme();
-        theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-        @ColorInt final int color = typedValue.data;
+    final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
-        // create alertDialog
-        fragment.requireActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+    // change text color based on theme
+    TypedValue typedValue = new TypedValue();
+    Resources.Theme theme = fragment.requireContext().getTheme();
+    theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
+    @ColorInt final int color = typedValue.data;
+
+    // create alertDialog
+    fragment
+        .requireActivity()
+        .runOnUiThread(
+            new Runnable() {
+              @Override
+              public void run() {
                 AlertDialog alertDialog = finalAlertDialogBuilder.create();
                 alertDialog.setCanceledOnTouchOutside(true);
                 alertDialog.show();
                 alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
-            }
-        });
-    }
-
-    /**
-     * Returns boolean whether advertising string should be added to clipboard text
-     *
-     * @param fragment Fragment
-     * @return boolean
-     */
-    public static boolean addAdvertisingStringToClipboard(Fragment fragment) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
-                fragment.requireContext());
-        if (preferences != null) {
-            return preferences.getBoolean(
-                    fragment.requireContext().getResources().getString(R.string.advertising_string_clipboard),
-                    false);
-        }
-        return false;
-    }
-
-    /**
-     * Creates collections from bookmarks category and adds them to listCollectionsBookmarked
-     *
-     * @param context Context
-     * @return List<Collection>
-     */
-    public static List<Collection> createCollectionsFromBookmarks(Context context) {
-        // initialize lists
-        List<Collection> listCollectionsBookmarked = new ArrayList<>();
-        List<String> listCategories = new ArrayList<>();
-
-        // read Bookmarks from Storage
-        List<Post> listAllPostsBookmarked = readAllBookmarksFromStorage(context);
-
-        // first create collection "All"
-        if (listAllPostsBookmarked != null && !listAllPostsBookmarked.isEmpty()) {
-
-            // add first bookmark as thumbnail
-            listCollectionsBookmarked.add(
-                    new Collection("All", listAllPostsBookmarked.get(0).getImageUrlThumbnail(),
-                                   listAllPostsBookmarked.get(0).getImageThumbnail()));
-
-            // then create all categories from all bookmarks category
-            if (!listAllPostsBookmarked.isEmpty()) {
-                for (Post post : listAllPostsBookmarked) {
-                    if (post.getCategory() != null && !listCategories.contains(post.getCategory())) {
-
-                        // create new collection
-                        listCollectionsBookmarked.add(
-                                new Collection(post.getCategory(), post.getImageUrlThumbnail(),
-                                               post.getImageThumbnail()));
-
-                        // add category to
-                        listCategories.add(post.getCategory());
-                    }
-                }
-            }
-        }
-
-        return listCollectionsBookmarked;
-    }
-
-    /**
-     * Retrieves all bookmarks from storage
-     *
-     * @param context Context
-     * @return ArrayList<Post>
-     */
-    private static ArrayList<Post> readAllBookmarksFromStorage(Context context) {
-    return StorageHelper.readPostsFromInternalStorage(context, StorageHelper.FILENAME_BOOKMARKS);
-    }
-
-    /**
-     * Retrieves all posts of specific collection (category)
-     *
-     * @param category String
-     * @param context  Context
-     * @return List<Post>
-     */
-    public static List<Post> getAllBookmarkedPostsOfCollection(final String category, Context context) {
-        // initialize listPostsInCollectionBookmarked with bookmarks from storage
-        List<Post> listPostsInCollectionBookmarked = readAllBookmarksFromStorage(context);
-
-        if (listPostsInCollectionBookmarked != null) {
-            // show all bookmarks if category is null or show specific category
-            if (!category.equals("All")) {
-                // get all posts with specific category
-                listPostsInCollectionBookmarked = listPostsInCollectionBookmarked.stream().filter(
-                        post -> (post.getCategory() != null) && post.getCategory().equals(category)).collect(
-                        Collectors.toList());
-            }
-        }
-
-        return listPostsInCollectionBookmarked;
-    }
-
-    /**
-     * Returns true, if there is a collection with the name of the String category
-     *
-     * @param category String
-     * @param context  Context
-     * @return boolean
-     */
-    public static boolean collectionWithNameDoesExist(final String category, Context context) {
-        List<Collection> listCollections = FragmentHelper.createCollectionsFromBookmarks(context);
-
-        // get all collections with specific category
-        listCollections = listCollections.stream().filter(
-                collection -> collection.getName() != null && collection.getName().equals(category)).collect(
-                Collectors.toList());
-
-        return !listCollections.isEmpty();
-    }
-
-    /**
-     * Returns true, if there are already collections
-     *
-     * @param context Context
-     * @return boolean
-     */
-    public static boolean collectionsAlreadyExist(Context context) {
-        List<Collection> listCollections = FragmentHelper.createCollectionsFromBookmarks(context);
-        return listCollections.size() > 1;
-    }
-
-    /**
-     * Start intent to rate the app in Google Play or in the web browser if Google Play is not installed
-     *
-     * @param context Context
-     */
-    public static void rateApp(Context context) {
-        try {
-            Intent rateIntent = rateIntentForUrl("market://details", context);
-            context.startActivity(rateIntent);
-        } catch (ActivityNotFoundException e) {
-            Intent rateIntent = rateIntentForUrl("https://play.google.com/store/apps/details", context);
-            context.startActivity(rateIntent);
-        }
-    }
-
-    /**
-     * Helper method for rateApp(context) to start intent
-     *
-     * @param url     String
-     * @param context Context
-     * @return Intent
-     */
-    private static Intent rateIntentForUrl(String url, Context context) {
-        Intent intent = new Intent(Intent.ACTION_VIEW,
-                                   Uri.parse(String.format("%s?id=%s", url, context.getPackageName())));
-        int flags = Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
-        flags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
-        intent.addFlags(flags);
-        return intent;
-    }
-
-    /**
-     * Shows a toast on main thread with a message
-     *
-     * @param message  String
-     * @param activity Activity
-     * @param context  Context
-     */
-    public static void showToast(final String message, Activity activity, final Context context) {
-        if (activity != null && context != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-                }
+              }
             });
+  }
+
+  /**
+   * Returns boolean whether advertising string should be added to clipboard text
+   *
+   * @param fragment Fragment
+   * @return boolean
+   */
+  public static boolean addAdvertisingStringToClipboard(Fragment fragment) {
+    SharedPreferences preferences =
+        PreferenceManager.getDefaultSharedPreferences(fragment.requireContext());
+    if (preferences != null) {
+      return preferences.getBoolean(
+          fragment.requireContext().getResources().getString(R.string.advertising_string_clipboard),
+          false);
+    }
+    return false;
+  }
+
+  /**
+   * Creates collections from bookmarks category and adds them to listCollectionsBookmarked
+   *
+   * @param context Context
+   * @return List<Collection>
+   */
+  public static List<Collection> createCollectionsFromBookmarks(Context context) {
+    // initialize lists
+    List<Collection> listCollectionsBookmarked = new ArrayList<>();
+    List<String> listCategories = new ArrayList<>();
+
+    // read Bookmarks from Storage
+    List<Post> listAllPostsBookmarked = readAllBookmarksFromStorage(context);
+
+    // first create collection "All"
+    if (listAllPostsBookmarked != null && !listAllPostsBookmarked.isEmpty()) {
+
+      // add first bookmark as thumbnail
+      listCollectionsBookmarked.add(
+          new Collection(
+              "All",
+              listAllPostsBookmarked.get(0).getImageUrlThumbnail(),
+              listAllPostsBookmarked.get(0).getImageThumbnail()));
+
+      // then create all categories from all bookmarks category
+      if (!listAllPostsBookmarked.isEmpty()) {
+        for (Post post : listAllPostsBookmarked) {
+          if (post.getCategory() != null && !listCategories.contains(post.getCategory())) {
+
+            // create new collection
+            listCollectionsBookmarked.add(
+                new Collection(
+                    post.getCategory(), post.getImageUrlThumbnail(), post.getImageThumbnail()));
+
+            // add category to
+            listCategories.add(post.getCategory());
+          }
         }
+      }
     }
 
-    /**
-     * Returns a base64 encoded string of an image from url. Hint: Method exists in StorageHelper as well, but
-     * cannot be used here because this would be an async task call inside an async task call, hence the
-     * "duplicated" method!
-     *
-     * @param url String
-     * @return String
-     * @throws Exception Exception
-     */
-    public static String getBase64EncodedImage(String url) throws Exception {
-        if (url == null) return null;
+    return listCollectionsBookmarked;
+  }
 
-        URL imageUrl = new URL(url);
-        URLConnection ucon = imageUrl.openConnection();
-        InputStream is = ucon.getInputStream();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = is.read(buffer, 0, buffer.length)) != -1) {
-            baos.write(buffer, 0, read);
-        }
-        baos.flush();
-        return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+  /**
+   * Retrieves all bookmarks from storage
+   *
+   * @param context Context
+   * @return ArrayList<Post>
+   */
+  private static ArrayList<Post> readAllBookmarksFromStorage(Context context) {
+    return StorageHelper.readPostsFromInternalStorage(context, StorageHelper.FILENAME_BOOKMARKS);
+  }
+
+  /**
+   * Retrieves all posts of specific collection (category)
+   *
+   * @param category String
+   * @param context Context
+   * @return List<Post>
+   */
+  public static List<Post> getAllBookmarkedPostsOfCollection(
+      final String category, Context context) {
+    // initialize listPostsInCollectionBookmarked with bookmarks from storage
+    List<Post> listPostsInCollectionBookmarked = readAllBookmarksFromStorage(context);
+
+    if (listPostsInCollectionBookmarked != null) {
+      // show all bookmarks if category is null or show specific category
+      if (!category.equals("All")) {
+        // get all posts with specific category
+        listPostsInCollectionBookmarked =
+            listPostsInCollectionBookmarked.stream()
+                .filter(post -> (post.getCategory() != null) && post.getCategory().equals(category))
+                .collect(Collectors.toList());
+      }
     }
 
-    /**
-     * Creates an SpannableStringBuilder with clickable links to accounts and hashtags. A link is generated
-     * for every word which contains an "@" or "#" character. If something went wrong the input text is
-     * returned
-     *
-     * @param text     String
-     * @param fragment Fragment
-     * @return SpannableStringBuilder
-     */
-    public static SpannableStringBuilder createSpannableStringWithClickableLinks(String text,
-                                                                                 final Fragment fragment) {
-        if (text == null) return null;
+    return listPostsInCollectionBookmarked;
+  }
 
-        SpannableStringBuilder ssb = new SpannableStringBuilder();
-        final Pattern patternAccount = Pattern.compile("(@([a-z0-9._]*))");
-        final Pattern patternHashtag = Pattern.compile("(#([A-Za-z0-9_]*))");
+  /**
+   * Returns true, if there is a collection with the name of the String category
+   *
+   * @param category String
+   * @param context Context
+   * @return boolean
+   */
+  public static boolean collectionWithNameDoesExist(final String category, Context context) {
+    List<Collection> listCollections = FragmentHelper.createCollectionsFromBookmarks(context);
 
-        try {
-            // replace every word containing "@" or "#" with clickable link
-            for (String word : text.split(" ")) {
-                if (word.contains("@")) {
-                    // add link to account
-                    int indexStartAccountName = 0;
-                    int indexEndAccountName = 0;
+    // get all collections with specific category
+    listCollections =
+        listCollections.stream()
+            .filter(
+                collection -> collection.getName() != null && collection.getName().equals(category))
+            .collect(Collectors.toList());
 
-                    Matcher matcher = patternAccount.matcher(word);
-                    while (matcher.find()) {
-                        indexStartAccountName = matcher.start();
-                        indexEndAccountName = matcher.end();
-                    }
+    return !listCollections.isEmpty();
+  }
 
-                    // +1 because "@" should be omitted
-                    final String accountName = word.substring(indexStartAccountName + 1, indexEndAccountName);
-                    SpannableString spannableString = new SpannableString(word);
+  /**
+   * Returns true, if there are already collections
+   *
+   * @param context Context
+   * @return boolean
+   */
+  public static boolean collectionsAlreadyExist(Context context) {
+    List<Collection> listCollections = FragmentHelper.createCollectionsFromBookmarks(context);
+    return listCollections.size() > 1;
+  }
 
-                    ClickableSpan clickableSpan = new ClickableSpan() {
-                        @SuppressLint("ResourceType")
-                        @Override
-                        public void updateDrawState(@NonNull TextPaint ds) {
-                            super.updateDrawState(ds);
-                            // underline text
-                            ds.setUnderlineText(true);
+  /**
+   * Start intent to rate the app in Google Play or in the web browser if Google Play is not
+   * installed
+   *
+   * @param context Context
+   */
+  public static void rateApp(Context context) {
+    try {
+      Intent rateIntent = rateIntentForUrl("market://details", context);
+      context.startActivity(rateIntent);
+    } catch (ActivityNotFoundException e) {
+      Intent rateIntent = rateIntentForUrl("https://play.google.com/store/apps/details", context);
+      context.startActivity(rateIntent);
+    }
+  }
 
-                            // set color to textColorSecondary
-                            int secondaryColor = MaterialColors.getColor(fragment.requireContext(),
-                                                                         android.R.attr.textColorSecondary,
-                                                                         Color.BLUE);
-                            ds.setColor(secondaryColor);
-                        }
+  /**
+   * Helper method for rateApp(context) to start intent
+   *
+   * @param url String
+   * @param context Context
+   * @return Intent
+   */
+  private static Intent rateIntentForUrl(String url, Context context) {
+    Intent intent =
+        new Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(String.format("%s?id=%s", url, context.getPackageName())));
+    int flags = Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+    flags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+    intent.addFlags(flags);
+    return intent;
+  }
 
-                        @Override
-                        public void onClick(@NonNull View view) {
-                            view.invalidate();
-                            // new profileFragment
-                            ProfileFragment profileFragment = ProfileFragment.newInstance(accountName);
-
-                            // add fragment to container
-                            FragmentHelper.addFragmentToContainer(profileFragment, fragment.requireActivity().getSupportFragmentManager());
-                        }
-                    };
-
-                    spannableString.setSpan(clickableSpan, indexStartAccountName, indexEndAccountName,
-                                            SPAN_EXCLUSIVE_EXCLUSIVE);
-                    ssb.append(spannableString);
-                } else if (word.contains("#")) {
-                    // add link to hashtag
-                    int indexStartHashtagName = 0;
-                    int indexEndHashtagName = 0;
-
-                    Matcher matcher = patternHashtag.matcher(word);
-                    while (matcher.find()) {
-                        indexStartHashtagName = matcher.start();
-                        indexEndHashtagName = matcher.end();
-                    }
-
-                    // +1 because "#" should be omitted
-                    final String hashtagName = word.substring(indexStartHashtagName + 1, indexEndHashtagName);
-                    SpannableString spannableString = new SpannableString(word);
-
-                    ClickableSpan clickableSpan = new ClickableSpan() {
-                        @SuppressLint("ResourceType")
-                        @Override
-                        public void updateDrawState(@NonNull TextPaint ds) {
-                            super.updateDrawState(ds);
-                            // underline text
-                            ds.setUnderlineText(true);
-
-                            // set color to textColorSecondary
-                            int secondaryColor = MaterialColors.getColor(fragment.requireContext(),
-                                                                         android.R.attr.textColorSecondary,
-                                                                         Color.BLUE);
-                            ds.setColor(secondaryColor);
-                        }
-
-                        @Override
-                        public void onClick(@NonNull View view) {
-                            view.invalidate();
-                            // new hashtagFragment
-                            HashtagFragment hashtagFragment = HashtagFragment.newInstance(hashtagName);
-
-                            // add fragment to container
-                            FragmentHelper.addFragmentToContainer(hashtagFragment,
-                                                                  fragment.requireActivity().getSupportFragmentManager());
-                        }
-                    };
-
-                    spannableString.setSpan(clickableSpan, indexStartHashtagName, indexEndHashtagName,
-                                            SPAN_EXCLUSIVE_EXCLUSIVE);
-                    ssb.append(spannableString);
-                } else {
-                    // insert normal word without link
-                    ssb.append(word);
-                }
-                ssb.append(" ");
+  /**
+   * Shows a toast on main thread with a message
+   *
+   * @param message String
+   * @param activity Activity
+   * @param context Context
+   */
+  public static void showToast(final String message, Activity activity, final Context context) {
+    if (activity != null && context != null) {
+      activity.runOnUiThread(
+          new Runnable() {
+            @Override
+            public void run() {
+              Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
-            return ssb;
-        } catch (Exception e) {
-            Log.d("FragmentHelper", Log.getStackTraceString(e));
-
-            // return text if something went wrong
-            return new SpannableStringBuilder(text);
-        }
+          });
     }
+  }
+
+  /**
+   * Returns a base64 encoded string of an image from url. Hint: Method exists in StorageHelper as
+   * well, but cannot be used here because this would be an async task call inside an async task
+   * call, hence the "duplicated" method!
+   *
+   * @param url String
+   * @return String
+   * @throws Exception Exception
+   */
+  public static String getBase64EncodedImage(String url) throws Exception {
+    if (url == null) return null;
+
+    URL imageUrl = new URL(url);
+    URLConnection ucon = imageUrl.openConnection();
+    InputStream is = ucon.getInputStream();
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    byte[] buffer = new byte[1024];
+    int read;
+    while ((read = is.read(buffer, 0, buffer.length)) != -1) {
+      baos.write(buffer, 0, read);
+    }
+    baos.flush();
+    return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+  }
+
+  /**
+   * Creates an SpannableStringBuilder with clickable links to accounts and hashtags. A link is
+   * generated for every word which contains an "@" or "#" character. If something went wrong the
+   * input text is returned
+   *
+   * @param text String
+   * @param fragment Fragment
+   * @return SpannableStringBuilder
+   */
+  public static SpannableStringBuilder createSpannableStringWithClickableLinks(
+      String text, final Fragment fragment) {
+    if (text == null) return null;
+
+    SpannableStringBuilder ssb = new SpannableStringBuilder();
+    final Pattern patternAccount = Pattern.compile("(@([a-z0-9._]*))");
+    final Pattern patternHashtag = Pattern.compile("(#([A-Za-z0-9_]*))");
+
+    try {
+      // replace every word containing "@" or "#" with clickable link
+      for (String word : text.split(" ")) {
+        if (word.contains("@")) {
+          // add link to account
+          int indexStartAccountName = 0;
+          int indexEndAccountName = 0;
+
+          Matcher matcher = patternAccount.matcher(word);
+          while (matcher.find()) {
+            indexStartAccountName = matcher.start();
+            indexEndAccountName = matcher.end();
+          }
+
+          // +1 because "@" should be omitted
+          final String accountName = word.substring(indexStartAccountName + 1, indexEndAccountName);
+          SpannableString spannableString = new SpannableString(word);
+
+          ClickableSpan clickableSpan =
+              new ClickableSpan() {
+                @SuppressLint("ResourceType")
+                @Override
+                public void updateDrawState(@NonNull TextPaint ds) {
+                  super.updateDrawState(ds);
+                  // underline text
+                  ds.setUnderlineText(true);
+
+                  // set color to textColorSecondary
+                  int secondaryColor =
+                      MaterialColors.getColor(
+                          fragment.requireContext(), android.R.attr.textColorSecondary, Color.BLUE);
+                  ds.setColor(secondaryColor);
+                }
+
+                @Override
+                public void onClick(@NonNull View view) {
+                  view.invalidate();
+                  // new profileFragment
+                  ProfileFragment profileFragment = ProfileFragment.newInstance(accountName);
+
+                  // add fragment to container
+                  FragmentHelper.addFragmentToContainer(
+                      profileFragment, fragment.requireActivity().getSupportFragmentManager());
+                }
+              };
+
+          spannableString.setSpan(
+              clickableSpan, indexStartAccountName, indexEndAccountName, SPAN_EXCLUSIVE_EXCLUSIVE);
+          ssb.append(spannableString);
+        } else if (word.contains("#")) {
+          // add link to hashtag
+          int indexStartHashtagName = 0;
+          int indexEndHashtagName = 0;
+
+          Matcher matcher = patternHashtag.matcher(word);
+          while (matcher.find()) {
+            indexStartHashtagName = matcher.start();
+            indexEndHashtagName = matcher.end();
+          }
+
+          // +1 because "#" should be omitted
+          final String hashtagName = word.substring(indexStartHashtagName + 1, indexEndHashtagName);
+          SpannableString spannableString = new SpannableString(word);
+
+          ClickableSpan clickableSpan =
+              new ClickableSpan() {
+                @SuppressLint("ResourceType")
+                @Override
+                public void updateDrawState(@NonNull TextPaint ds) {
+                  super.updateDrawState(ds);
+                  // underline text
+                  ds.setUnderlineText(true);
+
+                  // set color to textColorSecondary
+                  int secondaryColor =
+                      MaterialColors.getColor(
+                          fragment.requireContext(), android.R.attr.textColorSecondary, Color.BLUE);
+                  ds.setColor(secondaryColor);
+                }
+
+                @Override
+                public void onClick(@NonNull View view) {
+                  view.invalidate();
+                  // new hashtagFragment
+                  HashtagFragment hashtagFragment = HashtagFragment.newInstance(hashtagName);
+
+                  // add fragment to container
+                  FragmentHelper.addFragmentToContainer(
+                      hashtagFragment, fragment.requireActivity().getSupportFragmentManager());
+                }
+              };
+
+          spannableString.setSpan(
+              clickableSpan, indexStartHashtagName, indexEndHashtagName, SPAN_EXCLUSIVE_EXCLUSIVE);
+          ssb.append(spannableString);
+        } else {
+          // insert normal word without link
+          ssb.append(word);
+        }
+        ssb.append(" ");
+      }
+      return ssb;
+    } catch (Exception e) {
+      Log.d("FragmentHelper", Log.getStackTraceString(e));
+
+      // return text if something went wrong
+      return new SpannableStringBuilder(text);
+    }
+  }
 }

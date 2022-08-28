@@ -19,99 +19,100 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
-/**
- * Adapter for displaying the feed with posts in a gridView layout (used in FeedFragment)
- */
+/** Adapter for displaying the feed with posts in a gridView layout (used in FeedFragment) */
 public class GridViewAdapterFeed extends ArrayAdapter<Post> {
 
-    private final ArrayList<Post> posts;
-    private final Context context;
-    private final int resource;
+  private final ArrayList<Post> posts;
+  private final Context context;
+  private final int resource;
 
-    public GridViewAdapterFeed(final Context context, int resource, ArrayList<Post> posts) {
-        super(context, resource, posts);
-        this.context = context;
-        this.posts = posts;
-        this.resource = resource;
+  public GridViewAdapterFeed(final Context context, int resource, ArrayList<Post> posts) {
+    super(context, resource, posts);
+    this.context = context;
+    this.posts = posts;
+    this.resource = resource;
+  }
+
+  public View getView(int position, View convertView, ViewGroup parent) {
+    View row = convertView;
+    final ViewHolder holder;
+    if (row == null) {
+      LayoutInflater inflater =
+          (LayoutInflater) getContext().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+      assert inflater != null;
+      row = inflater.inflate(resource, parent, false);
+      holder = new ViewHolder();
+      holder.item_imageView = row.findViewById(R.id.gridView_item_image);
+      row.setTag(holder);
+    } else {
+      holder = (ViewHolder) row.getTag();
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View row = convertView;
-        final ViewHolder holder;
-        if (row == null) {
-            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
-                    Activity.LAYOUT_INFLATER_SERVICE);
-            assert inflater != null;
-            row = inflater.inflate(resource, parent, false);
-            holder = new ViewHolder();
-            holder.item_imageView = row.findViewById(R.id.gridView_item_image);
-            row.setTag(holder);
+    try {
+      // get the post at the current position
+      Post post = getItem(position);
+      assert post != null;
+
+      FrameLayout frameLayout = row.findViewById(R.id.frameLayoutImageView);
+
+      // set image overlay for sidecar and video posts
+      if (frameLayout != null) {
+        if (post.getIs_sideCar()) {
+          // sidecar overlay thumbnail
+          frameLayout.setForeground(ContextCompat.getDrawable(context, R.drawable.ic_sidecar_24dp));
+
+          // top right corner
+          frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);
+        } else if (post.getIs_video()) {
+          // video overlay thumbnail
+          frameLayout.setForeground(
+              ContextCompat.getDrawable(context, R.drawable.ic_play_circle_outline_24dp));
+
+          // top right corner
+          frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);
         } else {
-            holder = (ViewHolder) row.getTag();
+          // image overlay thumbnail (no overlay)
+          frameLayout.setForeground(null);
         }
+      }
 
-        try {
-            // get the post at the current position
-            Post post = getItem(position);
-            assert post != null;
-
-            FrameLayout frameLayout = row.findViewById(R.id.frameLayoutImageView);
-
-            // set image overlay for sidecar and video posts
-            if (frameLayout != null) {
-                if (post.getIs_sideCar()) {
-                    // sidecar overlay thumbnail
-                    frameLayout.setForeground(ContextCompat.getDrawable(context, R.drawable.ic_sidecar_24dp));
-
-                    // top right corner
-                    frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);
-                } else if (post.getIs_video()) {
-                    // video overlay thumbnail
-                    frameLayout.setForeground(
-                            ContextCompat.getDrawable(context, R.drawable.ic_play_circle_outline_24dp));
-
-                    // top right corner
-                    frameLayout.setForegroundGravity(Gravity.END | Gravity.TOP);
-                } else {
-                    // image overlay thumbnail (no overlay)
-                    frameLayout.setForeground(null);
-                }
-            }
-
-            // load image into view
-            Glide.with(row).load(post.getImageUrlThumbnail()).placeholder(
-                    ContextCompat.getDrawable(context, R.drawable.placeholder_image)).error(
-                    ContextCompat.getDrawable(context, R.drawable.placeholder_image_error)).centerCrop()
-                    .dontAnimate().into(holder.item_imageView);
-        } catch (Exception e) {
-            Log.d("GridViewAdapterFeed", Log.getStackTraceString(e));
-        }
-        return row;
+      // load image into view
+      Glide.with(row)
+          .load(post.getImageUrlThumbnail())
+          .placeholder(ContextCompat.getDrawable(context, R.drawable.placeholder_image))
+          .error(ContextCompat.getDrawable(context, R.drawable.placeholder_image_error))
+          .centerCrop()
+          .dontAnimate()
+          .into(holder.item_imageView);
+    } catch (Exception e) {
+      Log.d("GridViewAdapterFeed", Log.getStackTraceString(e));
     }
+    return row;
+  }
 
-    @Override
-    public int getCount() {
-        if (posts == null) return 0;
-        return posts.size();
-    }
+  @Override
+  public int getCount() {
+    if (posts == null) return 0;
+    return posts.size();
+  }
 
-    @Override
-    public Post getItem(int position) {
-        // hint: fix OutOfBoundsException
-        try {
-            return posts.get(position);
-        } catch (Exception e) {
-            Log.d("GridViewAdapterFeed", Log.getStackTraceString(e));
-            return null;
-        }
+  @Override
+  public Post getItem(int position) {
+    // hint: fix OutOfBoundsException
+    try {
+      return posts.get(position);
+    } catch (Exception e) {
+      Log.d("GridViewAdapterFeed", Log.getStackTraceString(e));
+      return null;
     }
+  }
 
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
+  @Override
+  public long getItemId(int position) {
+    return position;
+  }
 
-    static class ViewHolder {
-        ImageView item_imageView;
-    }
+  static class ViewHolder {
+    ImageView item_imageView;
+  }
 }

@@ -1,61 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    tools:ignore="UselessParent">
+
+    <com.google.android.material.card.MaterialCardView
+      android:id="@+id/cardViewProfilePic"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      android:layout_marginBottom="10dp"
+      android:layout_marginStart="15dp"
+      app:cardCornerRadius="25dp"
+      app:cardElevation="0dp"
+      app:cardPreventCornerOverlap="false"
+      app:strokeWidth="0dp">
+
+      <ImageView
+        android:id="@+id/accountOrHashtagProfilePic"
+        android:layout_width="100dp"
+        android:layout_height="100dp" />
+    </com.google.android.material.card.MaterialCardView>
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:ignore="UselessParent">
+      android:layout_width="match_parent"
+      android:layout_height="100dp"
+      android:layout_marginTop="10dp"
+      android:layout_toEndOf="@id/cardViewProfilePic">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardViewProfilePic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginStart="15dp"
-            app:cardCornerRadius="25dp"
-            app:cardElevation="0dp"
-            app:cardPreventCornerOverlap="false"
-            app:strokeWidth="0dp">
-
-            <ImageView
-                android:id="@+id/accountOrHashtagProfilePic"
-                android:layout_width="100dp"
-                android:layout_height="100dp" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_marginTop="10dp"
-            android:layout_toEndOf="@id/cardViewProfilePic">
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/textCountItems"
-                android:gravity="center"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="15sp" />
-        </RelativeLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_below="@id/cardViewProfilePic">
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical|center_horizontal"
-                android:layout_marginTop="10sp"
-                android:visibility="invisible"></Button>
-        </LinearLayout>
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textCountItems"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp" />
     </RelativeLayout>
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:layout_below="@id/cardViewProfilePic">
+
+      <Button
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:layout_marginTop="10sp"
+        android:visibility="invisible"></Button>
+    </LinearLayout>
+  </RelativeLayout>
 </RelativeLayout>

@@ -1,13 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:orderInCategory="100"
-        android:id="@+id/menu_copy_hashtag_link"
-        android:title="@string/menu_copy_hashtag_link"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/menu_download_hashtag_profile_photo"
-        android:orderInCategory="200"
-        android:title="@string/menu_download_hashtag_profile_photo"
-        app:showAsAction="never" />
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+  <item
+    android:orderInCategory="100"
+    android:id="@+id/menu_copy_hashtag_link"
+    android:title="@string/menu_copy_hashtag_link"
+    app:showAsAction="never" />
+  <item
+    android:id="@+id/menu_download_hashtag_profile_photo"
+    android:orderInCategory="200"
+    android:title="@string/menu_download_hashtag_profile_photo"
+    app:showAsAction="never" />
 </menu>

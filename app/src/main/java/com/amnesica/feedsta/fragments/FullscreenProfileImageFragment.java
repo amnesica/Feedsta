@@ -19,41 +19,47 @@ import com.bumptech.glide.Glide;
  */
 public class FullscreenProfileImageFragment extends Fragment {
 
-    public static FullscreenProfileImageFragment newInstance(String imageUrl) {
-        Bundle args = new Bundle();
-        args.putString("ImageUrl", imageUrl);
-        FullscreenProfileImageFragment fragment = new FullscreenProfileImageFragment();
-        fragment.setArguments(args);
-        return fragment;
+  public static FullscreenProfileImageFragment newInstance(String imageUrl) {
+    Bundle args = new Bundle();
+    args.putString("ImageUrl", imageUrl);
+    FullscreenProfileImageFragment fragment = new FullscreenProfileImageFragment();
+    fragment.setArguments(args);
+    return fragment;
+  }
+
+  @Override
+  public View onCreateView(
+      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    // inflate the layout for this fragment
+    View view = inflater.inflate(R.layout.fragment_fullscreen_image, container, false);
+
+    // to retrieve object in fragment
+    String profileImageUrl = null;
+    if (getArguments() != null) {
+      profileImageUrl = (String) getArguments().getSerializable("ImageUrl");
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_fullscreen_image, container, false);
+    // get image view
+    final ImageView imageProfilePicFullscreen = view.findViewById(R.id.imageProfilePicFullscreen);
 
-        // to retrieve object in fragment
-        String profileImageUrl = null;
-        if (getArguments() != null) {
-            profileImageUrl = (String) getArguments().getSerializable("ImageUrl");
-        }
-
-        // get image view
-        final ImageView imageProfilePicFullscreen = view.findViewById(R.id.imageProfilePicFullscreen);
-
-        // load image with url or from base64 encoded string glide
-        assert profileImageUrl != null;
-        if (!profileImageUrl.startsWith("https://instagram")) {
-            // load image into view
-            Glide.with(this).asBitmap().load(Base64.decode(profileImageUrl, Base64.DEFAULT)).error(
-                    ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
-                    .dontAnimate().into(imageProfilePicFullscreen);
-        } else {
-            // load image with url into view (url starts with "https://instagram")
-            Glide.with(this).load(profileImageUrl).error(
-                    ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
-                    .dontAnimate().into(imageProfilePicFullscreen);
-        }
+    // load image with url or from base64 encoded string glide
+    assert profileImageUrl != null;
+    if (!profileImageUrl.startsWith("https://instagram")) {
+      // load image into view
+      Glide.with(this)
+          .asBitmap()
+          .load(Base64.decode(profileImageUrl, Base64.DEFAULT))
+          .error(ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
+          .dontAnimate()
+          .into(imageProfilePicFullscreen);
+    } else {
+      // load image with url into view (url starts with "https://instagram")
+      Glide.with(this)
+          .load(profileImageUrl)
+          .error(ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
+          .dontAnimate()
+          .into(imageProfilePicFullscreen);
+    }
 
     // set onClickListener for closing fragment
     imageProfilePicFullscreen.setOnClickListener(
@@ -62,6 +68,6 @@ public class FullscreenProfileImageFragment extends Fragment {
           requireActivity().onBackPressed();
         });
 
-        return view;
-    }
+    return view;
+  }
 }
