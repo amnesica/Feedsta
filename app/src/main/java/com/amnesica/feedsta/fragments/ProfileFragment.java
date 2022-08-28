@@ -43,8 +43,8 @@ import androidx.preference.PreferenceManager;
 
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.GridViewAdapterPost;
-import com.amnesica.feedsta.asynctasks.BatchDownloadPosts;
 import com.amnesica.feedsta.asynctasks.DownloadImage;
+import com.amnesica.feedsta.asynctasks.download.DownloadPostsBatch;
 import com.amnesica.feedsta.helper.EndlessScrollListener;
 import com.amnesica.feedsta.helper.Error;
 import com.amnesica.feedsta.helper.FeedObject;
@@ -924,21 +924,29 @@ public class ProfileFragment extends Fragment {
                             likes = node.getJSONObject("edge_media_preview_like").getInt("count");
                         }
 
-                        // create post with username from account
-                        Post post = new Post(node.getString("id"), node.getString("display_url"), likes,
-                                             ownerId,
-                                             node.getJSONObject("edge_media_to_comment").getInt("count"),
-                                             caption, node.getString("shortcode"),
-                                             new Date(node.getLong("taken_at_timestamp") * 1000),
-                                             node.getBoolean("is_video"), fragment.account.getUsername(),
-                                             fragment.account.getImageProfilePicUrl(),
-                                             node.getString("thumbnail_src"), is_sidecar);
+            // create post with username from account
+            Post post =
+                Post.builder()
+                    .id(node.getString("id"))
+                    .imageUrl(node.getString("display_url"))
+                    .likes(likes)
+                    .ownerId(ownerId)
+                    .comments(node.getJSONObject("edge_media_to_comment").getInt("count"))
+                    .caption(caption)
+                    .shortcode(node.getString("shortcode"))
+                    .takenAtDate(new Date(node.getLong("taken_at_timestamp") * 1000))
+                    .is_video(node.getBoolean("is_video"))
+                    .username(fragment.account.getUsername())
+                    .imageUrlProfilePicOwner(fragment.account.getImageProfilePicUrl())
+                    .imageUrlThumbnail(node.getString("thumbnail_src"))
+                    .is_sideCar(is_sidecar)
+                    .build();
 
                         if (fragment.posts == null) {
                             fragment.posts = new ArrayList<>();
 
                             for (int j = 0; j < url.edgesTotalOfPage; j++) {
-                                Post placeholder = new Post();
+                Post placeholder = Post.builder().build();
                                 fragment.posts.add(placeholder);
                             }
                         }
@@ -948,7 +956,7 @@ public class ProfileFragment extends Fragment {
 
                             // only once per next page
                             for (int k = 0; k < url.edgesTotalOfPage; k++) {
-                                Post placeholder = new Post();
+                Post placeholder = Post.builder().build();
                                 fragment.posts.add(placeholder);
                             }
                         }
