@@ -367,10 +367,11 @@ public class ProfileFragment extends Fragment {
                                            @NonNull int[] grantResults) {
         if (permsRequestCode == 200) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //  Permission is granted. Continue the action or workflow
-                //  in your app.
-                // start BatchDownloadPosts async task
-                new BatchDownloadPosts(ProfileFragment.this, postsToDownload, progressDialogBatch).execute();
+        //  Permission is granted. Continue the action or workflow
+        //  in your app.
+        // start BatchDownloadPosts async task
+        new DownloadPostsBatch(ProfileFragment.this, postsToDownload, progressDialogBatch)
+            .execute();
             } else {
                 //  Explain to the user that the feature is unavailable because
                 //  the features requires a permission that the user has denied.
