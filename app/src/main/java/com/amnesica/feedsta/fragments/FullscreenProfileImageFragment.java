@@ -55,13 +55,11 @@ public class FullscreenProfileImageFragment extends Fragment {
                     .dontAnimate().into(imageProfilePicFullscreen);
         }
 
-        // set onClickListener for closing fragment
-        imageProfilePicFullscreen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // close fragment
-                requireActivity().onBackPressed();
-            }
+    // set onClickListener for closing fragment
+    imageProfilePicFullscreen.setOnClickListener(
+        view1 -> {
+          // close fragment
+          requireActivity().onBackPressed();
         });
 
         return view;
