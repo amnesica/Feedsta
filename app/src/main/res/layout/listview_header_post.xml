@@ -63,32 +63,32 @@
             android:background="#000000"
             android:visibility="gone">
 
-            <com.google.android.exoplayer2.ui.PlayerView
-                android:id="@+id/exoplayer"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:visibility="gone"
-                app:show_buffering="always" />
+          <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/exoplayer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:visibility="gone"
+            app:show_buffering="always" />
         </FrameLayout>
 
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/viewpagerPost"
-            android:layout_width="match_parent"
-            android:layout_height="600dp"
-            android:layout_marginTop="5dp"
-            android:visibility="visible" />
+      <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewpagerPost"
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        android:layout_marginTop="5dp"
+        android:visibility="visible" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/conLayCustomSnackBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:layout_alignParentBottom="true"
-            android:background="@drawable/background_round_corners_success"
-            android:visibility="gone">
+      <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/conLayCustomSnackBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/background_round_corners_success"
+        android:visibility="gone">
 
-            <com.google.android.material.textview.MaterialTextView
+        <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/textViewLabel"
                 style="@style/Widget.Material3.Snackbar.TextView"
                 android:layout_width="wrap_content"
