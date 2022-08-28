@@ -50,7 +50,6 @@ import com.google.android.material.color.MaterialColors;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URL;
@@ -122,8 +121,8 @@ public class FragmentHelper {
                     }
                 }
 
-                // only for deep linking (before: nothing here)
-                return fm.findFragmentByTag(FeedFragment.class.getSimpleName());
+        // only for deep linking (before: nothing here)
+        return fm.findFragmentByTag(FeedFragment.class.getSimpleName());
             }
             // get top fragment from backStack
             String fragmentTag = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName();
@@ -169,11 +168,30 @@ public class FragmentHelper {
             // get active fragment
             Fragment active = getTopFragment(fm);
 
-            try {
-                // add fragment to container with animation
-                fm.beginTransaction().setCustomAnimations(R.anim.frag_enter, R.anim.frag_exit,
-                                                          R.anim.frag_pop_enter, R.anim.frag_pop_exit).hide(
-                        active).add(R.id.main_container, fragmentToAdd, tag).addToBackStack(tag).commit();
+      // add fragment to container with animation
+      try {
+        // use animation for nav elements also for fullscreen fragments
+        if (fragmentToAdd.getClass().getSimpleName().equals("FullscreenImagePostFragment")
+            || fragmentToAdd.getClass().getSimpleName().equals("FullscreenProfileImageFragment")) {
+          fm.beginTransaction()
+              .setCustomAnimations(
+                  R.anim.nav_enter, R.anim.nav_exit,
+                  R.anim.nav_enter, R.anim.nav_exit)
+              .hide(active)
+              .add(R.id.main_container, fragmentToAdd, tag)
+              .addToBackStack(tag)
+              .commit();
+        } else {
+          fm.beginTransaction()
+              .setCustomAnimations(
+                  R.anim.frag_enter, R.anim.frag_exit,
+                  R.anim.frag_pop_enter, R.anim.frag_pop_exit)
+              .hide(active)
+              .add(R.id.main_container, fragmentToAdd, tag)
+              .addToBackStack(tag)
+              .commit();
+        }
+
             } catch (Exception e) {
                 Log.d("FragmentHelper", Log.getStackTraceString(e));
             }
@@ -344,8 +362,10 @@ public class FragmentHelper {
     public static void notifyUserOfProblem(final Fragment fragment, final Enum<Error> error) {
         if (!mapErrorWasShown.containsKey(error.toString())) {
 
-            // put fragment into map to eliminate error duplicates
-            mapErrorWasShown.put(error.toString(), true);
+      // TODO Replace custom snackbar with actual snackbar and SnackbarHelper
+
+      // put fragment into map to eliminate error duplicates
+      mapErrorWasShown.put(error.toString(), true);
             String errorMessage = error.toString();
 
             // text for dialog
@@ -658,6 +678,22 @@ public class FragmentHelper {
         }
     }
 
+  /**
+   * Gets the colorId of the color with the resIdColor
+   *
+   * @param context Context
+   * @param resIdColor int
+   * @return int (ColorInt)
+   */
+  public static int getColorId(Context context, int resIdColor) {
+    if (context == null) return 0;
+    TypedValue typedValue = new TypedValue();
+    Resources.Theme theme = context.getTheme();
+    theme.resolveAttribute(resIdColor, typedValue, true);
+    @ColorInt final int color = typedValue.data;
+    return color;
+  }
+
     /**
      * Validates a jsonStr and shows error message in snackBar if error was found
      *
@@ -867,34 +903,6 @@ public class FragmentHelper {
     public static boolean collectionsAlreadyExist(Context context) {
         List<Collection> listCollections = FragmentHelper.createCollectionsFromBookmarks(context);
         return listCollections.size() > 1;
-    }
-
-    /**
-     * Sets new category from newCategory to post and saves updated post in storage
-     *
-     * @param newCategory String
-     * @param post        Post
-     * @param context     Context
-     * @param fragment    Fragment
-     * @return boolean
-     */
-    public static boolean setNewCategoryToPost(String newCategory, Post post, Context context,
-                                               Fragment fragment) {
-        if (post == null) return false;
-
-        // set category to post
-        post.setCategory(newCategory);
-
-        try {
-            // save post in storage
-            return StorageHelper.updateBookmarkCategoryInStorage(post, context);
-        } catch (IOException e) {
-            Log.d("FragmentHelper", Log.getStackTraceString(e));
-            if (fragment != null) {
-                FragmentHelper.notifyUserOfProblem(fragment, Error.UPDATING_BOOKMARKS_CATEGORY_FAILED);
-            }
-            return false;
-        }
     }
 
     /**

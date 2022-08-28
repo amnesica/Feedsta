@@ -7,8 +7,8 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
+import com.amnesica.feedsta.helper.CollectionsHelper;
 import com.amnesica.feedsta.helper.EditBookmarksType;
-import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.interfaces.FragmentRefreshCallback;
 import com.amnesica.feedsta.models.Post;
 
@@ -65,10 +65,9 @@ public class SetCategoryToListOfPosts extends AsyncTask<Void, Integer, Void> {
             progressDialogBatch.setMax(progressMaxSize);
 
             for (Post bookmark : listOfPostsToEditCategory) {
-                // set new category to single post (null as parameter because there is no fragment
-                //  -> toasts are handled in this class!)
-                successful = FragmentHelper.setNewCategoryToPost(category, bookmark,
-                                                                 fragment.requireContext(), null);
+        // set new category to single post (null as parameter because there is no fragment
+        //  -> toasts are handled in this class!)
+        successful = CollectionsHelper.setCategoryToPost(bookmark, category, fragment);
                 if (!successful) {
                     return null;
                 } else {
@@ -134,7 +133,7 @@ public class SetCategoryToListOfPosts extends AsyncTask<Void, Integer, Void> {
         }
 
         if (callback != null) {
-            callback.refreshAdapterCallback();
+      callback.refreshAdapterFromCallback();
         }
 
         progressDialogBatch.dismiss();

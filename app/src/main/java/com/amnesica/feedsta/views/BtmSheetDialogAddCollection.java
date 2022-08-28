@@ -1,10 +1,7 @@
 package com.amnesica.feedsta.views;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.util.TypedValue;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,133 +10,158 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.helper.EditBookmarksType;
 import com.amnesica.feedsta.helper.FragmentHelper;
-import com.amnesica.feedsta.interfaces.FragmentCallback;
+import com.amnesica.feedsta.interfaces.SelectOrAddCollectionCallback;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.lang.ref.WeakReference;
+
 /**
- * Fragment for adding a collection of bookmarks (used in CollectionsFragment, SingleCollectionFragment and
- * PostFragment)
+ * Fragment for adding a collection of bookmarks (used in CollectionsFragment,
+ * SingleCollectionFragment and PostFragment)
  */
 public class BtmSheetDialogAddCollection extends BottomSheetDialogFragment {
 
-    // view stuff
-    private View view;
-    private TextView textInputField;
+  private final EditBookmarksType editMode;
+  private String inputString = null;
+  private final WeakReference<Fragment> fragmentReference;
+  private final SelectOrAddCollectionCallback selectOrAddCollectionCallback;
 
-    private final EditBookmarksType editMode;
-    private String inputString = null;
-    private FragmentCallback callback;
+  // case when collection should be renamed -> initial text in inputField
+  private final String initialCollectionName;
 
-    // case when collection should be renamed -> initial text in inputField
-    private final String initialCollectionName;
+  public BtmSheetDialogAddCollection(
+      String currentCategoryName,
+      Fragment callingFragment,
+      EditBookmarksType editMode,
+      SelectOrAddCollectionCallback selectOrAddCollectionCallback) {
+    initialCollectionName = currentCategoryName;
+    this.editMode = editMode;
+    this.fragmentReference = new WeakReference<>(callingFragment);
+    this.selectOrAddCollectionCallback = selectOrAddCollectionCallback;
+  }
 
-    public BtmSheetDialogAddCollection(String currentCategoryName, EditBookmarksType editMode) {
-        super();
-        initialCollectionName = currentCategoryName;
-        this.editMode = editMode;
+  public static void show(
+      String currentCategoryName,
+      Fragment callingFragment,
+      EditBookmarksType editMode,
+      SelectOrAddCollectionCallback selectOrAddCollectionCallback) {
+    BtmSheetDialogAddCollection btmSheetDialogAddCollection =
+        new BtmSheetDialogAddCollection(
+            currentCategoryName, callingFragment, editMode, selectOrAddCollectionCallback);
+
+    btmSheetDialogAddCollection.show(
+        callingFragment.requireActivity().getSupportFragmentManager(),
+        BtmSheetDialogAddCollection.class.getSimpleName());
+  }
+
+  @Override
+  public View onCreateView(
+      LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    View view = inflater.inflate(R.layout.bottom_sheet_add_collection, container, false);
+
+    setupCancelButton(view);
+
+    setupTextInputField(view);
+
+    setupBottomSheetTitle(view);
+
+    return view;
+  }
+
+  private void setupBottomSheetTitle(View view) {
+    TextView bottomSheetTitle = view.findViewById(R.id.bottom_sheet_title);
+
+    // set initial category if string is not null
+    if (initialCollectionName != null) {
+      bottomSheetTitle.setText(R.string.bottom_sheet_rename_collection_title);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.bottom_sheet_add_collection, container, false);
+    if (editMode.equals(EditBookmarksType.MOVE_BOOKMARKS)) {
+      bottomSheetTitle.setText(R.string.bottom_sheet_move_bookmarks_new_coll);
+    }
+  }
 
-        Button buttonCancel = view.findViewById(R.id.bottom_sheet_cancel_button);
-        textInputField = view.findViewById(R.id.bottom_sheet_editText);
-        TextView bottomSheetTitle = view.findViewById(R.id.bottom_sheet_title);
+  private void setupTextInputField(View view) {
+    TextView textInputField = view.findViewById(R.id.bottom_sheet_editText);
 
-        // set initial category if string is not null
-        if (initialCollectionName != null) {
-            textInputField.setText(initialCollectionName);
-            bottomSheetTitle.setText(R.string.bottom_sheet_rename_collection_title);
-        }
+    // set initial category if string is not null
+    if (initialCollectionName != null) {
+      textInputField.setText(initialCollectionName);
+    }
 
-        if (editMode.equals(EditBookmarksType.MOVE_BOOKMARKS)) {
-            bottomSheetTitle.setText(R.string.bottom_sheet_move_bookmarks_new_coll);
-        }
+    textInputField.setOnEditorActionListener(
+        (textView, i, keyEvent) -> {
+          if (i == EditorInfo.IME_ACTION_DONE) {
+            final Fragment fragment = fragmentReference.get();
+            if (fragment == null) return false;
 
-        // change category of posts with inputString
-        textInputField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                if (i == EditorInfo.IME_ACTION_DONE) {
+            inputString = textInputField.getText().toString();
 
-                    // get text from inputField
-                    inputString = textInputField.getText().toString();
+            if (inputStringIsValid(inputString)) {
+              // clear textField
+              textInputField.setText(null);
 
-                    // validate string
-                    if (inputStringIsValid(inputString)) {
-
-                        // clear textField
-                        textInputField.setText(null);
-
-                        // check if collection with name already exists
-                        if (!FragmentHelper.collectionWithNameDoesExist(inputString, requireContext())) {
-
-                            if (callback != null) {
-                                callback.savePostOrListToCollection(inputString, editMode);
-                            }
-
-                        } else {
-                            FragmentHelper.showToast(
-                                    requireContext().getString(R.string.collection_with_name_already_exists),
-                                    requireActivity(), requireContext());
-                        }
-
-                        // hide keyboard
-                        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(
-                                Context.INPUT_METHOD_SERVICE);
-                        assert imm != null;
-                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-
-                        dismiss();
-                    }
-                    return true;
+              if (!FragmentHelper.collectionWithNameDoesExist(inputString, requireContext())) {
+                if (selectOrAddCollectionCallback != null) {
+                  selectOrAddCollectionCallback.savePostOrListToCollection(
+                      inputString, editMode, fragment);
                 }
-                return false;
+
+              } else {
+                FragmentHelper.showToast(
+                    requireContext().getString(R.string.collection_with_name_already_exists),
+                    requireActivity(),
+                    requireContext());
+              }
+
+              hideKeyboard(view);
+
+              dismiss();
             }
+            return true;
+          }
+          return false;
         });
+  }
 
-        // set theme to bottom sheet
-        // set text color based on theme
-        TypedValue typedValue = new TypedValue();
-        Resources.Theme theme = requireContext().getTheme();
-        theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-        @ColorInt final int textColor = typedValue.data;
-        buttonCancel.setTextColor(textColor);
+  /**
+   * Sets up the cancel button to dismiss the dialog
+   *
+   * @param view View
+   */
+  private void setupCancelButton(View view) {
+    if (view == null) return;
 
-        // set background color based on theme
-        theme.resolveAttribute(R.attr.colorPrimary, typedValue, true);
-        @ColorInt final int backgroundColor = typedValue.data;
-        buttonCancel.setBackgroundColor(backgroundColor);
+    Button buttonCancel = view.findViewById(R.id.bottom_sheet_cancel_button);
 
-        buttonCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
-            }
-        });
+    // set theme to bottom sheet
+    buttonCancel.setTextColor(FragmentHelper.getColorId(requireContext(), R.attr.colorAccent));
+    buttonCancel.setBackgroundColor(
+        FragmentHelper.getColorId(requireContext(), R.attr.colorPrimary));
 
-        return view;
-    }
+    buttonCancel.setOnClickListener(view1 -> dismiss());
+  }
 
-    /**
-     * Validates input string of inputField
-     *
-     * @param inputString String
-     * @return boolean
-     */
-    private boolean inputStringIsValid(String inputString) {
-        return inputString != null && !inputString.isEmpty();
-    }
+  private void hideKeyboard(View view) {
+    InputMethodManager imm =
+        (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    assert imm != null;
+    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+  }
 
-    public void setOnFragmentCallbackListener(FragmentCallback callback) {
-        this.callback = callback;
-    }
+  /**
+   * Validates input string of inputField
+   *
+   * @param inputString String
+   * @return boolean
+   */
+  private boolean inputStringIsValid(String inputString) {
+    return inputString != null && !inputString.isEmpty();
+  }
 }

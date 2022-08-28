@@ -548,23 +548,31 @@ public class HashtagFragment extends Fragment {
                             caption = edgesCaption.getJSONObject(0).getJSONObject("node").getString("text");
                         }
 
-                        // Create post with username from account
-                        Post post = new Post(node.getString("id"), node.getString("display_url"),
-                                             Integer.parseInt(
-                                                     node.getJSONObject("edge_liked_by").getString("count")),
-                                             node.getJSONObject("owner").getString("id"), Integer.parseInt(
-                                node.getJSONObject("edge_media_to_comment").getString("count")), caption,
-                                             node.getString("shortcode"),
-                                             new Date(node.getLong("taken_at_timestamp") * 1000),
-                                             node.getBoolean("is_video"), fragment.hashtag.getName(),
-                                             fragment.hashtag.getProfile_pic_url(),
-                                             node.getString("thumbnail_src"), is_sidecar);
+            // Create post with username from account
+            Post post =
+                Post.builder()
+                    .id(node.getString("id"))
+                    .imageUrl(node.getString("display_url"))
+                    .likes(Integer.parseInt(node.getJSONObject("edge_liked_by").getString("count")))
+                    .ownerId(node.getJSONObject("owner").getString("id"))
+                    .comments(
+                        Integer.parseInt(
+                            node.getJSONObject("edge_media_to_comment").getString("count")))
+                    .caption(caption)
+                    .shortcode(node.getString("shortcode"))
+                    .takenAtDate(new Date(node.getLong("taken_at_timestamp") * 1000))
+                    .is_video(node.getBoolean("is_video"))
+                    .username(fragment.hashtag.getName())
+                    .imageUrlProfilePicOwner(fragment.hashtag.getProfile_pic_url())
+                    .imageUrlThumbnail(node.getString("thumbnail_src"))
+                    .is_sideCar(is_sidecar)
+                    .build();
 
                         if (fragment.posts == null) {
                             fragment.posts = new ArrayList<>();
 
                             for (int j = 0; j < url.edgesTotalOfPage; j++) {
-                                Post placeholder = new Post();
+                Post placeholder = Post.builder().build();
                                 fragment.posts.add(placeholder);
                             }
                         }
@@ -574,7 +582,7 @@ public class HashtagFragment extends Fragment {
                             // next page
                             fragment.addNextPageToPlaceholder = false; // only once per next page
                             for (int k = 0; k < url.edgesTotalOfPage; k++) {
-                                Post placeholder = new Post();
+                Post placeholder = Post.builder().build();
                                 fragment.posts.add(placeholder);
                             }
                         }

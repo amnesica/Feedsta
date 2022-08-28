@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,7 +23,6 @@ import androidx.preference.PreferenceManager;
 
 import com.amnesica.feedsta.R;
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -44,7 +42,6 @@ public class PostVideoFragment extends Fragment {
 
     // view stuff
     private View view;
-    private ProgressBar progressBar;
 
     // exoplayer stuff
     private SimpleExoPlayer player;
@@ -82,9 +79,6 @@ public class PostVideoFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_viewpager_video_post, container, false);
-
-        // get views
-        progressBar = view.findViewById(R.id.progress_bar);
 
         // get videoUrl from arguments
         String videoUrl = null;
@@ -163,16 +157,6 @@ public class PostVideoFragment extends Fragment {
 
         // new player instance
         player = ExoPlayerFactory.newSimpleInstance(requireActivity());
-        player.addListener(new ExoPlayer.EventListener() {
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                if (playbackState == ExoPlayer.STATE_BUFFERING) {
-                    progressBar.setVisibility(VISIBLE);
-                } else {
-                    progressBar.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
         playerView.setPlayer(player);
 
         // hide controller initially

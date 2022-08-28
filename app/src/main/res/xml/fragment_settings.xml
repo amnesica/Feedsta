@@ -1,74 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
-        android:title="@string/General"
-        app:iconSpaceReserved="false">
-        <SwitchPreferenceCompat
-            app:iconSpaceReserved="false"
-            app:key="@string/dark_mode"
-            app:title="@string/title_enable_dark_mode"
-            app:summary="@string/summary_dark_mode" />
-        <SwitchPreferenceCompat
-            app:iconSpaceReserved="false"
-            app:key="@string/advertising_string_clipboard"
-            app:summary="@string/summary_advertising_string_clipboard"
-            app:defaultValue="true"
-            app:title="@string/title_enable_advertising_string_clipboard" />
-    </PreferenceCategory>
+  <PreferenceCategory
+    android:title="@string/General"
+    app:iconSpaceReserved="false">
+    <SwitchPreferenceCompat
+      app:iconSpaceReserved="false"
+      app:key="@string/dark_mode"
+      app:summary="@string/summary_dark_mode"
+      app:title="@string/title_enable_dark_mode" />
+    <SwitchPreferenceCompat
+      app:defaultValue="true"
+      app:iconSpaceReserved="false"
+      app:key="@string/advertising_string_clipboard"
+      app:summary="@string/summary_advertising_string_clipboard"
+      app:title="@string/title_enable_advertising_string_clipboard" />
+  </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/toolbar_title_feed"
-        app:iconSpaceReserved="false">
-        <ListPreference
-            app:iconSpaceReserved="false"
-            android:defaultValue="2"
-            android:dialogTitle="@string/title_feed_list_columns"
-            android:entries="@array/pref_feed_list_columns_entries"
-            android:entryValues="@array/pref_feed_list_columns_values"
-            android:key="@string/key_feed_list_columns"
-            android:summary="@string/summary_feed_list_columns"
-            android:title="@string/title_feed_list_columns" />
-    </PreferenceCategory>
+  <PreferenceCategory
+    android:title="@string/Accounts"
+    app:iconSpaceReserved="false">
+    <ListPreference
+      android:defaultValue="3"
+      android:dialogTitle="@string/title_accounts_list_columns"
+      android:entries="@array/pref_accounts_list_columns_entries"
+      android:entryValues="@array/pref_accounts_list_columns_values"
+      android:key="@string/key_accounts_list_columns"
+      android:summary="@string/summary_accounts_list_columns"
+      android:title="@string/title_accounts_list_columns"
+      app:iconSpaceReserved="false" />
+  </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/Accounts"
-        app:iconSpaceReserved="false">
-        <ListPreference
-            app:iconSpaceReserved="false"
-            android:defaultValue="3"
-            android:dialogTitle="@string/title_accounts_list_columns"
-            android:entries="@array/pref_accounts_list_columns_entries"
-            android:entryValues="@array/pref_accounts_list_columns_values"
-            android:key="@string/key_accounts_list_columns"
-            android:summary="@string/summary_accounts_list_columns"
-            android:title="@string/title_accounts_list_columns" />
-    </PreferenceCategory>
+  <PreferenceCategory
+    android:title="@string/Posts"
+    app:iconSpaceReserved="false">
+    <SwitchPreferenceCompat
+      app:defaultValue="true"
+      app:iconSpaceReserved="false"
+      app:key="@string/videoControls"
+      app:summary="@string/summary_enable_video_controls"
+      app:title="@string/title_enable_video_controls" />
+  </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/Posts"
-        app:iconSpaceReserved="false">
-        <SwitchPreferenceCompat
-            app:iconSpaceReserved="false"
-            app:key="@string/videoControls"
-            app:summary="@string/summary_enable_video_controls"
-            app:defaultValue="true"
-            app:title="@string/title_enable_video_controls" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/Migrating"
-        app:iconSpaceReserved="false">
-        <Preference
-            app:iconSpaceReserved="false"
-            app:key="@string/export_files"
-            app:summary="@string/summary_export_files"
-            app:title="@string/title_export_files" />
-        <Preference
-            app:iconSpaceReserved="false"
-            app:key="@string/import_files"
-            app:summary="@string/summary_import_files"
-            app:title="@string/title_import_files" />
-    </PreferenceCategory>
+  <PreferenceCategory
+    android:title="@string/Migrating"
+    app:iconSpaceReserved="false">
+    <Preference
+      app:iconSpaceReserved="false"
+      app:key="@string/export_files"
+      app:summary="@string/summary_export_files"
+      app:title="@string/title_export_files" />
+    <Preference
+      app:iconSpaceReserved="false"
+      app:key="@string/import_files"
+      app:summary="@string/summary_import_files"
+      app:title="@string/title_import_files" />
+  </PreferenceCategory>
 </PreferenceScreen>

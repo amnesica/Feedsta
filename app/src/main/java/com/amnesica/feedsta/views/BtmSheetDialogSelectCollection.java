@@ -1,9 +1,6 @@
 package com.amnesica.feedsta.views;
 
-import android.app.ProgressDialog;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +8,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,178 +17,189 @@ import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.RecViewAdapterSelectCollection;
 import com.amnesica.feedsta.helper.EditBookmarksType;
 import com.amnesica.feedsta.helper.FragmentHelper;
-import com.amnesica.feedsta.interfaces.FragmentCallback;
-import com.amnesica.feedsta.interfaces.OnItemClickListenerSelectColl;
+import com.amnesica.feedsta.interfaces.SelectOrAddCollectionCallback;
 import com.amnesica.feedsta.models.Collection;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Fragment for selecting a collection of bookmarks (used in PostFragment and SingleCollectionFragment)
+ * Fragment for selecting a collection of bookmarks (used in PostFragment and
+ * SingleCollectionFragment)
  */
 public class BtmSheetDialogSelectCollection extends BottomSheetDialogFragment {
 
-    // view stuff
-    private ProgressDialog progressDialogBatch;
-    private RecViewAdapterSelectCollection adapter;
+  private RecViewAdapterSelectCollection adapter;
 
-    private final EditBookmarksType editMode;
-    private FragmentCallback callback;
+  private final EditBookmarksType editMode;
+  private final WeakReference<Fragment> fragmentReference;
 
-    private List<Collection> listCollectionsBookmarked;
+  private List<Collection> listCollectionsBookmarked;
 
-    public BtmSheetDialogSelectCollection(EditBookmarksType editMode) {
-        this.editMode = editMode;
-    }
+  private final SelectOrAddCollectionCallback selectOrAddCollectionCallback;
 
-    public void setOnFragmentCallbackListener(FragmentCallback callback) {
-        this.callback = callback;
-    }
+  public BtmSheetDialogSelectCollection(
+      EditBookmarksType editMode,
+      Fragment callingFragment,
+      SelectOrAddCollectionCallback selectOrAddCollectionCallback) {
+    this.editMode = editMode;
+    this.fragmentReference = new WeakReference<>(callingFragment);
+    this.selectOrAddCollectionCallback = selectOrAddCollectionCallback;
+  }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.bottom_sheet_select_collection, container, false);
+  /**
+   * Opens dialog to select existing collection for bookmark
+   *
+   * @param editMode EditBookmarksType
+   * @param callingFragment Fragment
+   * @param selectOrAddCollectionCallback SelectCollectionCallback (to set the category for post(s))
+   */
+  public static void show(
+      EditBookmarksType editMode,
+      Fragment callingFragment,
+      SelectOrAddCollectionCallback selectOrAddCollectionCallback) {
+    BtmSheetDialogSelectCollection btmSheetDialogSelectCollection =
+        new BtmSheetDialogSelectCollection(
+            editMode, callingFragment, selectOrAddCollectionCallback);
 
-        setupAddCollectionButton(view);
+    btmSheetDialogSelectCollection.show(
+        callingFragment.requireActivity().getSupportFragmentManager(),
+        BtmSheetDialogSelectCollection.class.getSimpleName());
+  }
 
-        setupCancelButton(view);
+  @Override
+  public View onCreateView(
+      LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    View view = inflater.inflate(R.layout.bottom_sheet_select_collection, container, false);
 
-        setupTitle(view);
+    setupAddCollectionButton(view);
 
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_view_collections_bottom_sheet);
+    setupCancelButton(view);
 
-        // use a linear layout manager
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
-        recyclerView.setLayoutManager(layoutManager);
+    setupTitle(view);
 
-        // create collections in listCollectionsBookmarked (except "All"-collection)
-        listCollectionsBookmarked = getCollectionsExceptAllCollectionFromStorage();
+    RecyclerView recyclerView = view.findViewById(R.id.recycler_view_collections_bottom_sheet);
+    RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
+    recyclerView.setLayoutManager(layoutManager);
 
-        // define an adapter
-        setAdapter(recyclerView);
+    // create collections in listCollectionsBookmarked (except "All"-collection)
+    listCollectionsBookmarked = getCollectionsExceptAllCollectionFromStorage();
 
-        return view;
-    }
+    setupRecViewAdapter(recyclerView);
 
-    /**
-     * Sets up the adapter with clickListener to select collection
-     *
-     * @param recyclerView RecyclerView
-     */
-    private void setAdapter(RecyclerView recyclerView) {
-        adapter = new RecViewAdapterSelectCollection(listCollectionsBookmarked);
-        recyclerView.setAdapter(adapter);
+    return view;
+  }
 
-        // set onClickListener to save selected category to post
-        adapter.setOnItemClickListener(new OnItemClickListenerSelectColl() {
-            @Override
-            public void onItemClick(int position) {
-                String category = listCollectionsBookmarked.get(position).getName();
-
-                if (callback != null && category != null) {
-                    callback.savePostOrListToCollection(category, editMode);
-                }
-                dismiss();
-            }
+  /**
+   * Sets up the adapter with clickListener to select collection
+   *
+   * @param recyclerView RecyclerView
+   */
+  private void setupRecViewAdapter(RecyclerView recyclerView) {
+    adapter = new RecViewAdapterSelectCollection(listCollectionsBookmarked);
+    adapter.setOnItemClickListener(
+        position -> {
+          selectCollection(position);
+          dismiss();
         });
+    recyclerView.setAdapter(adapter);
+  }
+
+  private void selectCollection(int position) {
+    if (selectOrAddCollectionCallback != null) {
+      final Fragment fragment = fragmentReference.get();
+      if (fragment == null) return;
+
+      String category = listCollectionsBookmarked.get(position).getName();
+      selectOrAddCollectionCallback.savePostOrListToCollection(category, editMode, fragment);
     }
 
-    /**
-     * Sets up the title of the bottom sheet to "Move to collection" or "Save to collection" depending on the
-     * editMode
-     *
-     * @param view View
-     */
-    private void setupTitle(View view) {
-        if (view == null) return;
+    dismiss();
+  }
 
-        TextView bottomSheetTitle = view.findViewById(R.id.bottom_sheet_select_title);
-        if (bottomSheetTitle != null) {
-            if (editMode.equals(EditBookmarksType.MOVE_BOOKMARKS)) {
-                bottomSheetTitle.setText(
-                        getResources().getString(R.string.bottom_sheet_select_collection_title_move));
-            } else {
-                bottomSheetTitle.setText(
-                        getResources().getString(R.string.bottom_sheet_select_collection_title));
-            }
-        }
+  /**
+   * Sets up the title of the bottom sheet to "Move to collection" or "Save to collection" depending
+   * on the editMode
+   *
+   * @param view View
+   */
+  private void setupTitle(View view) {
+    if (view == null) return;
+
+    TextView bottomSheetTitle = view.findViewById(R.id.bottom_sheet_select_title);
+    if (bottomSheetTitle != null) {
+      if (editMode.equals(EditBookmarksType.MOVE_BOOKMARKS)) {
+        bottomSheetTitle.setText(
+            getResources().getString(R.string.bottom_sheet_select_collection_title_move));
+      } else {
+        bottomSheetTitle.setText(
+            getResources().getString(R.string.bottom_sheet_select_collection_title));
+      }
     }
+  }
 
-    /**
-     * Sets up the "Add"-button depending on the theme
-     *
-     * @param view View
-     */
-    private void setupAddCollectionButton(View view) {
-        if (view == null) return;
+  /**
+   * Sets up the "Add"-button depending on the theme
+   *
+   * @param view View
+   */
+  private void setupAddCollectionButton(View view) {
+    if (view == null) return;
 
-        ImageView imageAddCollection = view.findViewById(R.id.imageAddCollection);
-        imageAddCollection.setBackgroundResource(R.drawable.ic_baseline_add_24dp);
+    ImageView imageAddCollection = view.findViewById(R.id.imageAddCollection);
+    imageAddCollection.setBackgroundResource(R.drawable.ic_baseline_add_24dp);
 
-        imageAddCollection.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (callback != null) {
-                    callback.openBtmSheetDialogAddCollection(editMode);
-                }
-                dismiss();
-            }
+    imageAddCollection.setOnClickListener(
+        view1 -> {
+          final Fragment fragment = fragmentReference.get();
+          if (fragment == null) return;
+
+          if (selectOrAddCollectionCallback != null) {
+            selectOrAddCollectionCallback.openAddCollectionBtmSheet();
+          }
+
+          dismiss();
         });
+  }
+
+  /** Returns all collections in storage except "All"-collection */
+  private List<Collection> getCollectionsExceptAllCollectionFromStorage() {
+    List<Collection> listCollectionsBookmarked =
+        FragmentHelper.createCollectionsFromBookmarks(requireContext());
+
+    // get all collections except "All"-collection
+    return listCollectionsBookmarked.stream()
+        .filter(collection -> !collection.getName().equals("All"))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Sets up the cancel button to dismiss the dialog
+   *
+   * @param view View
+   */
+  private void setupCancelButton(View view) {
+    if (view == null) return;
+
+    Button buttonCancel = view.findViewById(R.id.bottom_sheet_select_cancel_button);
+
+    // set theme to bottom sheet
+    buttonCancel.setTextColor(FragmentHelper.getColorId(requireContext(), R.attr.colorAccent));
+    buttonCancel.setBackgroundColor(
+        FragmentHelper.getColorId(requireContext(), R.attr.colorPrimary));
+
+    buttonCancel.setOnClickListener(view1 -> dismiss());
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+    if (adapter != null) {
+      listCollectionsBookmarked = getCollectionsExceptAllCollectionFromStorage();
+      adapter.setItems(listCollectionsBookmarked);
+      adapter.notifyDataSetChanged();
     }
-
-    /**
-     * Returns all collections in storage except "All"-collection
-     */
-    private List<Collection> getCollectionsExceptAllCollectionFromStorage() {
-        List<Collection> listCollectionsBookmarked = FragmentHelper.createCollectionsFromBookmarks(
-                requireContext());
-
-        // get all collections except "All"-collection
-        return listCollectionsBookmarked.stream().filter(collection -> !collection.getName().equals("All"))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Sets up the cancel button to dismiss the operation
-     *
-     * @param view View
-     */
-    private void setupCancelButton(View view) {
-        if (view == null) return;
-
-        Button buttonCancel = view.findViewById(R.id.bottom_sheet_select_cancel_button);
-
-        // set theme to bottom sheet
-        // set text color based on theme
-        TypedValue typedValue = new TypedValue();
-        Resources.Theme theme = requireContext().getTheme();
-        theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-        @ColorInt final int textColor = typedValue.data;
-        buttonCancel.setTextColor(textColor);
-
-        // set background color based on theme
-        theme.resolveAttribute(R.attr.colorPrimary, typedValue, true);
-        @ColorInt final int backgroundColor = typedValue.data;
-        buttonCancel.setBackgroundColor(backgroundColor);
-
-        buttonCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
-            }
-        });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (adapter != null) {
-            listCollectionsBookmarked = getCollectionsExceptAllCollectionFromStorage();
-            adapter.setItems(listCollectionsBookmarked);
-            adapter.notifyDataSetChanged();
-        }
-    }
+  }
 }

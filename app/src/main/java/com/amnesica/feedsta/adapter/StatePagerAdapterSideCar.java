@@ -2,92 +2,77 @@ package com.amnesica.feedsta.adapter;
 
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.amnesica.feedsta.models.Post;
+import com.amnesica.feedsta.models.Sidecar;
+import com.amnesica.feedsta.models.SidecarEntryType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
+/** Adapter for displaying a sidecar with multiple images and/or videos */
+public class StatePagerAdapterSideCar extends FragmentStateAdapter {
 
-/**
- * Adapter for displaying a sidecar with multiple images and/or videos
- */
-public class StatePagerAdapterSideCar extends FragmentStatePagerAdapter {
+  private final Sidecar sidecar;
+  private final SparseArray<Fragment> registeredFragments = new SparseArray<>();
 
-    private final HashMap<Integer, ArrayList<String>> sidecarUrls;
-    private final SparseArray<Fragment> registeredFragments = new SparseArray<>();
+  public StatePagerAdapterSideCar(@NonNull FragmentActivity fragmentActivity, Post post) {
+    super(fragmentActivity);
+    this.sidecar = post.getSidecar();
+  }
 
-    public StatePagerAdapterSideCar(@NonNull FragmentManager fm, int behavior, Post post) {
-        super(fm, behavior);
-        this.sidecarUrls = post.getSidecarUrls();
+  /** Finish all video players in registered fragments */
+  public void finishAllRegisteredFragments() {
+    for (int i = 0; i < registeredFragments.size(); i++) {
+      if (registeredFragments.valueAt(i) instanceof PostVideoFragment) {
+        // if fragment is videoPostFragment call releasePlayer
+        ((PostVideoFragment) registeredFragments.valueAt(i)).releasePlayer();
+      }
     }
+  }
 
-    @NonNull
-    @Override
-    public Fragment getItem(int position) {
-        // if post is image
-        Fragment fragmentToShow = null;
-        if (sidecarUrls != null && Objects.requireNonNull(sidecarUrls.get(position)).get(0).equals("image")) {
-            // get image url
-            String imageUrl = Objects.requireNonNull(sidecarUrls.get(position)).get(1);
+  @NonNull
+  @Override
+  public Fragment createFragment(int position) {
+    // if post is image
+    Fragment fragmentToShow = null;
+    if (sidecar != null
+        && sidecar
+            .getSidecarEntries()
+            .get(position)
+            .getSidecarEntryType()
+            .equals(SidecarEntryType.image)) {
+      // get image url
+      String imageUrl = sidecar.getSidecarEntries().get(position).getUrl();
 
-            // start new image fragment
-            fragmentToShow = PostImageFragment.newInstance(imageUrl);
-        } else {
-            // post is video
-            if (sidecarUrls != null) {
-                // get video url
-                String videoUrl = Objects.requireNonNull(sidecarUrls.get(position)).get(1);
+      // start new image fragment
+      fragmentToShow = PostImageFragment.newInstance(imageUrl);
+    } else {
+      // post is video
+      if (sidecar != null) {
+        // get video url
+        String videoUrl = sidecar.getSidecarEntries().get(position).getUrl();
 
-                // start new video fragment
-                fragmentToShow = PostVideoFragment.newInstance(videoUrl);
-            }
-        }
-        assert fragmentToShow != null;
-        return fragmentToShow;
+        // start new video fragment
+        fragmentToShow = PostVideoFragment.newInstance(videoUrl);
+
+        registeredFragments.put(position, fragmentToShow);
+      }
     }
+    assert fragmentToShow != null;
+    return fragmentToShow;
+  }
 
-    @Override
-    public int getCount() {
-        int getCount = 0;
-        try {
-            getCount = sidecarUrls.size();
-        } catch (NullPointerException e) {
-            Log.d("StatePagerAdapterSideCar", Log.getStackTraceString(e));
-        }
-        return getCount;
+  @Override
+  public int getItemCount() {
+    int getCount = 0;
+    try {
+      getCount = sidecar.getSidecarEntries().size();
+    } catch (NullPointerException e) {
+      Log.d("StatePagerAdapterSideCar", Log.getStackTraceString(e));
     }
-
-    @NonNull
-    @Override
-    public Object instantiateItem(@NonNull ViewGroup container, int position) {
-        Fragment fragment = (Fragment) super.instantiateItem(container, position);
-        registeredFragments.put(position, fragment);
-        return fragment;
-    }
-
-    @Override
-    public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-        registeredFragments.remove(position);
-        super.destroyItem(container, position, object);
-    }
-
-    /**
-     * Finish all video players in registered fragments
-     */
-    public void finishAllRegisteredFragments() {
-        for (int i = 0; i < registeredFragments.size(); i++) {
-            // if fragment is videoPostFragment
-            if (registeredFragments.valueAt(i) instanceof PostVideoFragment) {
-                // call releasePlayer inside videoPostFragment
-                ((PostVideoFragment) registeredFragments.valueAt(i)).releasePlayer();
-            }
-        }
-    }
+    return getCount;
+  }
 }

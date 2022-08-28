@@ -1,63 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/container"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:fitsSystemWindows="true"
+  tools:context=".activity.MainActivity">
+
+  <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context=".activity.MainActivity">
+    android:layout_height="match_parent">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <!-- Fragments Container -->
+    <include layout="@layout/content_main" />
 
-        <!-- Fragments Container -->
-        <include layout="@layout/content_main" />
+    <!-- BottomNavigationView (hint: scroll behaviour will work with RecyclerView instead of listView)-->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+      android:id="@+id/nav_view"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|center"
+      android:layout_marginHorizontal="8dp"
+      android:layout_marginBottom="8dp"
+      android:background="@drawable/nav_bar_background_round_corners"
+      app:elevation="2dp"
+      app:labelVisibilityMode="selected"
+      app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
+      app:menu="@menu/bottom_nav_menu" />
 
-        <!-- BottomNavigationView (hint: scroll behaviour will work with RecyclerView instead of listView)-->
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/nav_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/nav_bar_background_round_corners"
-            app:elevation="0dp"
-            app:labelVisibilityMode="selected"
-            android:layout_gravity="bottom|center"
-            app:menu="@menu/bottom_nav_menu"
-            app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/conLayCustomSnackBarAlert"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|center"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginBottom="125dp"
+      android:background="@drawable/background_round_corners_error"
+      android:visibility="invisible">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/conLayCustomSnackBarAlert"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            android:layout_gravity="bottom|center"
-            android:layout_marginHorizontal="8dp"
-            android:layout_marginBottom="112dp"
-            android:background="@drawable/background_round_corners_error">
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textViewLabelAlert"
+        style="@style/Widget.Material3.Snackbar.TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/textViewLabelAlert"
-                style="@style/Widget.Material3.Snackbar.TextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="12dp"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:ignore="MissingConstraints" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/textViewActionAlert"
-                style="@style/Widget.Material3.Button.TextButton.Snackbar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                tools:ignore="MissingConstraints" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textViewActionAlert"
+        style="@style/Widget.Material3.Button.TextButton.Snackbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="MissingConstraints" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+  </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

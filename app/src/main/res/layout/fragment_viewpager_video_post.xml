@@ -9,7 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_marginTop="5dp"
         android:visibility="gone">
 
         <com.google.android.exoplayer2.ui.PlayerView
@@ -20,11 +19,4 @@
             android:visibility="gone"
             app:show_buffering="never" />
     </FrameLayout>
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center"
-        android:visibility="gone" />
 </RelativeLayout>

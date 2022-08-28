@@ -1,112 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:layout_gravity="bottom"
+  android:paddingBottom="10dp"
+  android:background="@drawable/gradient_exoplayer_control_view"
+  android:layoutDirection="ltr"
+  android:orientation="vertical"
+  tools:ignore="Overdraw"
+  tools:targetApi="28">
+
+  <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="bottom"
-    android:layoutDirection="ltr"
-    android:orientation="vertical"
-    tools:ignore="Overdraw"
-    tools:targetApi="28">
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingTop="4dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingTop="4dp">
+    <FrameLayout
+      android:id="@+id/exo_volume_button"
+      android:layout_width="32dp"
+      android:layout_height="32dp">
 
-        <FrameLayout
-            android:id="@+id/exo_volume_button"
-            android:layout_width="32dp"
-            android:layout_height="32dp">
+      <ImageView
+        android:id="@+id/exo_volume_icon"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/volume_up_imageview"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_baseline_volume_up_24dp" />
+    </FrameLayout>
 
-            <ImageView
-                android:id="@+id/exo_volume_icon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:layout_gravity="center"
-                android:adjustViewBounds="true"
-                android:scaleType="fitXY"
-                android:contentDescription="@string/volume_up_imageview"
-                android:src="@drawable/ic_baseline_volume_up_24dp" />
-        </FrameLayout>
+    <ImageButton
+      android:id="@id/exo_rew"
+      style="@style/ExoMediaButton.Rewind"
+      android:contentDescription="@string/rewind_button" />
 
-        <ImageButton
-            android:id="@id/exo_rew"
-            style="@style/ExoMediaButton.Rewind"
-            android:contentDescription="@string/rewind_button" />
+    <ImageButton
+      android:id="@id/exo_repeat_toggle"
+      style="@style/ExoMediaButton"
+      android:contentDescription="@string/repeat_toggle_button" />
 
-        <ImageButton
-            android:id="@id/exo_repeat_toggle"
-            style="@style/ExoMediaButton"
-            android:contentDescription="@string/repeat_toggle_button" />
+    <ImageButton
+      android:id="@id/exo_play"
+      style="@style/ExoMediaButton.Play"
+      android:contentDescription="@string/play_button" />
 
-        <ImageButton
-            android:id="@id/exo_play"
-            style="@style/ExoMediaButton.Play"
-            android:contentDescription="@string/play_button" />
+    <ImageButton
+      android:id="@id/exo_pause"
+      style="@style/ExoMediaButton.Pause"
+      android:contentDescription="@string/pause_button" />
 
-        <ImageButton
-            android:id="@id/exo_pause"
-            style="@style/ExoMediaButton.Pause"
-            android:contentDescription="@string/pause_button" />
+    <ImageButton
+      android:id="@id/exo_ffwd"
+      style="@style/ExoMediaButton.FastForward"
+      android:contentDescription="@string/fast_forward_button" />
 
-        <ImageButton
-            android:id="@id/exo_ffwd"
-            style="@style/ExoMediaButton.FastForward"
-            android:contentDescription="@string/fast_forward_button" />
+    <FrameLayout
+      android:id="@+id/exo_fullscreen_button"
+      android:layout_width="32dp"
+      android:layout_height="32dp">
 
-        <FrameLayout
-            android:id="@+id/exo_fullscreen_button"
-            android:layout_width="32dp"
-            android:layout_height="32dp">
+      <ImageView
+        android:id="@+id/exo_fullscreen_icon"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/fullscreen_icon"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_baseline_fullscreen_24dp" />
+    </FrameLayout>
+  </LinearLayout>
 
-            <ImageView
-                android:id="@+id/exo_fullscreen_icon"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:layout_gravity="center"
-                android:adjustViewBounds="true"
-                android:scaleType="fitXY"
-                android:contentDescription="@string/fullscreen_icon"
-                android:src="@drawable/ic_baseline_fullscreen_24dp" />
-        </FrameLayout>
-    </LinearLayout>
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+    <com.google.android.material.textview.MaterialTextView
+      android:id="@id/exo_position"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:includeFontPadding="false"
+      android:paddingLeft="4dp"
+      android:paddingRight="4dp"
+      android:textColor="#FFBEBEBE"
+      android:textSize="14sp"
+      android:textStyle="bold" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@id/exo_position"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:includeFontPadding="false"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
-            android:textColor="#FFBEBEBE"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+    <View
+      android:id="@id/exo_progress_placeholder"
+      android:layout_width="0dp"
+      android:layout_height="26dp"
+      android:layout_weight="1"
+      android:background="#00FFFFFF" />
 
-        <View
-            android:id="@id/exo_progress_placeholder"
-            android:layout_width="0dp"
-            android:layout_height="26dp"
-            android:layout_weight="1" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@id/exo_duration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:includeFontPadding="false"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
-            android:textColor="#FFBEBEBE"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+    <com.google.android.material.textview.MaterialTextView
+      android:id="@id/exo_duration"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:includeFontPadding="false"
+      android:paddingLeft="4dp"
+      android:paddingRight="4dp"
+      android:textColor="#FFBEBEBE"
+      android:textSize="14sp"
+      android:textStyle="bold" />
+  </LinearLayout>
 </LinearLayout>

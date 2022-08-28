@@ -1,4 +1,4 @@
-package com.amnesica.feedsta.asynctasks;
+package com.amnesica.feedsta.asynctasks.download;
 
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
@@ -14,6 +14,9 @@ import com.amnesica.feedsta.helper.FeedObject;
 import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
 import com.amnesica.feedsta.models.Post;
+import com.amnesica.feedsta.models.Sidecar;
+import com.amnesica.feedsta.models.SidecarEntry;
+import com.amnesica.feedsta.models.SidecarEntryType;
 import com.amnesica.feedsta.models.URL;
 
 import org.json.JSONArray;
@@ -24,17 +27,12 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-/**
- * Async task to download multiple posts. Shows a progressDialog when downloading posts
- */
-public class BatchDownloadPosts extends AsyncTask<Void, Integer, Void> {
+/** Async task to download multiple posts. Shows a progressDialog when downloading posts */
+public class DownloadPostsBatch extends AsyncTask<Void, Integer, Void> {
 
     WeakReference<Fragment> fragmentWeakReference;
     private final List<Post> postsToDownload;
@@ -46,8 +44,8 @@ public class BatchDownloadPosts extends AsyncTask<Void, Integer, Void> {
 
     private boolean bSomethingsWrong = false;
 
-    public BatchDownloadPosts(Fragment fragment, List<Post> postsToDownload,
-                              ProgressDialog progressDialogBatch) {
+  public DownloadPostsBatch(
+      Fragment fragment, List<Post> postsToDownload, ProgressDialog progressDialogBatch) {
         this.fragmentWeakReference = new WeakReference<>(fragment);
         this.progressDialogBatch = progressDialogBatch;
         this.postsToDownload = postsToDownload;
@@ -185,16 +183,13 @@ public class BatchDownloadPosts extends AsyncTask<Void, Integer, Void> {
                 if (post.getIs_sideCar()) {
                     JSONObject edge_sidecar_to_children = shortcode_media.getJSONObject(
                             "edge_sidecar_to_children");
-                    JSONArray edges = edge_sidecar_to_children.getJSONArray("edges");
+          JSONArray edgesSidecar = edge_sidecar_to_children.getJSONArray("edges");
 
-                    // storing urls with "index" - "video or image" - "url"
-                    HashMap<Integer, ArrayList<String>> sidecarUrls = new HashMap<>();
+          // get sidecar urls
+          Sidecar sidecar = getSidecarFromEdge(edgesSidecar);
 
-                    // get sidecar urls
-                    getSidecarUrls(edges, sidecarUrls);
-
-                    // set hashMap of post
-                    post.setSidecarUrls(sidecarUrls);
+          // set sidecar of post
+          post.setSidecar(sidecar);
                 } else if (post.getIs_video()) {
                     // get video url of just a normal video - no sidecar
                     String video_url = shortcode_media.getString("video_url");
@@ -207,16 +202,16 @@ public class BatchDownloadPosts extends AsyncTask<Void, Integer, Void> {
         }
     }
 
-    /**
-     * Fetches all urls of all sidecar contents
-     *
-     * @param edges       JSONArray
-     * @param sidecarUrls HashMap<Integer, ArrayList<String>>
-     * @throws JSONException JSONException
-     */
-    private void getSidecarUrls(JSONArray edges, HashMap<Integer, ArrayList<String>> sidecarUrls)
-            throws JSONException {
-        ArrayList<String> listInsideMap;
+  /**
+   * Fetches all urls and types of all sidecar entries
+   *
+   * @param edges JSONArray
+   * @return Sidecar
+   * @throws JSONException JSONException
+   */
+  private Sidecar getSidecarFromEdge(JSONArray edges) throws JSONException {
+    ArrayList<SidecarEntry> sidecarEntries = new ArrayList<>();
+
         for (int i = 0; i < edges.length(); i++) {
             // get edge from edges
             JSONObject edge = edges.getJSONObject(i);
@@ -227,32 +222,23 @@ public class BatchDownloadPosts extends AsyncTask<Void, Integer, Void> {
             if (node.getBoolean("is_video")) {
                 // node is video -> get video_url
                 String video_url = node.getString("video_url");
+        int height = node.getJSONObject("dimensions").getInt("height");
 
-                listInsideMap = new ArrayList<>();
+        SidecarEntry sidecarEntry = new SidecarEntry(SidecarEntryType.video, i, video_url);
+        sidecarEntry.setHeight(height);
 
-                // add info that it is a video
-                listInsideMap.add("video");
-
-                // add url of video
-                listInsideMap.add(video_url);
-
-                // put listInside in sidecarUrls hashMap with index i
-                sidecarUrls.put(i, listInsideMap);
+        sidecarEntries.add(sidecarEntry);
             } else { // node is image -> get image_url
                 String image_url = node.getString("display_url");
+        int height = node.getJSONObject("dimensions").getInt("height");
 
-                listInsideMap = new ArrayList<>();
+        SidecarEntry sidecarEntry = new SidecarEntry(SidecarEntryType.image, i, image_url);
+        sidecarEntry.setHeight(height);
 
-                // add info that it is an image
-                listInsideMap.add("image");
-
-                // add url of image
-                listInsideMap.add(image_url);
-
-                // put listInside in sidecarUrls hashMap with index i
-                sidecarUrls.put(i, listInsideMap);
+        sidecarEntries.add(sidecarEntry);
             }
         }
+    return new Sidecar(sidecarEntries);
     }
 
     /**
@@ -361,27 +347,18 @@ public class BatchDownloadPosts extends AsyncTask<Void, Integer, Void> {
     private void downloadAllSideCarItems(Post post) {
         if (isCancelled() || fragmentWeakReference.get() == null) return;
 
-        Iterator it = post.getSidecarUrls().entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-
-            ArrayList<String> typeAndUrl;
-            typeAndUrl = (ArrayList<String>) pair.getValue();
-
-            if (typeAndUrl != null) {
-                if (typeAndUrl.get(0).equals("image")) {
-                    // post is image
-                    downloadImage(post, typeAndUrl.get(1));
-                } else if (typeAndUrl.get(0).equals("video")) {
-                    //  post is video
-                    downloadVideo(post, typeAndUrl.get(1));
+    for (SidecarEntry entry : post.getSidecar().getSidecarEntries()) {
+      if (entry != null) {
+        if (entry.getSidecarEntryType().equals(SidecarEntryType.image)) {
+          // post is image
+          downloadImage(post, entry.getUrl());
+        } else if (entry.getSidecarEntryType().equals(SidecarEntryType.video)) {
+          //  post is video
+          downloadVideo(post, entry.getUrl());
                 }
             } else {
                 bSomethingsWrong = true;
             }
-
-            // avoids a ConcurrentModificationException
-            it.remove();
         }
     }
 
@@ -397,7 +374,7 @@ public class BatchDownloadPosts extends AsyncTask<Void, Integer, Void> {
                 if (!post.getIs_sideCar()) {
                     maxSize += 1;
                 } else {
-                    maxSize += post.getSidecarUrls().size();
+          maxSize += post.getSidecar().getSidecarEntries().size();
                 }
             }
         }

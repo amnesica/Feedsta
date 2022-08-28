@@ -377,15 +377,29 @@ public class StorageHelper {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ArrayList<PostStorage> postStorages = new ArrayList<>();
 
-        // convert to PostStorage list
-        for (Post post : posts) {
-            postStorages.add(new PostStorage(post.getId(), post.getShortcode(), post.getTakenAtDate(),
-                                             post.getIs_video(), post.getImageUrlThumbnail(),
-                                             post.getIs_sideCar(), post.getCategory(),
-                                             post.getImageThumbnail(), post.getImageUrlProfilePicOwner(),
-                                             post.getLikes(), post.getOwnerId(), post.getUsername(),
-                                             post.getCaption(), post.getHeight()));
-        }
+    // convert to PostStorage list
+    for (Post post : posts) {
+      postStorages.add(
+          PostStorage.builder()
+              .id(post.getId())
+              .shortcode(post.getShortcode())
+              .takenAtDate(post.getTakenAtDate())
+              .is_video(post.getIs_video())
+              .imageUrlThumbnail(post.getImageUrlThumbnail())
+              .is_sideCar(post.getIs_sideCar())
+              .category(post.getCategory())
+              .imageThumbnail(post.getImageThumbnail())
+              .imageUrlProfilePicOwner(post.getImageUrlProfilePicOwner())
+              .likes(post.getLikes())
+              .ownerId(post.getOwnerId())
+              .username(post.getUsername())
+              .caption(post.getCaption())
+              .height(post.getHeight())
+              .sidecar(post.getSidecar())
+              .imageUrl(post.getImageUrl())
+              .videoUrl(post.getVideoUrl())
+              .build());
+    }
 
         ObjectOutputStream out;
         out = new ObjectOutputStream(bos);
@@ -514,14 +528,27 @@ public class StorageHelper {
             // get image as Base64 encoded string
             String imageThumbnail = getBase64EncodedImage(postToStore.getImageUrlThumbnail());
 
-            // add post to list in PostStorage representation
-            readPosts.add(new PostStorage(postToStore.getId(), postToStore.getShortcode(),
-                                          postToStore.getTakenAtDate(), postToStore.getIs_video(),
-                                          postToStore.getImageUrlThumbnail(), postToStore.getIs_sideCar(),
-                                          postToStore.getCategory(), imageThumbnail,
-                                          postToStore.getImageUrlProfilePicOwner(), postToStore.getLikes(),
-                                          postToStore.getOwnerId(), postToStore.getUsername(),
-                                          postToStore.getCaption(), postToStore.getHeight()));
+      // add post to list in PostStorage representation
+      readPosts.add(
+          PostStorage.builder()
+              .id(postToStore.getId())
+              .shortcode(postToStore.getShortcode())
+              .takenAtDate(postToStore.getTakenAtDate())
+              .is_video(postToStore.getIs_video())
+              .imageUrlThumbnail(postToStore.getImageUrlThumbnail())
+              .is_sideCar(postToStore.getIs_sideCar())
+              .category(postToStore.getCategory())
+              .imageThumbnail(imageThumbnail)
+              .imageUrlProfilePicOwner(postToStore.getImageUrlProfilePicOwner())
+              .likes(postToStore.getLikes())
+              .ownerId(postToStore.getOwnerId())
+              .username(postToStore.getUsername())
+              .caption(postToStore.getCaption())
+              .height(postToStore.getHeight())
+              .sidecar(postToStore.getSidecar())
+              .imageUrl(postToStore.getImageUrl())
+              .videoUrl(postToStore.getVideoUrl())
+              .build());
 
             ObjectOutputStream out;
             out = new ObjectOutputStream(bos);
@@ -789,13 +816,26 @@ public class StorageHelper {
             // convert PostStorage posts to normal Posts
             if (readPosts != null && listPosts != null) {
                 for (PostStorage postStorage : readPosts) {
-                    listPosts.add(new Post(postStorage.getId(), postStorage.getImageUrlThumbnail(),
-                                           postStorage.getImageUrlProfilePicOwner(), postStorage.getLikes(),
-                                           postStorage.getOwnerId(), postStorage.getUsername(),
-                                           postStorage.getCaption(), postStorage.getShortcode(),
-                                           postStorage.getTakenAtDate(), postStorage.getIs_video(),
-                                           postStorage.getIs_sideCar(), postStorage.getCategory(),
-                                           postStorage.getHeight(), postStorage.getImageThumbnail()));
+          listPosts.add(
+              Post.builder()
+                  .id(postStorage.getId())
+                  .imageUrlThumbnail(postStorage.getImageUrlThumbnail())
+                  .imageUrlProfilePicOwner(postStorage.getImageUrlProfilePicOwner())
+                  .likes(postStorage.getLikes())
+                  .ownerId(postStorage.getOwnerId())
+                  .username(postStorage.getUsername())
+                  .caption(postStorage.getCaption())
+                  .shortcode(postStorage.getShortcode())
+                  .takenAtDate(postStorage.getTakenAtDate())
+                  .is_video(postStorage.getIs_video())
+                  .is_sideCar(postStorage.getIs_sideCar())
+                  .category(postStorage.getCategory())
+                  .height(postStorage.getHeight())
+                  .imageThumbnail(postStorage.getImageThumbnail())
+                  .sidecar(postStorage.getSidecar())
+                  .imageUrl(postStorage.getImageUrl())
+                  .videoUrl(postStorage.getVideoUrl())
+                  .build());
                 }
 
                 // for normal behaviour in feedFragment to display text
