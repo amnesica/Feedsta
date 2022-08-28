@@ -97,29 +97,25 @@ public class RecViewAdapterSelectCollection
             textViewDirName = view.findViewById(R.id.dir_name);
             imageViewDir = view.findViewById(R.id.dir_thumbnail);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener == null) return;
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        listener.onItemClick(position);
-                    }
-                }
-            });
+      itemView.setOnClickListener(
+          view1 -> {
+            if (listener == null) return;
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+              listener.onItemClick(position);
+            }
+          });
         }
 
         private void update(final Collection collection) {
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (listener == null) return;
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        listener.onItemClick(position);
-                    }
-                }
-            });
+      itemView.setOnClickListener(
+          view -> {
+            if (listener == null) return;
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+              listener.onItemClick(position);
+            }
+          });
         }
     }
 }
