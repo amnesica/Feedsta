@@ -1,186 +1,218 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:orientation="vertical">
+  android:layout_height="wrap_content"
+  android:layout_margin="8dp"
+  app:cardCornerRadius="0dp"
+  app:cardElevation="0dp"
+  app:strokeColor="#0000"
+  app:strokeWidth="0dp">
 
-  <RelativeLayout
-    android:id="@+id/BarUnderAppBar"
+  <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/AppBarLayout"
-    android:layout_marginStart="10dp"
-    android:layout_marginBottom="5dp"
-    tools:ignore="ObsoleteLayoutParam">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+      android:id="@+id/BarUnderAppBar"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="10dp"
+      android:layout_marginBottom="10dp">
+
+      <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardViewProfilePic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:cardPreventCornerOverlap="false"
+        app:strokeWidth="0dp">
+
+        <ImageView
+          android:id="@+id/imageProfilePicPostOwner"
+          android:layout_width="40dp"
+          android:layout_height="40dp" />
+      </com.google.android.material.card.MaterialCardView>
+
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textUsernameInBarUnderAppBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@id/cardViewProfilePic"
+        android:paddingTop="5dp" />
+    </RelativeLayout>
 
     <com.google.android.material.card.MaterialCardView
-      android:id="@+id/cardViewProfilePic"
-      android:layout_width="wrap_content"
+      android:id="@+id/relLayImgOrVid"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="10dp"
-      app:cardCornerRadius="25dp"
+      android:layout_marginHorizontal="8dp"
+      android:layout_marginTop="0dp"
+      android:layout_marginBottom="0dp"
+      android:padding="0dp"
+      app:cardCornerRadius="10dp"
       app:cardElevation="0dp"
       app:cardPreventCornerOverlap="false"
       app:strokeWidth="0dp">
 
       <ImageView
-        android:id="@+id/imageProfilePicPostOwner"
-        android:layout_width="40dp"
-        android:layout_height="40dp" />
+        android:id="@+id/singleImagePost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/single_image_post"
+        android:scaleType="fitXY"
+        android:visibility="gone" />
+
+      <FrameLayout
+        android:id="@+id/main_media_frame_post"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <!-- note: imageView video preview is missing here -->
+
+        <com.google.android.exoplayer2.ui.PlayerView
+          android:id="@+id/exoplayer_post"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:gravity="center"
+          android:scaleType="fitXY"
+          android:visibility="gone"
+          app:surface_type="surface_view"
+          app:show_buffering="always" />
+      </FrameLayout>
+
+      <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewpagerPost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:visibility="visible"
+        android:adjustViewBounds="true" />
+
+      <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutViewpager"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_gravity="top"
+        android:background="@android:color/transparent"
+        app:tabBackground="@drawable/viewpager_tab_selector"
+        app:tabGravity="center"
+        app:tabIndicatorHeight="0dp"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+      <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/conLayCustomSnackBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="12dp"
+        android:layout_marginHorizontal="16dp"
+        android:background="@drawable/background_round_corners_success"
+        android:visibility="gone">
+
+        <com.google.android.material.textview.MaterialTextView
+          android:id="@+id/textViewLabel"
+          style="@style/Widget.Material3.Snackbar.TextView"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_centerVertical="true"
+          android:layout_marginStart="12dp"
+          android:gravity="start"
+          app:layout_constraintStart_toStartOf="parent"
+          tools:ignore="MissingConstraints" />
+
+        <com.google.android.material.textview.MaterialTextView
+          android:id="@+id/textViewAction"
+          style="@style/Widget.Material3.Button.TextButton.Snackbar"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentEnd="true"
+          android:layout_centerVertical="true"
+          android:layout_marginEnd="8dp"
+          app:layout_constraintEnd_toEndOf="parent"
+          tools:ignore="RelativeOverlap, MissingConstraints" />
+      </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/textUsernameInBarUnderAppBar"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_centerInParent="true"
-      android:layout_marginStart="10dp"
-      android:layout_toEndOf="@id/cardViewProfilePic"
-      android:paddingTop="5dp" />
-  </RelativeLayout>
-
-  <RelativeLayout
-    android:id="@+id/relLayImgOrVid"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <ImageView
-      android:id="@+id/singleImagePost"
+    <LinearLayout
+      android:id="@+id/linLayUnderPost"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="5dp"
-      android:adjustViewBounds="true"
-      android:contentDescription="@string/single_image_post"
-      android:visibility="gone" />
+      android:orientation="vertical"
+      android:paddingLeft="10dp"
+      android:paddingTop="10dp"
+      android:paddingRight="10dp"
+      android:paddingBottom="10dp">
 
-    <FrameLayout
-      android:id="@+id/main_media_frame"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="5dp"
-      android:background="#000000"
-      android:visibility="gone">
-
-      <com.google.android.exoplayer2.ui.PlayerView
-        android:id="@+id/exoplayer"
+      <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:visibility="gone"
-        app:show_buffering="always" />
-    </FrameLayout>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-    <androidx.viewpager2.widget.ViewPager2
-      android:id="@+id/viewpagerPost"
-      android:layout_width="match_parent"
-      android:layout_height="600dp"
-      android:layout_marginTop="5dp"
-      android:visibility="visible" />
+        <ImageButton
+          android:id="@+id/buttonBookmark"
+          android:layout_width="30dp"
+          android:layout_height="30dp"
+          android:layout_alignParentStart="true"
+          android:contentDescription="@string/button_bookmark"
+          android:paddingStart="20dp"
+          tools:ignore="RtlSymmetry" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/conLayCustomSnackBar"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginHorizontal="8dp"
-      android:layout_alignParentBottom="true"
-      android:background="@drawable/background_round_corners_success"
-      android:visibility="gone">
+        <ImageButton
+          android:id="@+id/buttonSaveImageOrVideo"
+          android:layout_width="30dp"
+          android:layout_height="30dp"
+          android:layout_alignParentEnd="true"
+          android:contentDescription="@string/button_save_image_or_video"
+          android:paddingEnd="20dp"
+          tools:ignore="RtlSymmetry" />
+
+        <ImageButton
+          android:id="@+id/buttonCopyLink"
+          android:layout_width="30dp"
+          android:layout_height="30dp"
+          android:layout_centerHorizontal="true"
+          android:contentDescription="@string/button_copy_link" />
+      </RelativeLayout>
 
       <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/textViewLabel"
-        style="@style/Widget.Material3.Snackbar.TextView"
+        android:id="@+id/likes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="12dp"
-        android:gravity="start"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="MissingConstraints" />
+        android:layout_marginTop="5dp"
+        android:textSize="15sp"
+        android:textStyle="bold" />
 
       <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/textViewAction"
-        style="@style/Widget.Material3.Button.TextButton.Snackbar"
+        android:id="@+id/ownerIdOrUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="RelativeOverlap, MissingConstraints" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-  </RelativeLayout>
+        android:layout_marginTop="5dp"
+        android:textSize="15sp"
+        android:textStyle="bold" />
 
-  <LinearLayout
-    android:id="@+id/linLayUnderPost"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingLeft="10dp"
-    android:paddingTop="10dp"
-    android:paddingRight="10dp"
-    android:paddingBottom="10dp">
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textSize="15sp" />
 
-    <RelativeLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal">
-
-      <ImageButton
-        android:id="@+id/buttonBookmark"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentStart="true"
-        android:contentDescription="@string/button_bookmark"
-        android:paddingStart="20dp"
-        tools:ignore="RtlSymmetry" />
-
-      <ImageButton
-        android:id="@+id/buttonSaveImageOrVideo"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentEnd="true"
-        android:contentDescription="@string/button_save_image_or_video"
-        android:paddingEnd="20dp"
-        tools:ignore="RtlSymmetry" />
-
-      <ImageButton
-        android:id="@+id/buttonCopyLink"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_centerHorizontal="true"
-        android:contentDescription="@string/button_copy_link" />
-    </RelativeLayout>
-
-    <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/likes"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="5dp"
-      android:textSize="15sp"
-      android:textStyle="bold" />
-
-    <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/ownerIdOrUsername"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="5dp"
-      android:textSize="15sp"
-      android:textStyle="bold" />
-
-    <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/caption"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="5dp"
-      android:textSize="15sp" />
-
-    <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/date"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="5dp"
-      android:textSize="12sp" />
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textSize="12sp" />
+    </LinearLayout>
   </LinearLayout>
-</LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

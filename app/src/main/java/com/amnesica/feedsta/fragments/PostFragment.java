@@ -64,6 +64,8 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,12 +98,12 @@ public class PostFragment extends Fragment {
   private ImageButton imageButtonDownload;
   private ImageButton buttonCopyLink;
   public ProgressDialog progressDialogBatch;
+  private TabLayout tabLayoutViewpager;
 
   // booleans
   private Boolean scrolling;
   private Boolean bFirstFetch;
   private Boolean bFirstAdapterFetch;
-  private Boolean bBookmarked = false;
 
   // exoplayer for videoView
   private SimpleExoPlayer player;
@@ -155,7 +157,24 @@ public class PostFragment extends Fragment {
     // inflate the layout for this fragment
     View view = inflater.inflate(R.layout.fragment_post, container, false);
 
-    // get post from arguments
+    getPostFromArguments();
+
+    setupToolbar(view);
+    setupProgressBar(view);
+    setupHeaderView();
+    setupFooterView(view);
+
+    initializeBookmarkedButton();
+
+    // check connection and set post info (e.g. textFields and sidecar)
+    checkConnectionAndSetPostInfo();
+
+    restorePositionOfVideo(savedInstanceState);
+
+    return view;
+  }
+
+  private void getPostFromArguments() {
     post = null;
     if (getArguments() != null) {
       if (getArguments().getSerializable("shortcode") != null) {
@@ -168,28 +187,14 @@ public class PostFragment extends Fragment {
         post = (Post) getArguments().getSerializable("post");
       }
     }
+  }
 
-    setupToolbar(view);
-
+  private void setupProgressBar(View view) {
     progressBar = view.findViewById(R.id.progressBarPost);
     progressBar.setVisibility(VISIBLE);
+  }
 
-    // define header and get items from header
-    header = getLayoutInflater().inflate(R.layout.listview_header_post, null);
-    setupHeaderView();
-
-    // setup Footer
-    View footer = getLayoutInflater().inflate(R.layout.listview_footer_post, null);
-    setupFooterView(footer);
-
-    setupListComments(view, footer);
-
-    initializeBookmarkedButton();
-
-    // check connection and set post info (e.g. textFields and sidecar)
-    checkConnectionAndSetPostInfo();
-
-    // get positions of video
+  private void restorePositionOfVideo(Bundle savedInstanceState) {
     if (savedInstanceState != null) {
       resumeWindow = savedInstanceState.getInt(STATE_RESUME_WINDOW);
       resumePosition = savedInstanceState.getLong(STATE_RESUME_POSITION);
@@ -197,15 +202,8 @@ public class PostFragment extends Fragment {
       videoMuted = savedInstanceState.getBoolean(STATE_VIDEO_MUTED);
       fullscreenIsPortrait = savedInstanceState.getBoolean(STATE_FULLSCREEN_IS_PORTRAIT);
     }
-
-    return view;
   }
 
-  /**
-   * Sets up toolbar with back arrow and title
-   *
-   * @param view View
-   */
   private void setupToolbar(View view) {
     if (view == null) return;
 
@@ -270,7 +268,7 @@ public class PostFragment extends Fragment {
   /** Initializes bookmarked button. Button is shown completely black if bookmark already exits */
   private void initializeBookmarkedButton() {
     // setting bookmarkButton
-    bBookmarked =
+    Boolean bBookmarked =
         StorageHelper.checkIfAccountOrPostIsInFile(
             post, StorageHelper.FILENAME_BOOKMARKS, getContext());
 
@@ -323,20 +321,24 @@ public class PostFragment extends Fragment {
   /**
    * Sets up the footer View with button "load more comments"
    *
-   * @param footer View
+   * @param view View
    */
-  private void setupFooterView(View footer) {
-    if (footer == null) return;
+  private void setupFooterView(View view) {
+    if (view == null) return;
 
+    View footer = getLayoutInflater().inflate(R.layout.listview_footer_post, null);
     // find button and set load more comments background resource
     buttonLoadMoreComments = footer.findViewById(R.id.buttonLoadMoreComments);
     buttonLoadMoreComments.setBackgroundResource(R.drawable.ic_add_circle_outline_48dp);
 
     progressBarComments = footer.findViewById(R.id.progressbarComments);
+
+    setupListComments(view, footer);
   }
 
   /** Find views for header elements and sets button bookmark and button copyLink */
   private void setupHeaderView() {
+    header = getLayoutInflater().inflate(R.layout.listview_header_post, null);
     if (header == null) return;
 
     // find header views
@@ -348,6 +350,7 @@ public class PostFragment extends Fragment {
     imageProfilePicPostOwner = header.findViewById(R.id.imageProfilePicPostOwner);
     imageViewPost = header.findViewById(R.id.singleImagePost);
     viewPager2 = header.findViewById(R.id.viewpagerPost);
+    tabLayoutViewpager = header.findViewById(R.id.tabLayoutViewpager);
 
     // make links highlighted and clickable in textView
     textCaption.setMovementMethod(LinkMovementMethod.getInstance());
@@ -450,15 +453,12 @@ public class PostFragment extends Fragment {
     if (post.getComments() > 24) {
       // button to load more comments
       buttonLoadMoreComments.setOnClickListener(
-          new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              buttonLoadMoreComments.setVisibility(GONE);
-              progressBarComments.setVisibility(VISIBLE);
+          view -> {
+            buttonLoadMoreComments.setVisibility(GONE);
+            progressBarComments.setVisibility(VISIBLE);
 
-              // start fetching comments
-              startGetPostCommentsTask();
-            }
+            // start fetching comments
+            startGetPostCommentsTask();
           });
     } else {
       // set button invisible if not enough comments
@@ -509,7 +509,7 @@ public class PostFragment extends Fragment {
 
     // resume with video
     if (header != null
-        && header.findViewById(R.id.main_media_frame).getVisibility() == VISIBLE
+        && header.findViewById(R.id.main_media_frame_post).getVisibility() == VISIBLE
         && post != null
         && post.getVideoUrl() != null) {
       loadVideoFromUrl(post.getVideoUrl());
@@ -628,11 +628,11 @@ public class PostFragment extends Fragment {
 
     if (playerView == null) {
       // initialize playerView
-      playerView = header.findViewById(R.id.exoplayer);
+      playerView = header.findViewById(R.id.exoplayer_post);
       playerView.setVisibility(VISIBLE);
 
       // make frame visible
-      mainMediaFrameLayout = header.findViewById(R.id.main_media_frame);
+      mainMediaFrameLayout = header.findViewById(R.id.main_media_frame_post);
       mainMediaFrameLayout.setVisibility(VISIBLE);
 
       initDialogToHoldFullscreenVideo();
@@ -682,12 +682,9 @@ public class PostFragment extends Fragment {
     if (!showControls) {
       // hide controller when visibility of playerView changes
       playerView.setControllerVisibilityListener(
-          new PlayerControlView.VisibilityListener() {
-            @Override
-            public void onVisibilityChange(int i) {
-              if (i == 0) {
-                playerView.hideController();
-              }
+          i -> {
+            if (i == 0) {
+              playerView.hideController();
             }
           });
     }
@@ -1420,6 +1417,10 @@ public class PostFragment extends Fragment {
               new StatePagerAdapterSideCar(fragment.requireActivity(), fragment.post);
           fragment.viewPager2.setSaveFromParentEnabled(false);
           fragment.viewPager2.setAdapter(fragment.statePagerAdapterSideCar);
+          // attach tab layout to viewpager
+          new TabLayoutMediator(
+                  fragment.tabLayoutViewpager, fragment.viewPager2, (tab, position) -> {})
+              .attach();
 
         } catch (IllegalStateException | NullPointerException e) {
           Log.d("PostFragment", Log.getStackTraceString(e));
