@@ -731,7 +731,8 @@ public class ProfileFragment extends Fragment {
 
       // make url for account posts (hint: url.endCursor is null at first page fetch)
       if (fragment.url == null || (fragment.url.endCursor == null && fragment.bFirstFetch)) {
-        urlAddress = "https://www.instagram.com/" + fragment.account.getUsername() + "/?__a=1";
+        urlAddress =
+            "https://www.instagram.com/" + fragment.account.getUsername() + "/?__a=1&__d=dis";
         fragment.bFirstFetch = false;
       } else if (fragment.url.hasNextPage != null
           && fragment.url.hasNextPage

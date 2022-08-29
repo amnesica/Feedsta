@@ -631,7 +631,9 @@ public class FollowingFragment extends Fragment implements AccountsListCallback 
         for (Account followedAccountUpdated : fragment.followedAccountsUpdatedToAccountList) {
           if (followedAccountUpdated != null && followedAccountUpdated.getUsername() != null) {
             String url =
-                "https://www.instagram.com/" + followedAccountUpdated.getUsername() + "/?__a=1";
+                "https://www.instagram.com/"
+                    + followedAccountUpdated.getUsername()
+                    + "/?__a=1&__d=dis";
 
             // get new thumbnail url
             try {

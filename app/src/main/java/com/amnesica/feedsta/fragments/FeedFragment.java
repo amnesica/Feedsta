@@ -502,7 +502,7 @@ public class FeedFragment extends Fragment {
       try {
         feedFragment.putAccountNameInFetchedAccountsMap(account.getUsername(), true);
 
-        final String url = "https://www.instagram.com/" + account.getUsername() + "/?__a=1";
+        final String url = "https://www.instagram.com/" + account.getUsername() + "/?__a=1&__d=dis";
 
         JSONObject userData = fetchUserDataFromInstagram(url, feedFragment);
         if (userData == null) return;
