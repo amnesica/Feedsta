@@ -356,11 +356,14 @@ public class PostFragment extends Fragment {
     textCaption.setMovementMethod(LinkMovementMethod.getInstance());
 
     // on click listener to show post image fullscreen to zoom into image
-    // (only enable listener for posts with no image as string saved, because
-    // BigImageViewer (for viewing image fullscreen) cannot handle that!)
-    if (!postHasThumbnailImageAsString()) {
-      imageViewPost.setOnClickListener(v -> goToFullscreenImagePostFragment());
-    }
+    // (only enable listener for posts with actual url, because
+    // BigImageViewer (for viewing image fullscreen) cannot handle base64 encoded images that!)
+    imageViewPost.setOnClickListener(
+        view -> {
+          if (post.getImageUrl() != null) {
+            goToFullscreenImagePostFragment();
+          }
+        });
 
     setupBookmarkButton(header);
 
@@ -1452,7 +1455,7 @@ public class PostFragment extends Fragment {
 
         // if imageUrl is null, try to show the image as string if it exists (post to show might be
         // bookmark)
-        if (fragment.postHasThumbnailImageAsString()) {
+        if (fragment.post.getImageUrl() == null && fragment.postHasThumbnailImageAsString()) {
           fragment.showImageThumbnailOfBookmark();
           return;
         }
