@@ -497,62 +497,93 @@ public class FeedFragment extends Fragment {
     }
 
     private void getAccountPosts() {
+      final FeedFragment feedFragment = fragmentReference.get();
+      if (feedFragment == null) return;
       try {
-        final FeedFragment feedFragment = fragmentReference.get();
-        if (feedFragment == null) return;
-
         feedFragment.putAccountNameInFetchedAccountsMap(account.getUsername(), true);
 
         final String url = "https://www.instagram.com/" + account.getUsername() + "/?__a=1";
 
-        JSONArray postsAsEdges = fetchPostsAsEdges(url, feedFragment);
-        if (postsAsEdges == null) return;
+        JSONObject userData = fetchUserDataFromInstagram(url, feedFragment);
+        if (userData == null) return;
+
+        enhanceAccountDataWithUserData(account, userData);
+
+        JSONArray postsAsEdges = extractPostsAsEdges(userData);
 
         createPostsFromEdgeData(postsAsEdges, feedFragment);
       } catch (Exception e) {
         Log.d("FeedRunnable", Log.getStackTraceString(e));
+        feedFragment.markFetchingOfPostsAsFailed(account.getUsername());
         networkHandler.closeConnectionsAndBuffers();
       }
     }
 
-    private void createPostsFromEdgeData(JSONArray edges, FeedFragment feedFragment) {
+    private void enhanceAccountDataWithUserData(
+        @NonNull Account account, @NonNull JSONObject userData) throws JSONException {
+      final String imageProfilePicUrl = userData.getString("profile_pic_url_hd");
+      account.setImageProfilePicUrl(imageProfilePicUrl);
+    }
+
+    private JSONObject fetchUserDataFromInstagram(
+        @NonNull final String url, @NonNull FeedFragment feedFragment) throws Exception {
+      JSONObject userData;
+
+      // get json string from url
+      String jsonStr = networkHandler.makeServiceCall(url, FeedFragment.class.getSimpleName());
+
+      // if rate limit or unknown error notify user (e.g. if jsonStr is null)
+      if (!FragmentHelper.checkIfJsonStrIsValid(jsonStr, feedFragment)) {
+        feedFragment.markFetchingOfPostsAsFailed(account.getUsername());
+        // stop fetching at this point
+        return null;
+      }
+
+      JSONObject jsonObj = new JSONObject(jsonStr);
+      userData = jsonObj.getJSONObject("graphql").getJSONObject("user");
+
+      return userData;
+    }
+
+    /** Fetches posts from account as edges */
+    private JSONArray extractPostsAsEdges(@NonNull JSONObject userData) throws Exception {
+      return userData.getJSONObject("edge_owner_to_timeline_media").getJSONArray("edges");
+    }
+
+    private void createPostsFromEdgeData(
+        @NonNull JSONArray edges, @NonNull FeedFragment feedFragment) throws Exception {
       final int startIndex = 0;
       final int endIndex = edges.length();
 
-      try {
-        for (int i = startIndex; i < endIndex; i++) {
-          JSONObject node = edges.getJSONObject(i).getJSONObject("node");
+      for (int i = startIndex; i < endIndex; i++) {
+        JSONObject node = edges.getJSONObject(i).getJSONObject("node");
 
-          boolean isSidecar = node.getString("__typename").equals("GraphSidecar");
-          boolean isVideo = node.getBoolean("is_video");
+        boolean isSidecar = node.getString("__typename").equals("GraphSidecar");
+        boolean isVideo = node.getBoolean("is_video");
 
-          Post post =
-              Post.builder()
-                  .id(node.getString("id"))
-                  .imageUrl(node.getString("display_url"))
-                  .likes(node.getJSONObject("edge_media_preview_like").getInt("count"))
-                  .ownerId(node.getJSONObject("owner").getString("id"))
-                  .comments(node.getJSONObject("edge_media_to_comment").getInt("count"))
-                  .caption(getCaption(node))
-                  .shortcode(node.getString("shortcode"))
-                  .takenAtDate(
-                      new Date(Long.parseLong(node.getString("taken_at_timestamp")) * 1000))
-                  .is_video(isVideo)
-                  .username(account.getUsername())
-                  .imageUrlProfilePicOwner(account.getImageProfilePicUrl())
-                  .imageUrlThumbnail(
-                      node.getJSONArray("thumbnail_resources").getJSONObject(2).getString("src"))
-                  .is_sideCar(isSidecar)
-                  .height(node.getJSONObject("dimensions").getInt("height"))
-                  .ownerId(node.getJSONObject("owner").getString("id"))
-                  .sidecar(isSidecar ? getSidecar(node) : null)
-                  .videoUrl(isVideo ? node.getString("video_url") : null)
-                  .build();
+        Post post =
+            Post.builder()
+                .id(node.getString("id"))
+                .imageUrl(node.getString("display_url"))
+                .likes(node.getJSONObject("edge_media_preview_like").getInt("count"))
+                .ownerId(node.getJSONObject("owner").getString("id"))
+                .comments(node.getJSONObject("edge_media_to_comment").getInt("count"))
+                .caption(getCaption(node))
+                .shortcode(node.getString("shortcode"))
+                .takenAtDate(new Date(Long.parseLong(node.getString("taken_at_timestamp")) * 1000))
+                .is_video(isVideo)
+                .username(account.getUsername())
+                .imageUrlProfilePicOwner(account.getImageProfilePicUrl())
+                .imageUrlThumbnail(
+                    node.getJSONArray("thumbnail_resources").getJSONObject(2).getString("src"))
+                .is_sideCar(isSidecar)
+                .height(node.getJSONObject("dimensions").getInt("height"))
+                .ownerId(node.getJSONObject("owner").getString("id"))
+                .sidecar(isSidecar ? getSidecar(node) : null)
+                .videoUrl(isVideo ? node.getString("video_url") : null)
+                .build();
 
-          feedFragment.addPostToFetchedPosts(post);
-        }
-      } catch (JSONException | IllegalStateException | ArrayIndexOutOfBoundsException e) {
-        feedFragment.markFetchingOfPostsAsFailed(account.getUsername());
+        feedFragment.addPostToFetchedPosts(post);
       }
     }
 
@@ -606,35 +637,6 @@ public class FeedFragment extends Fragment {
         }
       }
       return new Sidecar(sidecarEntries);
-    }
-
-    /** Fetches posts from account as edges */
-    private JSONArray fetchPostsAsEdges(String url, FeedFragment feedFragment) {
-      JSONArray edges = null;
-
-      // get json string from url
-      String jsonStr = networkHandler.makeServiceCall(url, FeedFragment.class.getSimpleName());
-
-      try {
-        // if rate limit or unknown error notify user (e.g. if jsonStr is null)
-        if (!FragmentHelper.checkIfJsonStrIsValid(jsonStr, feedFragment)) {
-          feedFragment.markFetchingOfPostsAsFailed(account.getUsername());
-          // stop fetching at this point
-          return null;
-        }
-
-        JSONObject jsonObj = new JSONObject(jsonStr);
-        edges =
-            jsonObj
-                .getJSONObject("graphql")
-                .getJSONObject("user")
-                .getJSONObject("edge_owner_to_timeline_media")
-                .getJSONArray("edges");
-      } catch (JSONException | IllegalStateException e) {
-        Log.d("FeedFragment", Log.getStackTraceString(e));
-        feedFragment.markFetchingOfPostsAsFailed(account.getUsername());
-      }
-      return edges;
     }
   }
 
