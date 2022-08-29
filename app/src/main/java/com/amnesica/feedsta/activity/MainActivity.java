@@ -3,6 +3,7 @@ package com.amnesica.feedsta.activity;
 import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -11,11 +12,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.TypedValue;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -25,6 +29,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 
+import com.amnesica.feedsta.BuildConfig;
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.fragments.AboutFragment;
 import com.amnesica.feedsta.fragments.CollectionsFragment;
@@ -280,7 +285,15 @@ public class MainActivity extends AppCompatActivity {
     int permGrantedRead =
         ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      // READ permission and MANAGE_EXTERNAL_STORAGE needed
+      if (permGrantedRead == PackageManager.PERMISSION_GRANTED
+          && Environment.isExternalStorageManager()) {
+        allPermsGranted = true;
+      }
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        && Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
       // only READ permission needed
       if (permGrantedRead == PackageManager.PERMISSION_GRANTED) {
         allPermsGranted = true;
@@ -299,7 +312,14 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void requestRequiredPermissions() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      startIntentToGetManageAllFilesPermission();
+
+      ActivityCompat.requestPermissions(
+          this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, permsRequestCode);
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        && Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
       ActivityCompat.requestPermissions(
           this,
           new String[] {
@@ -314,6 +334,13 @@ public class MainActivity extends AppCompatActivity {
           },
           permsRequestCode);
     }
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.R)
+  private void startIntentToGetManageAllFilesPermission() {
+    Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+    startActivity(intent);
   }
 
   @Override
