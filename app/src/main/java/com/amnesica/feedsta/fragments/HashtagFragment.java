@@ -426,13 +426,13 @@ public class HashtagFragment extends Fragment {
         urlAddress =
             "https://www.instagram.com/explore/tags/"
                 + fragment.hashtag.getName()
-                + "/?__a=1&max_id=";
+                + "/?__a=1&__d=dis&max_id=";
         fragment.bFirstFetch = false;
       } else if (fragment.url.hasNextPage != null && fragment.url.hasNextPage) {
         urlAddress =
             "https://www.instagram.com/explore/tags/"
                 + fragment.hashtag.getName()
-                + "/?__a=1&max_id="
+                + "/?__a=1&__d=dis&max_id="
                 + fragment.url.endCursor;
         fragment.addNextPageToPlaceholder = true;
       } else if (fragment.url.hasNextPage != null) {

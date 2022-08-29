@@ -51,19 +51,14 @@ public class AboutFragment extends Fragment {
           getResources().getString(R.string.made_with_love_from_hh_light_theme));
     }
 
-    // set text to rate the app
-    TextView textRatingInfo = view.findViewById(R.id.textAppInfoRating);
-    String stringToUnderline = getString(R.string.click_here_to_rate_the_app);
+    // set text to visit Github
+    TextView textRatingInfo = view.findViewById(R.id.textAppGoToGithub);
+    String stringToUnderline = getString(R.string.click_here_to_go_to_github);
     SpannableString content = new SpannableString(stringToUnderline);
     content.setSpan(new UnderlineSpan(), 0, stringToUnderline.length(), 0);
     textRatingInfo.setText(content);
     textRatingInfo.setOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View view) {
-            FragmentHelper.rateApp(requireContext());
-          }
-        });
+        view1 -> FragmentHelper.openProjectOnGithub(requireContext()));
 
     // set app name
     if (getContext() != null) {

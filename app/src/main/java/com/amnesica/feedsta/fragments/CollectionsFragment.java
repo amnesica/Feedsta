@@ -545,7 +545,8 @@ public class CollectionsFragment extends Fragment
 
       for (Post bookmarkedPost : fragment.listPostsBookmarked) {
         if (bookmarkedPost != null && bookmarkedPost.getShortcode() != null) {
-          String url = "https://www.instagram.com/p/" + bookmarkedPost.getShortcode() + "/?__a=1";
+          String url =
+              "https://www.instagram.com/p/" + bookmarkedPost.getShortcode() + "/?__a=1&__d=dis";
 
           // get new thumbnail url
           try {

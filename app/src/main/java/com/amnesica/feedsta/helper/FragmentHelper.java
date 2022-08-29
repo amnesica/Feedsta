@@ -5,7 +5,6 @@ import static android.view.View.GONE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -1015,29 +1014,24 @@ public class FragmentHelper {
   }
 
   /**
-   * Start intent to rate the app in Google Play or in the web browser if Google Play is not
-   * installed
+   * Start intent to visit the project page on Github
    *
    * @param context Context
    */
-  public static void rateApp(Context context) {
-    try {
-      Intent rateIntent = rateIntentForUrl("market://details", context);
-      context.startActivity(rateIntent);
-    } catch (ActivityNotFoundException e) {
-      Intent rateIntent = rateIntentForUrl("https://play.google.com/store/apps/details", context);
-      context.startActivity(rateIntent);
-    }
+  public static void openProjectOnGithub(Context context) {
+    final String githubUrl = "https://github.com/amnesica/feedsta";
+    Intent rateIntent = getIntentForUrl(githubUrl, context);
+    context.startActivity(rateIntent);
   }
 
   /**
-   * Helper method for rateApp(context) to start intent
+   * Helper method to start intent
    *
    * @param url String
    * @param context Context
    * @return Intent
    */
-  private static Intent rateIntentForUrl(String url, Context context) {
+  private static Intent getIntentForUrl(final String url, Context context) {
     Intent intent =
         new Intent(
             Intent.ACTION_VIEW,

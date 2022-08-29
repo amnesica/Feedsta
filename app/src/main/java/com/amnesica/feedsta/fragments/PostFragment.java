@@ -1157,7 +1157,8 @@ public class PostFragment extends Fragment {
       final PostFragment fragment = fragmentReference.get();
       if (fragment == null) return null;
 
-      String urlAddress = "https://www.instagram.com/p/" + fragment.post.getShortcode() + "/?__a=1";
+      String urlAddress =
+          "https://www.instagram.com/p/" + fragment.post.getShortcode() + "/?__a=1&__d=dis";
       return fragment.url = new URL(urlAddress, fragment.post.getShortcode(), FeedObject.ACCOUNT);
     }
 

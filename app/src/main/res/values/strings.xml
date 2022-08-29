@@ -30,7 +30,7 @@
   <string name="no_search_results">There are no results for your search.</string>
   <string name="no_bookmarked_posts">There are no saved posts.\nSave posts to view them here.</string>
   <string name="name_hashtag_with_symbol">#%1$s</string>
-  <string name="no_relationship_to_instagram">Thanks for using %1$s.\n\nThis app is designed for people who want to follow their favorite accounts without being registered with Instagram.\n\nPlease note that private profiles cannot be displayed. Instagram prohibits this.\n\nI am not affiliated with Instagram.\n\nIf you have any questions or suggestions, please write in the Play Store.\n\nIf you like the app, please leave a 5-star rating in the Play Store.</string>
+  <string name="no_relationship_to_instagram">Thanks for using %1$s.\n\nThis app is designed for people who want to follow their favorite accounts without being registered with Instagram.\n\nPlease note that private profiles cannot be displayed. Instagram prohibits this.\n\nI am not affiliated with Instagram.\n\nIf you have any questions or suggestions, please open an issue on Github.</string>
   <string name="remove_account_button">RemoveAccountButton</string>
   <string name="link_copied">Copied</string>
   <string name="video_saved">Video saved</string>
@@ -245,7 +245,7 @@
   <string name="removing_bookmarks_from_selected_collections_failed">Removing bookmarks from selected collections failed</string>
   <string name="successfully_removed_bookmarks_from_this_collection">Successfully removed bookmarks from this collection</string>
   <string name="successfully_removed_bookmarks_from_selected_collections">Successfully removed bookmarks from selected collections</string>
-  <string name="click_here_to_rate_the_app">Click here to rate the app</string>
+  <string name="click_here_to_go_to_github">Click here to visit the project on Github</string>
   <string name="dialog_permissions_note_title">Permissions note - Please read!</string>
   <string name="dialog_permissions_note_message">The following permissions are needed for using Feedsta:\n\n- INTERNET: Required to access Instagram\n- ACCESS NETWORK STATE: Required to check if internet connection is available\n- READ/WRITE EXTERNAL STORAGE: Required to export or import app data and for downloading posts\n\nPlease grant the following permission request to use Feedsta!</string>
   <string name="dialog_permissions_note_yes">Okay</string>

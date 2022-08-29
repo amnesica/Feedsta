@@ -146,7 +146,7 @@ public class DownloadPostsBatch extends AsyncTask<Void, Integer, Void> {
    */
   private URL makeValidURL(Post post) {
     if (isCancelled()) return null;
-    String urlAddress = "https://www.instagram.com/p/" + post.getShortcode() + "/?__a=1";
+    String urlAddress = "https://www.instagram.com/p/" + post.getShortcode() + "/?__a=1&__d=dis";
     return new URL(urlAddress, post.getShortcode(), FeedObject.ACCOUNT);
   }
 
