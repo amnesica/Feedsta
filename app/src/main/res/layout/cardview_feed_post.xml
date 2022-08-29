@@ -83,7 +83,7 @@
           android:visibility="gone"
           android:scaleType="center"
           android:foreground="@drawable/exo_controls_play"
-          android:foregroundGravity="center"></ImageView>
+          android:foregroundGravity="center" />
 
         <com.google.android.exoplayer2.ui.PlayerView
           android:id="@+id/exoplayer_feed"
