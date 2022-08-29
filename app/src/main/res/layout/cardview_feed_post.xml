@@ -79,9 +79,11 @@
         <ImageView
           android:id="@+id/exoplayer_feed_preview"
           android:layout_width="match_parent"
-          android:layout_height="match_parent"
+          android:layout_height="wrap_content"
           android:visibility="gone"
-          android:scaleType="center" />
+          android:scaleType="center"
+          android:foreground="@drawable/exo_controls_play"
+          android:foregroundGravity="center"></ImageView>
 
         <com.google.android.exoplayer2.ui.PlayerView
           android:id="@+id/exoplayer_feed"

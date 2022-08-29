@@ -10,7 +10,9 @@ import androidx.core.content.ContextCompat;
 import com.amnesica.feedsta.fragments.FullscreenImagePostFragment;
 import com.amnesica.feedsta.fragments.FullscreenProfileImageFragment;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 
 public class ImageHelper {
   /* Loads image with glide (note: error retries loading the image from the url) */
@@ -22,7 +24,6 @@ public class ImageHelper {
         .fallback(ContextCompat.getDrawable(context, idErrorImage)) // if load was null
         .diskCacheStrategy(DiskCacheStrategy.NONE)
         .skipMemoryCache(true)
-        .dontAnimate()
         .into(imageView);
   }
 
@@ -35,9 +36,18 @@ public class ImageHelper {
         .asBitmap()
         .load(Base64.decode(base64Image, Base64.DEFAULT))
         .error(ContextCompat.getDrawable(context, idErrorImage))
-        .dontAnimate()
         .diskCacheStrategy(DiskCacheStrategy.NONE)
         .skipMemoryCache(true)
+        .into(imageView);
+  }
+
+  public static void loadFirstVideoFrameWithGlide(
+      final ImageView imageView, final String videoUrl, int idErrorImage, final Context context) {
+    Glide.with(context)
+        .asBitmap()
+        .load(videoUrl)
+        .apply(new RequestOptions().frame(1000))
+        .priority(Priority.HIGH)
         .into(imageView);
   }
 

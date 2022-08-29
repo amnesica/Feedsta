@@ -199,9 +199,9 @@ public class RecViewAdapterFeed extends RecyclerView.Adapter<RecViewAdapterFeed.
       holder.mainMediaFrameLayout.getLayoutParams().height = post.getHeight();
     }
 
-    ImageHelper.loadImageWithGlide(
+    ImageHelper.loadFirstVideoFrameWithGlide(
         holder.imageViewPlayerPreview,
-        post.getImageUrlThumbnail(),
+        post.getVideoUrl(),
         R.drawable.placeholder_video_error,
         context);
     holder.imageViewPlayerPreview.getLayoutParams().height = post.getHeight();
