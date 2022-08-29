@@ -10,7 +10,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 31 // java docs for API 32 are not available yet
         versionCode 32
-        versionName "2.2.0"
+        versionName "3.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
