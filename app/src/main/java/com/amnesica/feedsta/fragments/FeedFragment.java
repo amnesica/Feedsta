@@ -174,15 +174,12 @@ public class FeedFragment extends Fragment {
           }
 
           getAccountDataFromStorage();
-
           showOrHideNoAccountsHint();
 
           if (accounts != null) {
             counterAmountAccountsToFetch = accounts.size();
-
             // randomize order of accounts to even fetch some accounts if rate limit appears
             Collections.shuffle(accounts);
-
             createAndExecuteThreadsToLoadFeed();
           }
 
@@ -194,16 +191,10 @@ public class FeedFragment extends Fragment {
                   saveAndDisplayNewlyFetchedPosts();
                 } else {
                   if (accounts == null) {
-                    // no fetchedPosts and no accounts -> delete stored posts
+                    // no fetchedPosts and no accounts -> delete stored posts and clear posts list
                     deleteStoredPosts();
-
-                    // delete posts in list
-                    if (posts != null) {
-                      posts.clear();
-                    }
-
+                    clearPostsList();
                     setTextFeedHint(getResources().getString(R.string.no_followed_accounts));
-
                   } else {
                     FragmentHelper.notifyUserOfProblem(this, Error.SOMETHINGS_WRONG);
                   }
@@ -217,8 +208,13 @@ public class FeedFragment extends Fragment {
     recyclerViewFeed.invalidate();
   }
 
+  private void clearPostsList() {
+    if (posts != null) {
+      posts.clear();
+    }
+  }
+
   private void createAndExecuteThreadsToLoadFeed() {
-    // try {
     loadFeedExecutor = Executors.newFixedThreadPool(counterAmountAccountsToFetch);
     // start new threads for all accounts
     for (Account account : accounts) {
@@ -230,6 +226,12 @@ public class FeedFragment extends Fragment {
     // This will make the executor accept no new threads and finish all existing threads in the
     // queue
     loadFeedExecutor.shutdown();
+
+    try {
+      loadFeedExecutor.awaitTermination(5L, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      Log.d("FeedFragment", Log.getStackTraceString(e));
+    }
   }
 
   private void deleteStoredPosts() {
@@ -341,15 +343,10 @@ public class FeedFragment extends Fragment {
       textFeedHint.setVisibility(GONE);
     } else {
       // only show message when there are no stored posts and no followed accounts
-      // boolean when there are stored posts at startup
-      boolean bStoredPosts = false;
-      if (!bStoredPosts) {
-        setTextFeedHint(getResources().getString(R.string.no_followed_accounts));
+      setTextFeedHint(getResources().getString(R.string.no_followed_accounts));
 
-        // invalidate view
-        recyclerViewFeed.invalidate();
-        swipeRefreshLayout.setRefreshing(false);
-      }
+      recyclerViewFeed.invalidate();
+      swipeRefreshLayout.setRefreshing(false);
     }
   }
 
@@ -471,8 +468,8 @@ public class FeedFragment extends Fragment {
     }
   }
 
-  private void putAccountNameInFetchedAccountsMap(String accountName, boolean isSuccessful) {
-    fetchedAccountsMap.put(accountName, isSuccessful);
+  private void putAccountNameInFetchedAccountsMap(String accountName) {
+    fetchedAccountsMap.put(accountName, true);
   }
 
   private void markFetchingOfPostsAsFailed(String accountName) {
@@ -500,7 +497,7 @@ public class FeedFragment extends Fragment {
       final FeedFragment feedFragment = fragmentReference.get();
       if (feedFragment == null) return;
       try {
-        feedFragment.putAccountNameInFetchedAccountsMap(account.getUsername(), true);
+        feedFragment.putAccountNameInFetchedAccountsMap(account.getUsername());
 
         final String url = "https://www.instagram.com/" + account.getUsername() + "/?__a=1&__d=dis";
 
