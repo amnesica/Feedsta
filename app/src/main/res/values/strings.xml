@@ -247,7 +247,7 @@
   <string name="successfully_removed_bookmarks_from_selected_collections">Successfully removed bookmarks from selected collections</string>
   <string name="click_here_to_go_to_github">Click here to visit the project on Github</string>
   <string name="dialog_permissions_note_title">Permissions note - Please read!</string>
-  <string name="dialog_permissions_note_message">The following permissions are needed for using Feedsta:\n\n- INTERNET: Required to access Instagram\n- ACCESS NETWORK STATE: Required to check if internet connection is available\n- READ/WRITE EXTERNAL STORAGE: Required to export or import app data and for downloading posts\n\nPlease grant the following permission request to use Feedsta!</string>
+  <string name="dialog_permissions_note_message">The following permissions are needed for using Feedsta:\n\n- INTERNET: Required to access Instagram\n- ACCESS NETWORK STATE: Required to check if internet connection is available\n- READ/WRITE EXTERNAL STORAGE: Required to export or import app data and for downloading posts\n- MANAGE EXTERNAL STORAGE: Required to export or import app data (on Android R only)\n\nPlease grant the following permission request to use Feedsta!</string>
   <string name="dialog_permissions_note_yes">Okay</string>
   <string name="dialog_permissions_note_exit_app">No, let\'s stop here</string>
   <string name="permissions_denied">Permissions are needed for using app</string>

@@ -1,27 +1,21 @@
 package com.amnesica.feedsta.fragments;
 
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsReadAndWrite;
-import static com.amnesica.feedsta.helper.StaticIdentifier.permsRequestCode;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.TypedValue;
+import android.provider.DocumentsContract;
 
 import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.amnesica.feedsta.R;
-import com.amnesica.feedsta.helper.FileUtil;
 import com.amnesica.feedsta.helper.FragmentHelper;
+import com.amnesica.feedsta.helper.MigrationHelper;
 import com.amnesica.feedsta.helper.StorageHelper;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -31,9 +25,6 @@ import java.util.Objects;
 /** Fragment for settings */
 public class SettingsFragment extends PreferenceFragmentCompat
     implements SharedPreferences.OnSharedPreferenceChangeListener {
-
-  // key of specific shared preference
-  private String key;
 
   @Override
   public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -50,46 +41,26 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
   @Override
   public boolean onPreferenceTreeClick(Preference preference) {
-    key = preference.getKey();
+    // key of specific shared preference
+    String key = preference.getKey();
 
     // ask permissions first
-    if (key.equals(getResources().getString(R.string.export_files))
-        || key.equals(getResources().getString(R.string.import_files))) {
+    if (key != null
+        && (key.equals(getResources().getString(R.string.export_files))
+            || key.equals(getResources().getString(R.string.import_files)))) {
 
-      // check permissions
-      requestPermissions(permsReadAndWrite, permsRequestCode);
+      // Permission is granted. Continue the action or workflow in your app.
+      if (key.equals(getResources().getString(R.string.export_files))) {
+        chooseFolderToExport();
+      }
+
+      if (key.equals(getResources().getString(R.string.import_files))) {
+        chooseFolderToImport();
+      }
+
       return true;
     }
     return false;
-  }
-
-  @Override
-  public void onRequestPermissionsResult(
-      int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    if (permsRequestCode == 200) {
-      if (grantResults.length > 0
-          && grantResults[0] == PackageManager.PERMISSION_GRANTED
-          && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-        // Permission is granted. Continue the action or workflow in your app.
-        if (key != null && key.equals(getResources().getString(R.string.export_files))) {
-          chooseFolderToExport();
-        }
-
-        if (key != null && key.equals(getResources().getString(R.string.import_files))) {
-          chooseFolderToImport();
-        }
-      } else {
-        // Explain to the user that the feature is unavailable because
-        // the features requires a permission that the user has denied.
-        // At the same time, respect the user's decision. Don't link to
-        // system settings in an effort to convince the user to change
-        // their decision.
-        FragmentHelper.showToast(
-            getResources().getString(R.string.permission_denied),
-            requireActivity(),
-            requireContext());
-      }
-    }
   }
 
   /** Opens system data manager to choose directory to export to */
@@ -128,8 +99,11 @@ public class SettingsFragment extends PreferenceFragmentCompat
         break;
       case 9998:
         if (data != null && data.getData() != null) {
-          Uri treeUri = data.getData();
-          String path = FileUtil.getFullPathFromTreeUri(treeUri, requireContext());
+          Uri uri = data.getData();
+          Uri docUri =
+              DocumentsContract.buildDocumentUriUsingTree(
+                  uri, DocumentsContract.getTreeDocumentId(uri));
+          String path = MigrationHelper.getPath(requireContext(), docUri);
 
           // show dialog that all previous imported files are overwritten
           showImportConfirmationDialog(path);
@@ -156,51 +130,30 @@ public class SettingsFragment extends PreferenceFragmentCompat
             .setMessage(R.string.dialog_confirm_import_message)
             .setPositiveButton(
                 R.string.dialog_confirm_import_positive_button,
-                new DialogInterface.OnClickListener() {
-                  public void onClick(DialogInterface dialog, int which) {
-                    // do import
-                    importDataFromApp(path);
-                  }
+                (dialog, which) -> {
+                  // do import
+                  importDataFromApp(path);
                 })
-            .setNegativeButton(
-                R.string.CANCEL,
-                new DialogInterface.OnClickListener() {
-                  @Override
-                  public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                  }
-                })
+            .setNegativeButton(R.string.CANCEL, (dialog, which) -> dialog.dismiss())
 
             // get the click outside the dialog to set the behaviour like the negative button was
             // clicked
-            .setOnCancelListener(
-                new DialogInterface.OnCancelListener() {
-                  @Override
-                  public void onCancel(DialogInterface dialog) {
-                    dialog.dismiss();
-                  }
-                });
+            .setOnCancelListener(DialogInterface::dismiss);
 
     final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
     // get color for button texts
-    TypedValue typedValue = new TypedValue();
-    Resources.Theme theme = requireContext().getTheme();
-    theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-    @ColorInt final int color = typedValue.data;
+    @ColorInt final int color = FragmentHelper.getColorId(requireContext(), R.attr.colorAccent);
 
     // create alertDialog
     requireActivity()
         .runOnUiThread(
-            new Runnable() {
-              @Override
-              public void run() {
-                AlertDialog alertDialog = finalAlertDialogBuilder.create();
-                alertDialog.setCanceledOnTouchOutside(true);
-                alertDialog.show();
-                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
-                alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
-              }
+            () -> {
+              AlertDialog alertDialog = finalAlertDialogBuilder.create();
+              alertDialog.setCanceledOnTouchOutside(true);
+              alertDialog.show();
+              alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
+              alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
             });
   }
 
@@ -391,50 +344,29 @@ public class SettingsFragment extends PreferenceFragmentCompat
             .setMessage(R.string.dialog_dark_mode_changed_message)
             .setPositiveButton(
                 R.string.dialog_dark_mode_changed_positive_button,
-                new DialogInterface.OnClickListener() {
-                  public void onClick(DialogInterface dialog, int which) {
-                    requireActivity().finish();
-                  }
-                })
+                (dialog, which) -> requireActivity().finish())
             .setNegativeButton(
                 R.string.dialog_dark_mode_changed_negative_button,
-                new DialogInterface.OnClickListener() {
-                  @Override
-                  public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                  }
-                })
+                (dialog, which) -> dialog.dismiss())
 
             // get the click outside the dialog to set the behaviour like the negative button was
             // clicked
-            .setOnCancelListener(
-                new DialogInterface.OnCancelListener() {
-                  @Override
-                  public void onCancel(DialogInterface dialog) {
-                    dialog.dismiss();
-                  }
-                });
+            .setOnCancelListener(DialogInterface::dismiss);
 
     final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
     // get color for button texts
-    TypedValue typedValue = new TypedValue();
-    Resources.Theme theme = requireContext().getTheme();
-    theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-    @ColorInt final int color = typedValue.data;
+    @ColorInt final int color = FragmentHelper.getColorId(requireContext(), R.attr.colorAccent);
 
     // create alertDialog
     requireActivity()
         .runOnUiThread(
-            new Runnable() {
-              @Override
-              public void run() {
-                AlertDialog alertDialog = finalAlertDialogBuilder.create();
-                alertDialog.setCanceledOnTouchOutside(true);
-                alertDialog.show();
-                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
-                alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
-              }
+            () -> {
+              AlertDialog alertDialog = finalAlertDialogBuilder.create();
+              alertDialog.setCanceledOnTouchOutside(true);
+              alertDialog.show();
+              alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
+              alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
             });
   }
 
@@ -448,49 +380,27 @@ public class SettingsFragment extends PreferenceFragmentCompat
             .setMessage(R.string.dialog_restart_phone_message)
             .setPositiveButton(
                 R.string.dialog_restart_phone_positive_button,
-                new DialogInterface.OnClickListener() {
-                  public void onClick(DialogInterface dialog, int which) {
-                    requireActivity().finish();
-                  }
-                })
+                (dialog, which) -> requireActivity().finish())
             .setNegativeButton(
-                R.string.dialog_restart_phone_negative_button,
-                new DialogInterface.OnClickListener() {
-                  @Override
-                  public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                  }
-                })
+                R.string.dialog_restart_phone_negative_button, (dialog, which) -> dialog.dismiss())
             // get the click outside the dialog to set the behaviour like the negative button was
             // clicked
-            .setOnCancelListener(
-                new DialogInterface.OnCancelListener() {
-                  @Override
-                  public void onCancel(DialogInterface dialog) {
-                    dialog.dismiss();
-                  }
-                });
+            .setOnCancelListener(DialogInterface::dismiss);
 
     final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
     // get color for button texts
-    TypedValue typedValue = new TypedValue();
-    Resources.Theme theme = requireContext().getTheme();
-    theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-    @ColorInt final int color = typedValue.data;
+    @ColorInt final int color = FragmentHelper.getColorId(requireContext(), R.attr.colorAccent);
 
     // create alertDialog
     requireActivity()
         .runOnUiThread(
-            new Runnable() {
-              @Override
-              public void run() {
-                AlertDialog alertDialog = finalAlertDialogBuilder.create();
-                alertDialog.setCanceledOnTouchOutside(true);
-                alertDialog.show();
-                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
-                alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
-              }
+            () -> {
+              AlertDialog alertDialog = finalAlertDialogBuilder.create();
+              alertDialog.setCanceledOnTouchOutside(true);
+              alertDialog.show();
+              alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
+              alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
             });
   }
 
@@ -522,51 +432,30 @@ public class SettingsFragment extends PreferenceFragmentCompat
             .setMessage(R.string.dialog_confirm_export_message)
             .setPositiveButton(
                 R.string.dialog_confirm_export_positive_button,
-                new DialogInterface.OnClickListener() {
-                  public void onClick(DialogInterface dialog, int which) {
-                    // do export
-                    exportDataFromApp(pickedDir);
-                  }
+                (dialog, which) -> {
+                  // do export
+                  exportDataFromApp(pickedDir);
                 })
-            .setNegativeButton(
-                R.string.CANCEL,
-                new DialogInterface.OnClickListener() {
-                  @Override
-                  public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                  }
-                })
+            .setNegativeButton(R.string.CANCEL, (dialog, which) -> dialog.dismiss())
 
             // get the click outside the dialog to set the behaviour like the negative button was
             // clicked
-            .setOnCancelListener(
-                new DialogInterface.OnCancelListener() {
-                  @Override
-                  public void onCancel(DialogInterface dialog) {
-                    dialog.dismiss();
-                  }
-                });
+            .setOnCancelListener(DialogInterface::dismiss);
 
     final MaterialAlertDialogBuilder finalAlertDialogBuilder = alertDialogBuilder;
 
     // get color for button texts
-    TypedValue typedValue = new TypedValue();
-    Resources.Theme theme = requireContext().getTheme();
-    theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-    @ColorInt final int color = typedValue.data;
+    @ColorInt final int color = FragmentHelper.getColorId(requireContext(), R.attr.colorAccent);
 
     // create alertDialog
     requireActivity()
         .runOnUiThread(
-            new Runnable() {
-              @Override
-              public void run() {
-                AlertDialog alertDialog = finalAlertDialogBuilder.create();
-                alertDialog.setCanceledOnTouchOutside(true);
-                alertDialog.show();
-                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
-                alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
-              }
+            () -> {
+              AlertDialog alertDialog = finalAlertDialogBuilder.create();
+              alertDialog.setCanceledOnTouchOutside(true);
+              alertDialog.show();
+              alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
+              alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
             });
   }
 }
