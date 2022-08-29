@@ -99,6 +99,9 @@ public class FeedFragment extends Fragment {
     checkInternetConnection();
     loadPostsFromInternalStorage();
 
+    getAccountDataFromStorage();
+    showOrHideNoAccountsHint();
+
     return view;
   }
 
@@ -340,7 +343,7 @@ public class FeedFragment extends Fragment {
   private void showOrHideNoAccountsHint() {
     if (accounts != null) {
       // in case there were no accounts on last fetch hide warning now
-      textFeedHint.setVisibility(GONE);
+      requireActivity().runOnUiThread(() -> textFeedHint.setVisibility(GONE));
     } else {
       // only show message when there are no stored posts and no followed accounts
       setTextFeedHint(getResources().getString(R.string.no_followed_accounts));
@@ -422,11 +425,10 @@ public class FeedFragment extends Fragment {
    * @param text CharSequence
    */
   private void setTextFeedHint(CharSequence text) {
-    textFeedHint.setText(text);
-
     requireActivity()
         .runOnUiThread(
             () -> {
+              textFeedHint.setText(text);
               textFeedHint.setVisibility(View.VISIBLE);
               recyclerViewFeed.setVisibility(GONE);
             });
