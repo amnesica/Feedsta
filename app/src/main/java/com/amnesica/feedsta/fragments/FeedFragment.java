@@ -203,12 +203,11 @@ public class FeedFragment extends Fragment {
                     FragmentHelper.notifyUserOfProblem(this, Error.SOMETHINGS_WRONG);
                   }
                 }
+                swipeRefreshLayout.setRefreshing(false);
               });
         });
 
     executor.shutdown();
-
-    swipeRefreshLayout.setRefreshing(false);
     recyclerViewFeed.invalidate();
   }
 
