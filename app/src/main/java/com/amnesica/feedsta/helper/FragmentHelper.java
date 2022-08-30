@@ -1100,104 +1100,16 @@ public class FragmentHelper {
     if (text == null) return null;
 
     SpannableStringBuilder ssb = new SpannableStringBuilder();
-    final Pattern patternAccount = Pattern.compile("(@([a-z0-9._]*))");
+    final Pattern patternAccount = Pattern.compile("(@([a-z0-9._]*[a-z0-9_|$]))");
     final Pattern patternHashtag = Pattern.compile("(#([A-Za-z0-9_]*))");
 
     try {
       // replace every word containing "@" or "#" with clickable link
       for (String word : text.split(" ")) {
         if (word.contains("@")) {
-          // add link to account
-          int indexStartAccountName = 0;
-          int indexEndAccountName = 0;
-
-          Matcher matcher = patternAccount.matcher(word);
-          while (matcher.find()) {
-            indexStartAccountName = matcher.start();
-            indexEndAccountName = matcher.end();
-          }
-
-          // +1 because "@" should be omitted
-          final String accountName = word.substring(indexStartAccountName + 1, indexEndAccountName);
-          SpannableString spannableString = new SpannableString(word);
-
-          ClickableSpan clickableSpan =
-              new ClickableSpan() {
-                @SuppressLint("ResourceType")
-                @Override
-                public void updateDrawState(@NonNull TextPaint ds) {
-                  super.updateDrawState(ds);
-                  // underline text
-                  ds.setUnderlineText(true);
-
-                  // set color to textColorSecondary
-                  int secondaryColor =
-                      MaterialColors.getColor(
-                          fragment.requireContext(), android.R.attr.textColorSecondary, Color.BLUE);
-                  ds.setColor(secondaryColor);
-                }
-
-                @Override
-                public void onClick(@NonNull View view) {
-                  view.invalidate();
-                  // new profileFragment
-                  ProfileFragment profileFragment = ProfileFragment.newInstance(accountName);
-
-                  // add fragment to container
-                  FragmentHelper.addFragmentToContainer(
-                      profileFragment, fragment.requireActivity().getSupportFragmentManager());
-                }
-              };
-
-          spannableString.setSpan(
-              clickableSpan, indexStartAccountName, indexEndAccountName, SPAN_EXCLUSIVE_EXCLUSIVE);
-          ssb.append(spannableString);
+          createClickableLinkWithAtChar(fragment, ssb, patternAccount, word);
         } else if (word.contains("#")) {
-          // add link to hashtag
-          int indexStartHashtagName = 0;
-          int indexEndHashtagName = 0;
-
-          Matcher matcher = patternHashtag.matcher(word);
-          while (matcher.find()) {
-            indexStartHashtagName = matcher.start();
-            indexEndHashtagName = matcher.end();
-          }
-
-          // +1 because "#" should be omitted
-          final String hashtagName = word.substring(indexStartHashtagName + 1, indexEndHashtagName);
-          SpannableString spannableString = new SpannableString(word);
-
-          ClickableSpan clickableSpan =
-              new ClickableSpan() {
-                @SuppressLint("ResourceType")
-                @Override
-                public void updateDrawState(@NonNull TextPaint ds) {
-                  super.updateDrawState(ds);
-                  // underline text
-                  ds.setUnderlineText(true);
-
-                  // set color to textColorSecondary
-                  int secondaryColor =
-                      MaterialColors.getColor(
-                          fragment.requireContext(), android.R.attr.textColorSecondary, Color.BLUE);
-                  ds.setColor(secondaryColor);
-                }
-
-                @Override
-                public void onClick(@NonNull View view) {
-                  view.invalidate();
-                  // new hashtagFragment
-                  HashtagFragment hashtagFragment = HashtagFragment.newInstance(hashtagName);
-
-                  // add fragment to container
-                  FragmentHelper.addFragmentToContainer(
-                      hashtagFragment, fragment.requireActivity().getSupportFragmentManager());
-                }
-              };
-
-          spannableString.setSpan(
-              clickableSpan, indexStartHashtagName, indexEndHashtagName, SPAN_EXCLUSIVE_EXCLUSIVE);
-          ssb.append(spannableString);
+          createClickableLinkWithHashtagChar(fragment, ssb, patternHashtag, word);
         } else {
           // insert normal word without link
           ssb.append(word);
@@ -1207,9 +1119,122 @@ public class FragmentHelper {
       return ssb;
     } catch (Exception e) {
       Log.d("FragmentHelper", Log.getStackTraceString(e));
-
-      // return text if something went wrong
+      // return normal text if something went wrong
       return new SpannableStringBuilder(text);
     }
+  }
+
+  private static void createClickableLinkWithHashtagChar(
+      Fragment fragment, SpannableStringBuilder ssb, Pattern patternHashtag, String word) {
+    // add link to hashtag
+    int indexStartHashtagName = 0;
+    int indexEndHashtagName = 0;
+
+    Matcher matcher = patternHashtag.matcher(word);
+    while (matcher.find()) {
+      indexStartHashtagName = matcher.start();
+      indexEndHashtagName = matcher.end();
+    }
+
+    // +1 because "#" should be omitted
+    final String hashtagName = word.substring(indexStartHashtagName + 1, indexEndHashtagName);
+    SpannableString spannableString = new SpannableString(word);
+
+    ClickableSpan clickableSpan = createClickableSpanHashtag(fragment, hashtagName);
+
+    spannableString.setSpan(
+        clickableSpan, indexStartHashtagName, indexEndHashtagName, SPAN_EXCLUSIVE_EXCLUSIVE);
+    ssb.append(spannableString);
+  }
+
+  private static void createClickableLinkWithAtChar(
+      Fragment fragment, SpannableStringBuilder ssb, Pattern patternAccount, String word) {
+    // add link to account
+    int indexStartAccountName = 0;
+    int indexEndAccountName = 0;
+
+    Matcher matcher = patternAccount.matcher(word);
+    while (matcher.find()) {
+      indexStartAccountName = matcher.start();
+      indexEndAccountName = matcher.end();
+    }
+
+    // +1 because "@" should be omitted
+    final String accountName = word.substring(indexStartAccountName + 1, indexEndAccountName);
+    SpannableString spannableString = new SpannableString(word);
+
+    ClickableSpan clickableSpan = createClickableSpanAccount(fragment, accountName);
+
+    spannableString.setSpan(
+        clickableSpan, indexStartAccountName, indexEndAccountName, SPAN_EXCLUSIVE_EXCLUSIVE);
+    ssb.append(spannableString);
+  }
+
+  @NonNull
+  private static ClickableSpan createClickableSpanHashtag(Fragment fragment, String hashtagName) {
+    return new ClickableSpan() {
+      @SuppressLint("ResourceType")
+      @Override
+      public void updateDrawState(@NonNull TextPaint ds) {
+        super.updateDrawState(ds);
+        // underline text
+        ds.setUnderlineText(true);
+
+        // set color to textColorSecondary
+        int secondaryColor =
+            MaterialColors.getColor(
+                fragment.requireContext(), android.R.attr.textColorSecondary, Color.BLUE);
+        ds.setColor(secondaryColor);
+      }
+
+      @Override
+      public void onClick(@NonNull View view) {
+        view.invalidate();
+        goToHashtagFragment(hashtagName, fragment);
+      }
+    };
+  }
+
+  private static void goToHashtagFragment(String hashtagName, Fragment fragment) {
+    // new hashtagFragment
+    HashtagFragment hashtagFragment = HashtagFragment.newInstance(hashtagName);
+
+    // add fragment to container
+    FragmentHelper.addFragmentToContainer(
+        hashtagFragment, fragment.requireActivity().getSupportFragmentManager());
+  }
+
+  @NonNull
+  private static ClickableSpan createClickableSpanAccount(Fragment fragment, String accountName) {
+    return new ClickableSpan() {
+      @SuppressLint("ResourceType")
+      @Override
+      public void updateDrawState(@NonNull TextPaint ds) {
+        super.updateDrawState(ds);
+        // underline text
+        ds.setUnderlineText(true);
+
+        // set color to textColorSecondary
+        int secondaryColor =
+            MaterialColors.getColor(
+                fragment.requireContext(), android.R.attr.textColorSecondary, Color.BLUE);
+        ds.setColor(secondaryColor);
+      }
+
+      @Override
+      public void onClick(@NonNull View view) {
+        view.invalidate();
+        goToProfileFragment(accountName, fragment);
+      }
+    };
+  }
+
+  private static void goToProfileFragment(String accountName, Fragment fragment) {
+    // new profileFragment
+    ProfileFragment profileFragment = ProfileFragment.newInstance(accountName);
+
+    // add fragment to container
+    FragmentHelper.addFragmentToContainer(
+        profileFragment, fragment.requireActivity().getSupportFragmentManager());
   }
 }
