@@ -1223,7 +1223,7 @@ public class FragmentHelper {
     };
   }
 
-  private static void goToProfileFragment(String accountName, Fragment fragment) {
+  public static void goToProfileFragment(@NonNull String accountName, Fragment fragment) {
     // new profileFragment
     ProfileFragment profileFragment = ProfileFragment.newInstance(accountName);
 

@@ -105,7 +105,14 @@ public class RecViewAdapterFeed extends RecyclerView.Adapter<RecViewAdapterFeed.
 
     setUsername(holder, post.getUsername());
 
+    createListenerGoToProfileOnUsernameAppBar(holder);
+
     setTakenAtDate(holder, post.getTakenAtDate());
+  }
+
+  private void createListenerGoToProfileOnUsernameAppBar(Viewholder holder) {
+    holder.textUsernameAppBar.setOnClickListener(
+        view -> FragmentHelper.goToProfileFragment(holder.post.getUsername(), fragment));
   }
 
   private void setLikes(Viewholder holder, int likes) {
