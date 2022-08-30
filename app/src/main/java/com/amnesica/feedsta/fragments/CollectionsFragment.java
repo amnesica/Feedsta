@@ -1,4 +1,4 @@
-package com.amnesica.feedsta.fragments.collections;
+package com.amnesica.feedsta.fragments;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;

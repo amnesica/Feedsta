@@ -1,4 +1,4 @@
-package com.amnesica.feedsta.fragments.collections;
+package com.amnesica.feedsta.fragments;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
@@ -17,7 +17,6 @@ import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.collections.RecViewAdapterSingleCollection;
 import com.amnesica.feedsta.asynctasks.SetCategoryToListOfPosts;
 import com.amnesica.feedsta.asynctasks.download.DownloadPostsBatch;
-import com.amnesica.feedsta.fragments.PostFragment;
 import com.amnesica.feedsta.fragments.bottomsheets.BtmSheetDialogAddCollection;
 import com.amnesica.feedsta.fragments.bottomsheets.BtmSheetDialogSelectCollection;
 import com.amnesica.feedsta.helper.FragmentHelper;

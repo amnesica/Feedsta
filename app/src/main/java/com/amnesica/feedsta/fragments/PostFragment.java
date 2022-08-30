@@ -133,7 +133,7 @@ public class PostFragment extends Fragment {
   private final String STATE_VIDEO_MUTED = "videoMuted";
   private final String STATE_FULLSCREEN_IS_PORTRAIT = "fullscreenIsPortrait";
 
-  public static PostFragment newInstance(Post post) {
+  static PostFragment newInstance(Post post) {
     PostFragment fragment = new PostFragment();
     Bundle b = new Bundle();
     b.putSerializable("post", post);
