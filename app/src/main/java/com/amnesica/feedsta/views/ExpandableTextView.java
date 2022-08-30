@@ -31,7 +31,7 @@ public class ExpandableTextView extends MaterialTextView {
   private static final String MORE = "more";
   private static final String LESS = "less";
 
-  private CharSequence fullText;
+  private SpannableStringBuilder fullText;
   private int maxLines;
   private boolean textHasAlreadyBeenChanged = false;
 
@@ -47,7 +47,7 @@ public class ExpandableTextView extends MaterialTextView {
     super(context, attrs, defStyleAttr);
   }
 
-  public void makeExpandable(@NonNull final CharSequence fullText, final int maxLines) {
+  public void makeExpandable(@NonNull final SpannableStringBuilder fullText, final int maxLines) {
     this.fullText = fullText;
     this.maxLines = maxLines;
 
@@ -56,7 +56,10 @@ public class ExpandableTextView extends MaterialTextView {
     textHasAlreadyBeenChanged = false;
 
     // set text here so method onTextChanged is called and getLayout does not return null
-    setText(fullText);
+    setText(fullText, BufferType.SPANNABLE);
+
+    // call method below so texts with less than maxLines lines are clickable
+    setMovementMethod(LinkMovementMethod.getInstance());
   }
 
   @Override
