@@ -44,7 +44,7 @@ public class FullscreenProfileImageFragment extends Fragment {
 
     // load image with url or from base64 encoded string glide
     assert profileImageUrl != null;
-    if (!profileImageUrl.startsWith("https://scontent")) {
+    if (!profileImageUrl.startsWith("https://")) {
       // load image into view
       Glide.with(this)
           .asBitmap()
@@ -53,7 +53,7 @@ public class FullscreenProfileImageFragment extends Fragment {
           .dontAnimate()
           .into(imageProfilePicFullscreen);
     } else {
-      // load image with url into view (url starts with "https://scontent")
+      // load image with url into view (url starts with "https://")
       Glide.with(this)
           .load(profileImageUrl)
           .error(ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
