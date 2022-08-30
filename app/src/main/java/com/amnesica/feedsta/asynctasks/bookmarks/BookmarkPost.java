@@ -8,14 +8,14 @@ import android.widget.ImageButton;
 import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
-import com.amnesica.feedsta.helper.CollectionsHelper;
-import com.amnesica.feedsta.helper.EditBookmarksType;
-import com.amnesica.feedsta.helper.SnackbarAlertType;
-import com.amnesica.feedsta.helper.SnackbarHelper;
+import com.amnesica.feedsta.fragments.bottomsheets.BtmSheetDialogAddCollection;
 import com.amnesica.feedsta.helper.StorageHelper;
-import com.amnesica.feedsta.interfaces.SelectOrAddCollectionCallback;
+import com.amnesica.feedsta.helper.collections.CollectionsHelper;
+import com.amnesica.feedsta.helper.collections.EditBookmarksType;
+import com.amnesica.feedsta.helper.snackbar.SnackbarAlertType;
+import com.amnesica.feedsta.helper.snackbar.SnackbarHelper;
+import com.amnesica.feedsta.interfaces.collections.SelectOrAddCollectionCallback;
 import com.amnesica.feedsta.models.Post;
-import com.amnesica.feedsta.views.BtmSheetDialogAddCollection;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;

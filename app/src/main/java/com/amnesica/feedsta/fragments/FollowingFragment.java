@@ -25,11 +25,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.ListAdapterSearch;
-import com.amnesica.feedsta.helper.CustomComparatorAccount;
+import com.amnesica.feedsta.fragments.settings.SettingsHolderFragment;
 import com.amnesica.feedsta.helper.Error;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
+import com.amnesica.feedsta.helper.comparator.CustomComparatorAccount;
 import com.amnesica.feedsta.interfaces.AccountsListCallback;
 import com.amnesica.feedsta.models.Account;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;

@@ -5,7 +5,7 @@ import android.widget.ImageButton;
 import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.models.Post;
-import com.amnesica.feedsta.models.SidecarEntryType;
+import com.amnesica.feedsta.models.sidecar.SidecarEntryType;
 
 public class DownloadMedia {
 

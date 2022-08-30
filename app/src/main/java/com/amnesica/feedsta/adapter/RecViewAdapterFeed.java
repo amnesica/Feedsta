@@ -26,15 +26,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.amnesica.feedsta.R;
+import com.amnesica.feedsta.adapter.sidecar.StatePagerAdapterSideCar;
 import com.amnesica.feedsta.asynctasks.CopyLink;
 import com.amnesica.feedsta.asynctasks.bookmarks.BookmarkPost;
 import com.amnesica.feedsta.asynctasks.download.DownloadMedia;
 import com.amnesica.feedsta.helper.Error;
-import com.amnesica.feedsta.helper.ExpandableTextView;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.ImageHelper;
 import com.amnesica.feedsta.helper.StorageHelper;
 import com.amnesica.feedsta.models.Post;
+import com.amnesica.feedsta.views.ExpandableTextView;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;

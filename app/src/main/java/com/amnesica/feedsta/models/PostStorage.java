@@ -1,5 +1,7 @@
 package com.amnesica.feedsta.models;
 
+import com.amnesica.feedsta.models.sidecar.Sidecar;
+
 import java.io.Serializable;
 import java.util.Date;
 

@@ -23,17 +23,18 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.RecViewAdapterFeed;
-import com.amnesica.feedsta.helper.CustomComparatorNewestFirst;
+import com.amnesica.feedsta.fragments.settings.SettingsHolderFragment;
 import com.amnesica.feedsta.helper.Error;
-import com.amnesica.feedsta.helper.FeedHelper;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
+import com.amnesica.feedsta.helper.comparator.CustomComparatorNewestFirst;
+import com.amnesica.feedsta.helper.feed.FeedHelper;
 import com.amnesica.feedsta.models.Account;
 import com.amnesica.feedsta.models.Post;
-import com.amnesica.feedsta.models.Sidecar;
-import com.amnesica.feedsta.models.SidecarEntry;
-import com.amnesica.feedsta.models.SidecarEntryType;
+import com.amnesica.feedsta.models.sidecar.Sidecar;
+import com.amnesica.feedsta.models.sidecar.SidecarEntry;
+import com.amnesica.feedsta.models.sidecar.SidecarEntryType;
 
 import org.json.JSONArray;
 import org.json.JSONException;

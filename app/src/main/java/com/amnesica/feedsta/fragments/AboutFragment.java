@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.BuildConfig;
 import com.amnesica.feedsta.R;
+import com.amnesica.feedsta.fragments.settings.SettingsHolderFragment;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.StorageHelper;
 

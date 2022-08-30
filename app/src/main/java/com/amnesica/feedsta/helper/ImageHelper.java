@@ -7,8 +7,8 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.amnesica.feedsta.fragments.FullscreenImagePostFragment;
-import com.amnesica.feedsta.fragments.FullscreenProfileImageFragment;
+import com.amnesica.feedsta.fragments.fullscreenimages.FullscreenImagePostFragment;
+import com.amnesica.feedsta.fragments.fullscreenimages.FullscreenProfileImageFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;

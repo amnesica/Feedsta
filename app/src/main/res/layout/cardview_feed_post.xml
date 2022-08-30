@@ -206,7 +206,7 @@
         android:textSize="15sp"
         android:textStyle="bold" />
 
-      <com.amnesica.feedsta.helper.ExpandableTextView
+      <com.amnesica.feedsta.views.ExpandableTextView
         android:id="@+id/caption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

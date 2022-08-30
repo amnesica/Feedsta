@@ -7,9 +7,9 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
-import com.amnesica.feedsta.helper.CollectionsHelper;
-import com.amnesica.feedsta.helper.EditBookmarksType;
-import com.amnesica.feedsta.interfaces.FragmentRefreshCallback;
+import com.amnesica.feedsta.helper.collections.CollectionsHelper;
+import com.amnesica.feedsta.helper.collections.EditBookmarksType;
+import com.amnesica.feedsta.interfaces.collections.FragmentRefreshCallback;
 import com.amnesica.feedsta.models.Post;
 
 import java.lang.ref.WeakReference;

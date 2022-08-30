@@ -33,22 +33,23 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.adapter.ListAdapterComment;
-import com.amnesica.feedsta.adapter.StatePagerAdapterSideCar;
+import com.amnesica.feedsta.adapter.sidecar.StatePagerAdapterSideCar;
 import com.amnesica.feedsta.asynctasks.CopyLink;
 import com.amnesica.feedsta.asynctasks.bookmarks.BookmarkPost;
 import com.amnesica.feedsta.asynctasks.download.DownloadMedia;
+import com.amnesica.feedsta.fragments.fullscreenimages.FullscreenImagePostFragment;
 import com.amnesica.feedsta.helper.Error;
-import com.amnesica.feedsta.helper.FeedObject;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
+import com.amnesica.feedsta.helper.feed.FeedObject;
 import com.amnesica.feedsta.models.Account;
 import com.amnesica.feedsta.models.Comment;
 import com.amnesica.feedsta.models.Post;
-import com.amnesica.feedsta.models.Sidecar;
-import com.amnesica.feedsta.models.SidecarEntry;
-import com.amnesica.feedsta.models.SidecarEntryType;
 import com.amnesica.feedsta.models.URL;
+import com.amnesica.feedsta.models.sidecar.Sidecar;
+import com.amnesica.feedsta.models.sidecar.SidecarEntry;
+import com.amnesica.feedsta.models.sidecar.SidecarEntryType;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.exoplayer2.C;
@@ -132,7 +133,7 @@ public class PostFragment extends Fragment {
   private final String STATE_VIDEO_MUTED = "videoMuted";
   private final String STATE_FULLSCREEN_IS_PORTRAIT = "fullscreenIsPortrait";
 
-  static PostFragment newInstance(Post post) {
+  public static PostFragment newInstance(Post post) {
     PostFragment fragment = new PostFragment();
     Bundle b = new Bundle();
     b.putSerializable("post", post);

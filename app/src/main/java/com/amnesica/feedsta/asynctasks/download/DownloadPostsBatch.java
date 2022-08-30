@@ -10,14 +10,14 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.amnesica.feedsta.R;
-import com.amnesica.feedsta.helper.FeedObject;
 import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
+import com.amnesica.feedsta.helper.feed.FeedObject;
 import com.amnesica.feedsta.models.Post;
-import com.amnesica.feedsta.models.Sidecar;
-import com.amnesica.feedsta.models.SidecarEntry;
-import com.amnesica.feedsta.models.SidecarEntryType;
 import com.amnesica.feedsta.models.URL;
+import com.amnesica.feedsta.models.sidecar.Sidecar;
+import com.amnesica.feedsta.models.sidecar.SidecarEntry;
+import com.amnesica.feedsta.models.sidecar.SidecarEntryType;
 
 import org.json.JSONArray;
 import org.json.JSONException;
