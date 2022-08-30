@@ -535,8 +535,8 @@ public class StorageHelper {
     // if this boolean is false, bytesToWrite is null -> nothing is stored!
     if (bPostShouldBeStored && readPosts != null) {
 
-      // get image as Base64 encoded string
-      String imageThumbnail = getBase64EncodedImage(postToStore.getImageUrlThumbnail());
+      // get image as Base64 encoded string from image url (highest resolution)
+      String imageThumbnail = getBase64EncodedImage(postToStore.getImageUrl());
 
       // add post to list in PostStorage representation
       readPosts.add(
