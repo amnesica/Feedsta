@@ -17,6 +17,7 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 
 /** Async task to download an image from an url (used in PostFragment and ProfileFragment) */
+@Deprecated
 public class DownloadImage extends AsyncTask<Void, Void, Void> {
 
   private final WeakReference<Fragment> fragmentReference;
