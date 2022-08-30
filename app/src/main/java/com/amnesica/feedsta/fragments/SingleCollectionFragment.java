@@ -70,26 +70,16 @@ public class SingleCollectionFragment extends Fragment
     // inflate the layout for this fragment
     View view = inflater.inflate(R.layout.fragment_single_collection, container, false);
 
-    // setup toolbar with title from category
-    setupToolbar(view);
+    getBookmarksAndCategoryFromArguments();
 
-    textViewNoBookmarksInSingleCollection =
-        view.findViewById(R.id.textNoBookmarksInSingleCollection);
+    setupToolbarWithCategoryAsTitle(view);
+
     recyclerView = view.findViewById(R.id.recycler_view_single_collection);
-
-    // use a linear layout manager
     RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
     recyclerView.setLayoutManager(layoutManager);
 
-    // retrieve bookmarks in collection
-    if (this.getArguments() != null) {
-      if (getArguments().getSerializable("bookmarksInCollection") != null) {
-        listPostsInCollectionBookmarked =
-            (List<Post>) getArguments().getSerializable("bookmarksInCollection");
-        category = (String) getArguments().getSerializable("category");
-      }
-    }
-
+    textViewNoBookmarksInSingleCollection =
+        view.findViewById(R.id.textNoBookmarksInSingleCollection);
     showTextNoBookmarksIfNoPosts();
 
     setupAdapter();
@@ -97,12 +87,22 @@ public class SingleCollectionFragment extends Fragment
     return view;
   }
 
+  private void getBookmarksAndCategoryFromArguments() {
+    if (this.getArguments() != null) {
+      if (getArguments().getSerializable("bookmarksInCollection") != null) {
+        listPostsInCollectionBookmarked =
+            (List<Post>) getArguments().getSerializable("bookmarksInCollection");
+        category = (String) getArguments().getSerializable("category");
+      }
+    }
+  }
+
   /**
    * Sets up toolbar with with title and back button
    *
    * @param view View
    */
-  private void setupToolbar(View view) {
+  private void setupToolbarWithCategoryAsTitle(View view) {
     Toolbar toolbar = view.findViewById(R.id.toolbar);
     toolbar.setTitle(category);
     FragmentHelper.setupToolbarWithBackButton(
