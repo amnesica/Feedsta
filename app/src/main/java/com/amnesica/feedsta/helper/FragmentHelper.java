@@ -796,14 +796,9 @@ public class FragmentHelper {
    * @param fragment Fragment
    */
   public static boolean checkIfJsonStrIsValid(String jsonStr, Fragment fragment) {
-    if (jsonStr != null && fragment != null) {
-      if (jsonStr.startsWith("<!DOCTYPE html>") || jsonStr.isEmpty()) {
-
-        // only throw error when fragment is not FeedFragment
-        if (fragment.getTag() != null && !fragment.getTag().equals("FeedFragment")) {
-          FragmentHelper.notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
-        }
-
+    if (fragment != null) {
+      if (jsonStr == null || (jsonStr.startsWith("<!DOCTYPE html>") || jsonStr.isEmpty())) {
+        throwErrorWhenFragmentIsNotFeedFragment(fragment);
         return false;
       } else {
         // no errors
@@ -811,6 +806,12 @@ public class FragmentHelper {
       }
     }
     return false;
+  }
+
+  private static void throwErrorWhenFragmentIsNotFeedFragment(Fragment fragment) {
+    if (fragment.getTag() != null && !fragment.getTag().equals("FeedFragment")) {
+      FragmentHelper.notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
+    }
   }
 
   /**

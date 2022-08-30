@@ -197,7 +197,7 @@ public class SingleCollectionFragment extends Fragment
 
     if (postToSend != null) {
       // new postFragment
-      PostFragment postFragment = PostFragment.newInstance(postToSend);
+      PostFragment postFragment = PostFragment.newInstanceWithBookmarkedPost(postToSend);
 
       // add fragment to container
       FragmentHelper.addFragmentToContainer(

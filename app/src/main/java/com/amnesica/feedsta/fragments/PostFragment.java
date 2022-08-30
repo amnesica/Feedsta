@@ -101,8 +101,6 @@ public class PostFragment extends Fragment {
   private TabLayout tabLayoutViewpager;
 
   // booleans
-  private Boolean scrolling;
-  private Boolean bFirstFetch;
   private Boolean bFirstAdapterFetch;
 
   // exoplayer for videoView
@@ -133,11 +131,23 @@ public class PostFragment extends Fragment {
   private final String STATE_VIDEO_MUTED = "videoMuted";
   private final String STATE_FULLSCREEN_IS_PORTRAIT = "fullscreenIsPortrait";
 
+  private boolean postIsFromBookmarks = false;
+
   static PostFragment newInstance(Post post) {
     PostFragment fragment = new PostFragment();
     Bundle b = new Bundle();
     b.putSerializable("post", post);
     fragment.setArguments(b);
+    return fragment;
+  }
+
+  // show bookmarked post (when fetching more post info fails, show available info instead of error)
+  static PostFragment newInstanceWithBookmarkedPost(Post bookmark) {
+    PostFragment fragment = new PostFragment();
+    Bundle b = new Bundle();
+    b.putSerializable("post", bookmark);
+    fragment.setArguments(b);
+    fragment.postIsFromBookmarks = true;
     return fragment;
   }
 
@@ -179,7 +189,6 @@ public class PostFragment extends Fragment {
     if (getArguments() != null) {
       if (getArguments().getSerializable("shortcode") != null) {
         String shortcode = (String) getArguments().getSerializable("shortcode");
-
         // initial post with only shortcode
         post = Post.builder().shortcode(shortcode).build();
         postIsFromDeepLink = true;
@@ -926,7 +935,7 @@ public class PostFragment extends Fragment {
     // check if image thumbnail of post is available and is base64 encoded string
     return post != null
         && post.getImageThumbnail() != null
-        && !post.getImageThumbnail().startsWith("https://instagram");
+        && !post.getImageThumbnail().startsWith("https://");
   }
 
   /**
@@ -944,7 +953,7 @@ public class PostFragment extends Fragment {
     changeVisibilityOfUiElementsDependingOnPostType(true);
 
     // set height of imageView
-    setHeightOfImageViewPost();
+    setHeightOfImageViewPostIfNecessary();
 
     // set basic post info like likes, caption, username etc.
     setBasicPostInfo();
@@ -965,8 +974,7 @@ public class PostFragment extends Fragment {
     // add header and update view
     listComments.addHeaderView(header);
     ListAdapterComment adapter =
-        new ListAdapterComment(
-            getContext(), R.layout.list_item_comment, new ArrayList<Comment>(), this);
+        new ListAdapterComment(getContext(), R.layout.list_item_comment, new ArrayList<>(), this);
     listComments.setAdapter(adapter);
     buttonLoadMoreComments.setVisibility(GONE);
   }
@@ -974,7 +982,7 @@ public class PostFragment extends Fragment {
   /**
    * Sets the height of the imageViewPost. If no height is given the height is then set to 1000px
    */
-  private void setHeightOfImageViewPost() {
+  private void setHeightOfImageViewPostIfNecessary() {
     if (post == null || imageViewPost == null) return;
 
     if (post.getHeight() == 0) {
@@ -982,8 +990,6 @@ public class PostFragment extends Fragment {
       post.setHeight(1000);
     }
 
-    // set height of imageView
-    imageViewPost.getLayoutParams().height = post.getHeight();
     imageViewPost.requestLayout();
     imageViewPost.invalidate();
   }
@@ -991,24 +997,20 @@ public class PostFragment extends Fragment {
   /** Set basic post info like likes, caption, username etc. */
   private void setBasicPostInfo() {
     if (getActivity() == null) return;
+    setImageProfilePicOwner();
+    setLikes();
+    setCaption();
+    setUsername();
+    setTakenAtDate();
+  }
 
-    // load profile pic app bar
-    Glide.with(this)
-        .load(post.getImageUrlProfilePicOwner())
-        .error(ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
-        .dontAnimate()
-        .into(imageProfilePicPostOwner);
-
-    // set Likes
-    textLikes.setText(getResources().getString(R.string.likes, String.valueOf(post.getLikes())));
-
-    // set caption (with clickable links)
-    if (post.getCaption() != null) {
-      textCaption.setText(
-          FragmentHelper.createSpannableStringWithClickableLinks(post.getCaption(), this));
+  private void setTakenAtDate() {
+    if (post.getTakenAtDate() != null) {
+      textDate.setText(DateFormat.getDateTimeInstance().format(post.getTakenAtDate()));
     }
+  }
 
-    // set username or ownerId
+  private void setUsername() {
     if (post.getUsername() == null && post.getOwnerId() != null) {
       textOwnerIdOrUsername.setText(post.getOwnerId());
       textUsernameAppBar.setText(post.getOwnerId());
@@ -1017,11 +1019,26 @@ public class PostFragment extends Fragment {
       // set title in bar under app bar
       textUsernameAppBar.setText(post.getUsername());
     }
+  }
 
-    // set date
-    if (post.getTakenAtDate() != null) {
-      textDate.setText(DateFormat.getDateTimeInstance().format(post.getTakenAtDate()));
+  private void setCaption() {
+    if (post.getCaption() != null) {
+      textCaption.setText(
+          FragmentHelper.createSpannableStringWithClickableLinks(post.getCaption(), this));
     }
+  }
+
+  private void setLikes() {
+    textLikes.setText(getResources().getString(R.string.likes, String.valueOf(post.getLikes())));
+  }
+
+  private void setImageProfilePicOwner() {
+    // load profile pic app bar
+    Glide.with(this)
+        .load(post.getImageUrlProfilePicOwner())
+        .error(ContextCompat.getDrawable(requireContext(), R.drawable.placeholder_image_error))
+        .dontAnimate()
+        .into(imageProfilePicPostOwner);
   }
 
   /**
@@ -1075,9 +1092,7 @@ public class PostFragment extends Fragment {
       fragment.changeVisibilityOfUiElementsDependingOnPostType(false);
 
       // initialize booleans for first fetching
-      fragment.bFirstFetch = true;
       fragment.bFirstAdapterFetch = true;
-      fragment.scrolling = false;
 
       // make progressBar visible
       try {
@@ -1092,8 +1107,7 @@ public class PostFragment extends Fragment {
       if (isCancelled()) return null;
 
       sh = new NetworkHandler();
-      URL url;
-      url = makeValidUrlForVideo();
+      URL url = makeValidUrl();
       getMoreInfoFromPost(url);
 
       return null;
@@ -1104,7 +1118,7 @@ public class PostFragment extends Fragment {
      *
      * @return String
      */
-    private URL makeValidUrlForVideo() {
+    private URL makeValidUrl() {
       if (isCancelled()) return null;
 
       // get reference from fragment
@@ -1133,14 +1147,12 @@ public class PostFragment extends Fragment {
       // get json string from url
       String jsonStr = sh.makeServiceCall(newUrl, this.getClass().getSimpleName());
 
-      if (jsonStr == null) {
-        FragmentHelper.showNetworkOrSomethingWrongErrorToUser(fragment);
-        fragment.disableButtonsUnderPost();
-        return;
-      }
-
       // something went wrong -> possible rate limit reached
       if (!FragmentHelper.checkIfJsonStrIsValid(jsonStr, fragment)) {
+        if (fragment.postIsFromBookmarks) {
+          // initialize comments to get a view and show saved bookmark info
+          fragment.comments = new ArrayList<>();
+        }
         return;
       }
 
@@ -1155,101 +1167,135 @@ public class PostFragment extends Fragment {
 
         // if post is from deep link set basic info first
         if (fragment.postIsFromDeepLink) {
-          fragment.post.setId(shortcode_media.getString("id"));
-          fragment.post.setTakenAtDate(
-              new Date(Long.parseLong(shortcode_media.getString("taken_at_timestamp")) * 1000));
-          fragment.post.setIs_video(shortcode_media.getBoolean("is_video"));
-          fragment.post.setImageUrlThumbnail(
-              shortcode_media.getJSONArray("display_resources").getJSONObject(0).getString("src"));
-          fragment.post.setIs_sideCar(
-              shortcode_media.getString("__typename").equals("GraphSidecar"));
+          setBasicPostInfoFirstDeepLink(fragment, shortcode_media);
         }
 
-        // get likes, username, ownerId, comments (int), caption and imageUrl (full size)
-        fragment.post.setLikes(
-            shortcode_media.getJSONObject("edge_media_preview_like").getInt("count"));
-        fragment.post.setUsername(shortcode_media.getJSONObject("owner").getString("username"));
-        fragment.post.setOwnerId(shortcode_media.getJSONObject("owner").getString("id"));
-        fragment.post.setComments(
-            shortcode_media.getJSONObject("edge_media_preview_comment").getInt("count"));
-
-        // get height of image for single image post
-        fragment.post.setHeight(
-            shortcode_media
-                .getJSONArray("display_resources")
-                .getJSONObject(2)
-                .getInt("config_height"));
-
-        // get caption of post
-        JSONArray edgesCaption =
-            shortcode_media.getJSONObject("edge_media_to_caption").getJSONArray("edges");
-        String caption = null;
-        if (edgesCaption.length() != 0) {
-          JSONObject captionNode = edgesCaption.getJSONObject(0);
-          JSONObject captionNodeString = captionNode.getJSONObject("node");
-          caption = captionNodeString.getString("text");
-        }
-        fragment.post.setCaption(caption);
-        fragment.post.setImageUrl(shortcode_media.getString("display_url"));
-        fragment.post.setImageUrlProfilePicOwner(
-            shortcode_media.getJSONObject("owner").getString("profile_pic_url"));
-
-        // hint: active workaround: only comments under shortcode-url can be fetched ->
-        // no more than 24 comments can be fetched at the moment
-        JSONObject edge_media_to_parent_comment =
-            shortcode_media.getJSONObject("edge_media_to_parent_comment");
-
-        // save page_info and has_next_page
-        JSONObject page_info = edge_media_to_parent_comment.getJSONObject("page_info");
-
-        JSONArray edgesComments = edge_media_to_parent_comment.getJSONArray("edges");
-
-        url.jsonArrayEdges = edgesComments;
-        if (edgesComments != null) {
-          url.edgesTotalOfPage = edgesComments.length();
-        } else {
-          url.edgesTotalOfPage = 0;
-        }
-        int startIndex = 0;
-        int endIndex;
-        if (url.edgesTotalOfPage == 1) {
-          endIndex = 1; // if there is only one comment
-        } else {
-          endIndex = url.edgesTotalOfPage - 1;
-        }
-
-        // initialize comments to get a view
-        if (fragment.comments == null) {
-          fragment.comments = new ArrayList<>();
-        }
-
-        if (edgesComments.length() > 0) {
-          // set edge data for comments
-          fragment.comments = getEdgeDataComments(edgesComments, startIndex, endIndex);
-        }
-
-        if (fragment.post.getIs_sideCar()) {
-          // get sidecar urls if post is sidecar
-          JSONObject edge_sidecar_to_children =
-              shortcode_media.getJSONObject("edge_sidecar_to_children");
-          JSONArray edgesSidecar = edge_sidecar_to_children.getJSONArray("edges");
-
-          // get sidecar urls
-          Sidecar sidecar = getSidecarFromEdge(edgesSidecar);
-
-          // set sidecar of post
-          fragment.post.setSidecar(sidecar);
-        } else if (fragment.post.getIs_video()) {
-          // get video url of just a normal video - no sidecar
-          String video_url = shortcode_media.getString("video_url");
-          fragment.post.setVideoUrl(video_url);
-        }
+        updatePostInfo(url, fragment, shortcode_media);
       } catch (JSONException | IllegalStateException e) {
         Log.d("PostFragment", Log.getStackTraceString(e));
-
         FragmentHelper.showNetworkOrSomethingWrongErrorToUser(fragment);
         fragment.disableButtonsUnderPost();
       }
+    }
+
+    private void updatePostInfo(URL url, PostFragment fragment, JSONObject shortcode_media)
+        throws JSONException {
+      updateBasicPostInfo(fragment, shortcode_media);
+      updateHeight(fragment, shortcode_media);
+      updateCaption(fragment, shortcode_media);
+      updateComments(url, fragment, shortcode_media);
+
+      if (fragment.post.getIs_sideCar()) {
+        updateSidecar(fragment, shortcode_media);
+      } else if (fragment.post.getIs_video()) {
+        updateVideoUrl(fragment, shortcode_media);
+      }
+    }
+
+    private void updateVideoUrl(PostFragment fragment, JSONObject shortcode_media)
+        throws JSONException {
+      // get video url of just a normal video
+      String video_url = shortcode_media.getString("video_url");
+      fragment.post.setVideoUrl(video_url);
+    }
+
+    private void updateSidecar(PostFragment fragment, JSONObject shortcode_media)
+        throws JSONException {
+      JSONObject edge_sidecar_to_children =
+          shortcode_media.getJSONObject("edge_sidecar_to_children");
+      JSONArray edgesSidecar = edge_sidecar_to_children.getJSONArray("edges");
+
+      // get sidecar urls
+      Sidecar sidecar = getSidecarFromEdge(edgesSidecar);
+
+      // set sidecar of post
+      fragment.post.setSidecar(sidecar);
+    }
+
+    private void updateComments(URL url, PostFragment fragment, JSONObject shortcode_media)
+        throws JSONException {
+      // hint: active workaround: only comments under shortcode-url can be fetched ->
+      // no more than 24 comments can be fetched at the moment
+      JSONObject edge_media_to_parent_comment =
+          shortcode_media.getJSONObject("edge_media_to_parent_comment");
+
+      // save page_info and has_next_page
+      JSONObject page_info = edge_media_to_parent_comment.getJSONObject("page_info");
+
+      JSONArray edgesComments = edge_media_to_parent_comment.getJSONArray("edges");
+
+      url.jsonArrayEdges = edgesComments;
+      if (edgesComments != null) {
+        url.edgesTotalOfPage = edgesComments.length();
+      } else {
+        url.edgesTotalOfPage = 0;
+      }
+      int startIndex = 0;
+      int endIndex;
+      if (url.edgesTotalOfPage == 1) {
+        endIndex = 1; // if there is only one comment
+      } else {
+        endIndex = url.edgesTotalOfPage - 1;
+      }
+
+      // initialize comments to get a view
+      if (fragment.comments == null) {
+        fragment.comments = new ArrayList<>();
+      }
+
+      if (edgesComments.length() > 0) {
+        // set edge data for comments
+        fragment.comments = getEdgeDataComments(edgesComments, startIndex, endIndex);
+      }
+    }
+
+    private void updateHeight(PostFragment fragment, JSONObject shortcode_media)
+        throws JSONException {
+      // get height of image for single image post
+      fragment.post.setHeight(
+          shortcode_media
+              .getJSONArray("display_resources")
+              .getJSONObject(2)
+              .getInt("config_height"));
+    }
+
+    private void updateBasicPostInfo(PostFragment fragment, JSONObject shortcode_media)
+        throws JSONException {
+      // get likes, username, ownerId, comments (int), caption and imageUrl (full size)
+      fragment.post.setLikes(
+          shortcode_media.getJSONObject("edge_media_preview_like").getInt("count"));
+      fragment.post.setUsername(shortcode_media.getJSONObject("owner").getString("username"));
+      fragment.post.setOwnerId(shortcode_media.getJSONObject("owner").getString("id"));
+      fragment.post.setComments(
+          shortcode_media.getJSONObject("edge_media_preview_comment").getInt("count"));
+    }
+
+    private void updateCaption(PostFragment fragment, JSONObject shortcode_media)
+        throws JSONException {
+      // get caption of post
+      JSONArray edgesCaption =
+          shortcode_media.getJSONObject("edge_media_to_caption").getJSONArray("edges");
+      String caption = null;
+      if (edgesCaption.length() != 0) {
+        JSONObject captionNode = edgesCaption.getJSONObject(0);
+        JSONObject captionNodeString = captionNode.getJSONObject("node");
+        caption = captionNodeString.getString("text");
+      }
+      fragment.post.setCaption(caption);
+      fragment.post.setImageUrl(shortcode_media.getString("display_url"));
+      fragment.post.setImageUrlProfilePicOwner(
+          shortcode_media.getJSONObject("owner").getString("profile_pic_url"));
+    }
+
+    private void setBasicPostInfoFirstDeepLink(PostFragment fragment, JSONObject shortcode_media)
+        throws JSONException {
+      fragment.post.setId(shortcode_media.getString("id"));
+      fragment.post.setTakenAtDate(
+          new Date(Long.parseLong(shortcode_media.getString("taken_at_timestamp")) * 1000));
+      fragment.post.setIs_video(shortcode_media.getBoolean("is_video"));
+      fragment.post.setImageUrlThumbnail(
+          shortcode_media.getJSONArray("display_resources").getJSONObject(0).getString("src"));
+      fragment.post.setIs_sideCar(shortcode_media.getString("__typename").equals("GraphSidecar"));
     }
 
     /**
@@ -1350,9 +1396,6 @@ public class PostFragment extends Fragment {
       final PostFragment fragment = fragmentReference.get();
       if (fragment == null) return;
 
-      // make progressBar gone
-      fragment.hideProgressBar();
-
       // set adapters
       if (fragment.post.getIs_sideCar()) {
         // post is sidecar
@@ -1378,14 +1421,10 @@ public class PostFragment extends Fragment {
           new TabLayoutMediator(
                   fragment.tabLayoutViewpager, fragment.viewPager2, (tab, position) -> {})
               .attach();
-
         } catch (IllegalStateException | NullPointerException e) {
           Log.d("PostFragment", Log.getStackTraceString(e));
-
           FragmentHelper.notifyUserOfProblem(fragment, Error.POST_NOT_AVAILABLE_ANYMORE);
-
           fragment.disableButtonsUnderPost();
-
           return;
         }
       } else if (fragment.post.getIs_video()) {
@@ -1403,9 +1442,6 @@ public class PostFragment extends Fragment {
       } else {
         // is only image
         if (fragment.getContext() == null) return;
-
-        // set height of imageView
-        fragment.setHeightOfImageViewPost();
 
         // if imageUrl is null, try to show the image as string if it exists (post to show might be
         // bookmark)
@@ -1442,42 +1478,42 @@ public class PostFragment extends Fragment {
       fragment.listComments.deferNotifyDataSetChanged();
       fragment.listComments.invalidateViews();
 
-      // get comments to post
-      try {
-        // workaround to see comments (actual fetching does not work anymore)
-        if (fragment.comments != null && fragment.bFirstAdapterFetch) {
-          // set adapter on first fetch
-          fragment.bFirstAdapterFetch = false;
+      fragment.makeCommentsVisible();
 
-          try {
-            ListAdapterComment adapter =
-                new ListAdapterComment(
-                    fragment.getContext(), R.layout.list_item_comment, fragment.comments, fragment);
-            fragment.listComments.setAdapter(adapter);
-          } catch (NullPointerException e) {
-            Log.d("PostFragment", Log.getStackTraceString(e));
-          }
-        } else {
-          fragment.listComments.deferNotifyDataSetChanged();
+      fragment.hideProgressBar();
+    }
+  }
 
-          fragment.progressBarComments.setVisibility(GONE);
-          fragment.buttonLoadMoreComments.setVisibility(GONE);
-        }
+  private void makeCommentsVisible() {
+    // get comments to post
+    try {
+      // workaround to see comments (actual fetching does not work anymore)
+      if (comments != null && bFirstAdapterFetch) {
+        // set adapter on first fetch
+        bFirstAdapterFetch = false;
 
-        fragment.buttonLoadMoreComments.setVisibility(GONE);
-
-      } catch (NullPointerException e) {
         try {
           ListAdapterComment adapter =
               new ListAdapterComment(
-                  fragment.getContext(),
-                  R.layout.list_item_comment,
-                  new ArrayList<Comment>(),
-                  fragment);
-          fragment.listComments.setAdapter(adapter);
-        } catch (NullPointerException ee) {
+                  getContext(), R.layout.list_item_comment, comments, PostFragment.this);
+          listComments.setAdapter(adapter);
+        } catch (NullPointerException e) {
           Log.d("PostFragment", Log.getStackTraceString(e));
         }
+      } else {
+        listComments.deferNotifyDataSetChanged();
+        progressBarComments.setVisibility(GONE);
+        buttonLoadMoreComments.setVisibility(GONE);
+      }
+      buttonLoadMoreComments.setVisibility(GONE);
+    } catch (NullPointerException e) {
+      try {
+        ListAdapterComment adapter =
+            new ListAdapterComment(
+                getContext(), R.layout.list_item_comment, new ArrayList<>(), PostFragment.this);
+        listComments.setAdapter(adapter);
+      } catch (NullPointerException ee) {
+        Log.d("PostFragment", Log.getStackTraceString(e));
       }
     }
   }
