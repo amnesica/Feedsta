@@ -1051,13 +1051,7 @@ public class FragmentHelper {
    */
   public static void showToast(final String message, Activity activity, final Context context) {
     if (activity != null && context != null) {
-      activity.runOnUiThread(
-          new Runnable() {
-            @Override
-            public void run() {
-              Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-            }
-          });
+      activity.runOnUiThread(() -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show());
     }
   }
 
