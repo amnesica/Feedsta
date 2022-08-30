@@ -168,7 +168,6 @@ public class FeedFragment extends Fragment {
     ExecutorService executor = Executors.newSingleThreadExecutor();
     Handler handler = new Handler(Looper.getMainLooper());
 
-    // try {
     executor.execute(
         () -> {
           // Background work here
