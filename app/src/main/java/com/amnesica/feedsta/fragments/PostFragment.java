@@ -344,7 +344,7 @@ public class PostFragment extends Fragment {
     // find header views
     textLikes = header.findViewById(R.id.likes);
     textOwnerIdOrUsername = header.findViewById(R.id.ownerIdOrUsername);
-    textCaption = header.findViewById(R.id.caption);
+    textCaption = header.findViewById(R.id.captionFull);
     textUsernameAppBar = header.findViewById(R.id.textUsernameInBarUnderAppBar);
     textDate = header.findViewById(R.id.date);
     imageProfilePicPostOwner = header.findViewById(R.id.imageProfilePicPostOwner);
