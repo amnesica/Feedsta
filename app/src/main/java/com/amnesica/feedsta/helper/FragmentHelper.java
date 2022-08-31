@@ -1095,8 +1095,8 @@ public class FragmentHelper {
     if (text == null) return null;
 
     SpannableStringBuilder ssb = new SpannableStringBuilder();
-    final Pattern patternAccount = Pattern.compile("(@([a-z0-9._]*[a-z0-9_|$]))");
-    final Pattern patternHashtag = Pattern.compile("(#([A-Za-z0-9_]*))");
+    final Pattern patternAccount = Pattern.compile("(@([A-Za-zÀ-ÿ0-9._]*[A-Za-zÀ-ÿ0-9_|$]))");
+    final Pattern patternHashtag = Pattern.compile("(#([A-Za-zÀ-ÿ0-9_]*))");
 
     try {
       // replace every word containing "@" or "#" with clickable link
