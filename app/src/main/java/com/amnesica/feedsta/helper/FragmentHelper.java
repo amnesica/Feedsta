@@ -283,20 +283,6 @@ public class FragmentHelper {
   }
 
   /**
-   * Makes the bottom navigation view disappear by setting it to invisible
-   *
-   * @param activity FragmentActivity
-   */
-  public static void makeBottomNavigationBarInvisible(FragmentActivity activity) {
-    if (activity == null) return;
-
-    BottomNavigationView bottomNavigationView =
-        Objects.requireNonNull(activity).findViewById(R.id.nav_view);
-    if (bottomNavigationView == null) return;
-    bottomNavigationView.setVisibility(View.INVISIBLE);
-  }
-
-  /**
    * Notifies the user that no account or not all but some accounts could be queried and shows a
    * dialog. Method handles the NOT_ALL_ACCOUNTS_COULD_BE_QUERIED error
    *

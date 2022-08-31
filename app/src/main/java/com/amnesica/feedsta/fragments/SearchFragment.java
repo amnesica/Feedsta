@@ -10,14 +10,13 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
+import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -79,48 +78,47 @@ public class SearchFragment extends Fragment {
 
     // listener to get listView element and show profile page
     setItemClickListenerListView();
+
+    // listener to show or hide nav bar
+    setScrollListenerListView();
   }
 
   /** Sets up listener to get inputString and start search from keyboard search icon */
   private void setListenerInputFieldToStartFromKeyboard() {
     // when clicking on search key in keyboard start CheckConnectionAndStartSearch async task
     textInputField.setOnEditorActionListener(
-        new TextView.OnEditorActionListener() {
-          @Override
-          public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+        (view, actionId, event) -> {
+          if (actionId == EditorInfo.IME_ACTION_SEARCH) {
 
-              // clear listView to show new list items
-              clearListsForRefresh();
+            // clear listView to show new list items
+            clearListsForRefresh();
 
-              // get text from inputField
-              inputString = textInputField.getText().toString();
+            // get text from inputField
+            inputString = textInputField.getText().toString();
 
-              // manipulate input
-              if (inputString.contains(" ")) {
-                // replace whitespaces with "+"
-                makeValidInputWithSpace();
-              }
-
-              // set progressBar
-              progressBar = requireView().findViewById(R.id.progressBarSearch);
-              progressBar.setProgress(0);
-
-              // validate string and start getAccountsAndHashtags
-              if (inputStringIsValid(inputString)) {
-                new CheckConnectionAndStartSearch(SearchFragment.this).execute();
-
-                // hide keyboard
-                InputMethodManager imm =
-                    (InputMethodManager)
-                        v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                assert imm != null;
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-              }
-              return true;
+            // manipulate input
+            if (inputString.contains(" ")) {
+              // replace whitespaces with "+"
+              makeValidInputWithSpace();
             }
-            return false;
+
+            progressBar = requireView().findViewById(R.id.progressBarSearch);
+            progressBar.setProgress(0);
+
+            // validate string and start getAccountsAndHashtags
+            if (inputStringIsValid(inputString)) {
+              new CheckConnectionAndStartSearch(SearchFragment.this).execute();
+
+              // hide keyboard
+              InputMethodManager imm =
+                  (InputMethodManager)
+                      view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+              assert imm != null;
+              imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+            return true;
           }
+          return false;
         });
   }
 
@@ -138,25 +136,23 @@ public class SearchFragment extends Fragment {
 
     textInputField.setCompoundDrawables(
         null, null, inputString.equals("") ? null : clearDrawable, null);
+
     textInputField.setOnTouchListener(
-        new View.OnTouchListener() {
-          @Override
-          public boolean onTouch(View v, MotionEvent event) {
-            if (textInputField.getCompoundDrawables()[2] == null) {
-              return false;
-            }
-            if (event.getAction() != MotionEvent.ACTION_UP) {
-              return false;
-            }
-            if (event.getX()
-                > textInputField.getWidth()
-                    - textInputField.getPaddingRight()
-                    - clearDrawable.getIntrinsicWidth()) {
-              textInputField.setText("");
-              textInputField.setCompoundDrawables(null, null, null, null);
-            }
+        (view, event) -> {
+          if (textInputField.getCompoundDrawables()[2] == null) {
             return false;
           }
+          if (event.getAction() != MotionEvent.ACTION_UP) {
+            return false;
+          }
+          if (event.getX()
+              > textInputField.getWidth()
+                  - textInputField.getPaddingRight()
+                  - clearDrawable.getIntrinsicWidth()) {
+            textInputField.setText("");
+            textInputField.setCompoundDrawables(null, null, null, null);
+          }
+          return false;
         });
 
     textInputField.addTextChangedListener(
@@ -182,28 +178,43 @@ public class SearchFragment extends Fragment {
   private void setItemClickListenerListView() {
     // get list item in list view
     listView.setOnItemClickListener(
-        new AdapterView.OnItemClickListener() {
-          @Override
-          public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (listObjects.get(position) instanceof Account) {
-              // only clickable if account is public
-              if (!((Account) listObjects.get(position)).getIs_private()) {
-                // go to profile page of account
-                goToProfilePageOfAccount((Account) listObjects.get(position));
-              }
-            } else if (listObjects.get(position) instanceof Hashtag) {
-              // go to hashtag page with posts
-              goToHashtagPageOfHashtag((Hashtag) listObjects.get(position));
+        (parent, view, position, id) -> {
+          if (listObjects.get(position) instanceof Account) {
+            // only clickable if account is public
+            if (!((Account) listObjects.get(position)).getIs_private()) {
+              // go to profile page of account
+              goToProfilePageOfAccount((Account) listObjects.get(position));
             }
+          } else if (listObjects.get(position) instanceof Hashtag) {
+            // go to hashtag page with posts
+            goToHashtagPageOfHashtag((Hashtag) listObjects.get(position));
           }
         });
   }
 
-  /**
-   * Starts new hashtagFragment
-   *
-   * @param hashtag Hashtag
-   */
+  /** Sets up listener to hide and show nav bar */
+  private void setScrollListenerListView() {
+    listView.setOnScrollListener(
+        new AbsListView.OnScrollListener() {
+          private int mLastFirstVisibleItem;
+
+          @Override
+          public void onScrollStateChanged(AbsListView view, int scrollState) {}
+
+          @Override
+          public void onScroll(
+              AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            if (mLastFirstVisibleItem < firstVisibleItem) {
+              FragmentHelper.slideDownBottomNavigationBar(requireActivity());
+            }
+            if (mLastFirstVisibleItem > firstVisibleItem) {
+              FragmentHelper.slideUpBottomNavigationBar(requireActivity());
+            }
+            mLastFirstVisibleItem = firstVisibleItem;
+          }
+        });
+  }
+
   private void goToHashtagPageOfHashtag(Hashtag hashtag) {
     // new hashtagFragment
     HashtagFragment hashtagFragment = HashtagFragment.newInstance(hashtag);
@@ -213,11 +224,6 @@ public class SearchFragment extends Fragment {
         hashtagFragment, requireActivity().getSupportFragmentManager());
   }
 
-  /**
-   * Starts new ProfileFragment
-   *
-   * @param account Account
-   */
   private void goToProfilePageOfAccount(Account account) {
     // new profileFragment
     ProfileFragment profileFragment = ProfileFragment.newInstance(account);
@@ -230,14 +236,7 @@ public class SearchFragment extends Fragment {
   /** Hides the progressBar */
   private void hideProgressBar() {
     if (this.getActivity() != null) {
-      requireActivity()
-          .runOnUiThread(
-              new Runnable() {
-                @Override
-                public void run() {
-                  progressBar.setVisibility(GONE);
-                }
-              });
+      requireActivity().runOnUiThread(() -> progressBar.setVisibility(GONE));
     }
   }
 
@@ -273,12 +272,6 @@ public class SearchFragment extends Fragment {
     }
   }
 
-  /**
-   * Validates input string of inputField
-   *
-   * @param inputString String
-   * @return boolean
-   */
   private boolean inputStringIsValid(String inputString) {
     return inputString != null && !inputString.isEmpty();
   }
@@ -306,7 +299,6 @@ public class SearchFragment extends Fragment {
       super.onPostExecute(aVoid);
       if (isCancelled()) return;
 
-      // get reference from fragment
       final SearchFragment fragment = fragmentReference.get();
       if (fragment == null) return;
 
@@ -337,7 +329,6 @@ public class SearchFragment extends Fragment {
       super.onPreExecute();
       if (isCancelled()) return;
 
-      // get reference from fragment
       final SearchFragment fragment = fragmentReference.get();
       if (fragment == null) return;
 
@@ -349,7 +340,6 @@ public class SearchFragment extends Fragment {
     protected Void doInBackground(Void... arg0) {
       if (isCancelled()) return null;
 
-      // get reference from fragment
       SearchFragment fragment = fragmentReference.get();
       if (fragment == null) return null;
 
@@ -372,7 +362,7 @@ public class SearchFragment extends Fragment {
     private void makeValidUrls(String inputString) {
       if (isCancelled()) return;
 
-      String urlAddress =
+      final String urlAddress =
           "https://www.instagram.com/web/search/topsearch/?context=blended&query=" + inputString;
       url = new URL(urlAddress, inputString, null);
     }
@@ -385,27 +375,21 @@ public class SearchFragment extends Fragment {
     void fetchDataOfUrl(URL url) {
       if (isCancelled()) return;
 
-      // get reference from fragment
       final SearchFragment fragment = fragmentReference.get();
       if (fragment == null) return;
 
-      // get json string from url
       String jsonStr = sh.makeServiceCall(url.url, SearchFragment.class.getSimpleName());
 
-      // fetch site data
       if (jsonStr == null) {
         FragmentHelper.showNetworkOrSomethingWrongErrorToUser(fragment);
       }
 
-      // validate jsonStr
       if (!FragmentHelper.checkIfJsonStrIsValid(jsonStr, fragment)) {
         // stop fetching
         return;
       }
 
-      // file overall as json object
       JSONObject jsonObj = null;
-
       try {
         jsonObj = new JSONObject(jsonStr);
       } catch (JSONException e) {
@@ -413,10 +397,7 @@ public class SearchFragment extends Fragment {
       }
 
       if (jsonObj != null) {
-        // fetch site data for hashtags
         fetchDataOfUrlForHashtag(jsonObj);
-
-        // fetch site data for accounts
         fetchDataOfUrlForAccount(jsonObj);
       }
     }
@@ -429,7 +410,6 @@ public class SearchFragment extends Fragment {
     private void fetchDataOfUrlForAccount(JSONObject jsonObj) {
       if (isCancelled()) return;
 
-      // get reference from fragment
       final SearchFragment fragment = fragmentReference.get();
       if (fragment == null) return;
 
@@ -452,7 +432,6 @@ public class SearchFragment extends Fragment {
     private void fetchDataOfUrlForHashtag(JSONObject jsonObj) {
       if (isCancelled()) return;
 
-      // get reference from fragment
       final SearchFragment fragment = fragmentReference.get();
       if (fragment == null) return;
 
@@ -475,7 +454,6 @@ public class SearchFragment extends Fragment {
     private void fetchUserOfUrl(JSONArray users) {
       if (isCancelled()) return;
 
-      // get reference from fragment
       final SearchFragment fragment = fragmentReference.get();
       if (fragment == null) return;
 
@@ -521,7 +499,6 @@ public class SearchFragment extends Fragment {
     private void fetchHashtagOfUrl(JSONArray hashtagsJSONArray) {
       if (isCancelled()) return;
 
-      // get reference from fragment
       final SearchFragment fragment = fragmentReference.get();
       if (fragment == null) return;
 
@@ -559,11 +536,9 @@ public class SearchFragment extends Fragment {
       super.onPostExecute(result);
       if (isCancelled()) return;
 
-      // get reference from fragment
       final SearchFragment fragment = fragmentReference.get();
       if (fragment == null) return;
 
-      // hide progressBar
       fragment.hideProgressBar();
 
       try {
@@ -577,7 +552,6 @@ public class SearchFragment extends Fragment {
               .findViewById(R.id.listAccountsAndHashtags)
               .setVisibility(View.VISIBLE);
 
-          // set adapter etc.
           setListAdapter();
         } else {
           // make listView disappear

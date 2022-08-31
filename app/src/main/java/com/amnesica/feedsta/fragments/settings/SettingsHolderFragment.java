@@ -95,7 +95,7 @@ public class SettingsHolderFragment extends Fragment {
 
     if (!hidden) {
       // Slide down bottom navigation view if necessary
-      FragmentHelper.makeBottomNavigationBarInvisible(getActivity());
+      FragmentHelper.slideDownBottomNavigationBar(requireActivity());
     }
   }
 }
