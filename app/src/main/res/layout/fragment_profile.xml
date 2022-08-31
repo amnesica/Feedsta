@@ -1,72 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:fillViewport="true">
+
+  <com.google.android.material.appbar.AppBarLayout
+    android:id="@+id/AppBarLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:ignore="MissingConstraints">
+
+    <com.google.android.material.appbar.MaterialToolbar
+      android:id="@+id/toolbar"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize">
+
+      <ImageView
+        android:id="@+id/verifiedBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/ic_baseline_check_circle_24dp"
+        android:contentDescription="@string/verified_account"
+        android:visibility="gone" />
+    </com.google.android.material.appbar.MaterialToolbar>
+  </com.google.android.material.appbar.AppBarLayout>
+
+  <ProgressBar
+    style="@style/Widget.AppCompat.ProgressBar"
+    android:id="@+id/progressBarProfile"
+    android:visibility="gone"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true" />
+
+  <com.google.android.material.textview.MaterialTextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:paddingTop="200dp"
+    android:layout_centerHorizontal="true"
+    android:textStyle="bold"
+    android:visibility="gone" />
+
+  <com.google.android.material.textview.MaterialTextView
+    android:layout_width="wrap_content"
+    android:id="@+id/textAccountIsPrivate"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:paddingTop="200dp"
+    android:layout_centerHorizontal="true"
+    android:text="@string/private_account"
+    android:textStyle="bold"
+    android:visibility="gone" />
+
+  <in.srain.cube.views.GridViewWithHeaderAndFooter
+    android:id="@+id/grid_view"
+    android:layout_below="@id/AppBarLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/AppBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:ignore="MissingConstraints">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:theme="@style/MyToolbar">
-
-            <ImageView
-                android:id="@+id/verifiedBadge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:adjustViewBounds="true"
-                android:background="?attr/verifiedImageSearch"
-                android:contentDescription="@string/verified_account"
-                android:visibility="gone" />
-        </androidx.appcompat.widget.Toolbar>
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <ProgressBar
-        style="@style/Widget.AppCompat.ProgressBar"
-        android:id="@+id/progressBarProfile"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:paddingTop="200dp"
-        android:layout_centerHorizontal="true"
-        android:textStyle="bold"
-        android:visibility="gone" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:id="@+id/textAccountIsPrivate"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:paddingTop="200dp"
-        android:layout_centerHorizontal="true"
-        android:text="@string/private_account"
-        android:textStyle="bold"
-        android:visibility="gone"/>
-
-    <in.srain.cube.views.GridViewWithHeaderAndFooter
-        android:id="@+id/grid_view"
-        android:layout_below="@id/AppBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fadingEdge="none"
-        android:focusable="auto"
-        android:horizontalSpacing="1dp"
-        android:scrollbarStyle="outsideOverlay"
-        android:scrollbars="none"
-        android:stretchMode="columnWidth"
-        android:verticalSpacing="1dp" />
+    android:fadingEdge="none"
+    android:focusable="auto"
+    android:horizontalSpacing="1dp"
+    android:scrollbarStyle="outsideOverlay"
+    android:scrollbars="none"
+    android:stretchMode="columnWidth"
+    android:verticalSpacing="1dp" />
 </RelativeLayout>

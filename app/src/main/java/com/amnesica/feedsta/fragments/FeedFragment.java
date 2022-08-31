@@ -1,950 +1,647 @@
 package com.amnesica.feedsta.fragments;
 
-import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
+import static android.view.View.GONE;
+
+import android.graphics.text.LineBreaker;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.amnesica.feedsta.Account;
-import com.amnesica.feedsta.Post;
 import com.amnesica.feedsta.R;
-import com.amnesica.feedsta.adapter.GridViewAdapterFeed;
-import com.amnesica.feedsta.helper.CustomComparatorNewestFirst;
+import com.amnesica.feedsta.adapter.RecViewAdapterFeed;
+import com.amnesica.feedsta.fragments.settings.SettingsHolderFragment;
 import com.amnesica.feedsta.helper.Error;
-import com.amnesica.feedsta.helper.FeedHelper;
-import com.amnesica.feedsta.helper.FeedObject;
 import com.amnesica.feedsta.helper.FragmentHelper;
 import com.amnesica.feedsta.helper.NetworkHandler;
 import com.amnesica.feedsta.helper.StorageHelper;
-import com.amnesica.feedsta.models.URL;
+import com.amnesica.feedsta.helper.comparator.CustomComparatorNewestFirst;
+import com.amnesica.feedsta.helper.feed.FeedHelper;
+import com.amnesica.feedsta.models.Account;
+import com.amnesica.feedsta.models.Post;
+import com.amnesica.feedsta.models.sidecar.Sidecar;
+import com.amnesica.feedsta.models.sidecar.SidecarEntry;
+import com.amnesica.feedsta.models.sidecar.SidecarEntryType;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import static android.view.View.GONE;
-import static com.amnesica.feedsta.helper.FeedHelper.counterPostBorder;
-import static com.amnesica.feedsta.helper.FeedHelper.fetchBorderPerPage;
-import static com.amnesica.feedsta.helper.StaticIdentifier.query_id;
-
-/**
- * Fragment displays the feed based on the followed accounts
- */
-@SuppressWarnings("deprecation")
+/** Fragment displays the feed based on the followed accounts */
 public class FeedFragment extends Fragment {
 
-    // view stuff
-    private View v;
-    private GridView gridView;
-    private SwipeRefreshLayout swipe;
-    private ProgressBar progressBar;
-    private TextView textNoAccountsToFollow;
+  // view stuff
+  private RecyclerView recyclerViewFeed;
+  private SwipeRefreshLayout swipeRefreshLayout;
+  private TextView textFeedHint;
 
-    // list of posts
-    private ArrayList<Post> posts;
+  private ArrayList<Post> posts;
+  private ArrayList<Post> fetchedPosts;
+  private ArrayList<Account> accounts;
 
-    // list of fetched posts
-    private ArrayList<Post> fetchedPosts;
+  private ExecutorService loadFeedExecutor;
 
-    // list of accounts
-    private ArrayList<Account> accounts;
+  // copy list for storing
+  private ArrayList<Post> postsToStore;
 
-    // thread lists
-    private ArrayList<GetPostsFromAccount> GetPostsFromAccountList;
+  // boolean that something went wrong when fetching
+  // (e.g. not all accounts could be queried)
+  private boolean bSomethingWentWrong = false;
 
-    // finished thread list
-    private ArrayList<GetPostsFromAccount> finishedThreadsList;
+  // counter for overall amount of accounts to fetch
+  private int counterAmountAccountsToFetch = 0;
 
-    // boolean when there are stored posts at startup
-    private boolean bStoredPosts = false;
+  // hashmap to store fetched accounts
+  private final HashMap<String, Boolean> fetchedAccountsMap = new HashMap<>();
 
-    // boolean firstLoad
-    private boolean bFirstLoad = true;
+  private RecViewAdapterFeed recViewAdapterFeed;
 
-    // copy list for storing
-    private ArrayList<Post> postsToStore;
+  public FeedFragment() {
+    //  Required empty public constructor
+  }
 
-    // boolean that something went wrong when fetching
-    // (e.g. not all accounts could be queried)
-    private boolean bSomethingWentWrong = false;
+  @Override
+  public View onCreateView(
+      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    // list of handler to reset them properly
-    private ArrayList<NetworkHandler> networkHandlersList;
+    // inflate the layout for this fragment
+    View view = inflater.inflate(R.layout.fragment_feed, container, false);
 
-    public FeedFragment() {
-        //  Required empty public constructor
+    setupToolbar(view);
+    setupTextFeedHint(view);
+    setupRecyclerViewFeed(view);
+    setupSwipeRefreshLayout(view);
+
+    checkInternetConnection();
+    loadPostsFromInternalStorage();
+
+    getAccountDataFromStorage();
+    showOrHideNoAccountsHint();
+
+    return view;
+  }
+
+  private Boolean checkInternetConnection() {
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    Handler handler = new Handler(Looper.getMainLooper());
+    AtomicBoolean internetIsAvailable = new AtomicBoolean(false);
+
+    try {
+      executor.execute(
+          () -> {
+            // Background work here
+            internetIsAvailable.set(NetworkHandler.isInternetAvailable());
+            handler.post(
+                () -> {
+                  // UI Thread work here
+                  if (!internetIsAvailable.get())
+                    FragmentHelper.notifyUserOfProblem(this, Error.NO_INTERNET_CONNECTION);
+                });
+          });
+
+      executor.shutdown();
+
+      // timeout is 5 seconds
+      executor.awaitTermination(5L, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      Log.d("FeedFragment", Log.getStackTraceString(e));
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    return internetIsAvailable.get();
+  }
 
-        // inflate the layout for this fragment
-        v = inflater.inflate(R.layout.fragment_feed, container, false);
+  private void loadPostsFromInternalStorage() {
+    if (getContext() == null) return;
 
-        // set up toolbar
-        Toolbar toolbar = v.findViewById(R.id.toolbar);
-        setUpToolbar(toolbar);
+    posts =
+        StorageHelper.readPostsFromInternalStorage(requireContext(), StorageHelper.FILENAME_POSTS);
 
-        // set up progressbar and textNoAccountsToFollow
-        progressBar = v.findViewById(R.id.progressBarFeed);
-        progressBar.setProgress(0);
-        textNoAccountsToFollow = v.findViewById(R.id.textNoAccountsToFollow);
+    setRecViewAdapterFeedWithPosts();
+  }
 
-        // setup gridView
-        gridView = v.findViewById(R.id.gridViewFeed);
-        setUpGridViewFeed(gridView);
-
-        // set swipe refresh action
-        swipe = v.findViewById(R.id.swipeRefresh);
-        setUpSwipeRefreshListener(swipe);
-
-        finishedThreadsList = new ArrayList<>();
-        GetPostsFromAccountList = new ArrayList<>();
-
-        // load posts from Instagram, but check connection first
-        new CheckConnectionAndFetchPosts(FeedFragment.this).execute();
-
-        return v;
+  /** Sets up textFeedHint for showing messages related to feed */
+  private void setupTextFeedHint(@NonNull final View view) {
+    textFeedHint = view.findViewById(R.id.textFeedHint);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      textFeedHint.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD);
     }
+  }
 
-    /**
-     * Sets up SwipeRefreshListener to load new posts
-     *
-     * @param swipe swipe
-     */
-    private void setUpSwipeRefreshListener(SwipeRefreshLayout swipe) {
-        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if (posts != null && !posts.isEmpty()) {
-                    finishedThreadsList.clear();
-                    GetPostsFromAccountList.clear();
+  private void setupRecyclerViewFeed(@NonNull final View view) {
+    recyclerViewFeed = view.findViewById(R.id.recyclerViewFeed);
+    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext());
+    linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+    recyclerViewFeed.setLayoutManager(linearLayoutManager);
+  }
+
+  private void setupSwipeRefreshLayout(@NonNull final View view) {
+    swipeRefreshLayout = view.findViewById(R.id.swipeRefreshFeed);
+    swipeRefreshLayout.setOnRefreshListener(this::loadFeedFromInstagram);
+  }
+
+  private void loadFeedFromInstagram() {
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    Handler handler = new Handler(Looper.getMainLooper());
+
+    executor.execute(
+        () -> {
+          // Background work here
+          if (!checkInternetConnection()) {
+            swipeRefreshLayout.setRefreshing(false);
+            return;
+          }
+
+          getAccountDataFromStorage();
+          showOrHideNoAccountsHint();
+
+          if (accounts != null) {
+            counterAmountAccountsToFetch = accounts.size();
+            // randomize order of accounts to even fetch some accounts if rate limit appears
+            Collections.shuffle(accounts);
+            createAndExecuteThreadsToLoadFeed();
+          }
+
+          handler.post(
+              () -> {
+                // UI Thread work here
+                if (fetchedPosts != null) {
+                  // only show new posts if fetchedPosts is not empty
+                  saveAndDisplayNewlyFetchedPosts();
+                } else {
+                  if (accounts == null) {
+                    // no fetchedPosts and no accounts -> delete stored posts and clear posts list
+                    deleteStoredPosts();
+                    clearPostsList();
+                    setTextFeedHint(getResources().getString(R.string.no_followed_accounts));
+                  } else {
+                    FragmentHelper.notifyUserOfProblem(this, Error.SOMETHINGS_WRONG);
+                  }
                 }
-
-                // refresh posts
-                new CheckConnectionAndFetchPosts(FeedFragment.this).execute();
-            }
+                swipeRefreshLayout.setRefreshing(false);
+              });
         });
+
+    executor.shutdown();
+    recyclerViewFeed.invalidate();
+  }
+
+  private void clearPostsList() {
+    if (posts != null) {
+      posts.clear();
+    }
+  }
+
+  private void createAndExecuteThreadsToLoadFeed() {
+    loadFeedExecutor = Executors.newFixedThreadPool(counterAmountAccountsToFetch);
+    // start new threads for all accounts
+    for (Account account : accounts) {
+      FeedRunnable feedRunnable = new FeedRunnable(account, this);
+      Thread thread = new Thread(feedRunnable);
+      loadFeedExecutor.submit(thread);
     }
 
-    /**
-     * Sets up gridView for feed with onItemClickListener for posts
-     *
-     * @param gridView gridView
-     */
-    private void setUpGridViewFeed(GridView gridView) {
-        setAmountOfColumnsGridView();
+    // This will make the executor accept no new threads and finish all existing threads in the
+    // queue
+    loadFeedExecutor.shutdown();
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // get post to send
-                Post postToSend = posts.get(position);
+    try {
+      loadFeedExecutor.awaitTermination(5L, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      Log.d("FeedFragment", Log.getStackTraceString(e));
+    }
+  }
 
-                // new PostFragment
-                PostFragment postFragment = PostFragment.newInstance(postToSend);
+  private void deleteStoredPosts() {
+    if (getContext() != null
+        && StorageHelper.checkIfFileExists(StorageHelper.FILENAME_POSTS, requireContext())) {
+      StorageHelper.deleteSpecificFile(requireContext(), StorageHelper.FILENAME_POSTS);
+    }
+  }
 
-                // add fragment to container
-                FragmentHelper.addFragmentToContainer(postFragment, requireActivity().getSupportFragmentManager());
+  /**
+   * Saves newly fetched posts in internal storage and makes them visible in recyclerView in sorted
+   * order. Duplicate posts are being removed
+   */
+  private void saveAndDisplayNewlyFetchedPosts() {
+    if (posts == null) {
+      // in case there are no stored posts but accounts
+      posts = new ArrayList<>();
+    }
+
+    // set posts to fetchedPosts and reset fetchedPosts list
+    if (!fetchedPosts.isEmpty()) {
+      posts.clear();
+      posts.addAll(fetchedPosts);
+      fetchedPosts.clear();
+      fetchedPosts = null;
+
+      // sort posts and display
+      Collections.sort(posts, new CustomComparatorNewestFirst());
+      Collections.reverse(posts);
+
+      // remove duplicates from list
+      removeDuplicatePosts(posts);
+
+      // resize list to improve performance
+      if (posts.size() > FeedHelper.counterFeedBorder) {
+        posts.subList(FeedHelper.counterFeedBorder, posts.size()).clear();
+      }
+
+      // list to store posts in storage for next startup
+      postsToStore = new ArrayList<>(posts);
+
+      // store posts in storage for next startup
+      storePostsInStorage();
+
+      // show snackBar alert when not all but some accounts could be queried
+      if (bSomethingWentWrong
+          && fetchedAccountsMap.keySet().size() < counterAmountAccountsToFetch) {
+        FragmentHelper.notifyUserOfIncompleteFetchProblem(
+            this, fetchedAccountsMap.keySet().size(), counterAmountAccountsToFetch);
+      }
+    } else {
+      // show alert that nothing could be queried and something went wrong
+      if (bSomethingWentWrong) {
+        FragmentHelper.notifyUserOfIncompleteFetchProblem(this, 0, counterAmountAccountsToFetch);
+      }
+    }
+
+    // set adapter of view with fetchedPosts
+    setRecViewAdapterFeedWithPosts();
+  }
+
+  private void storePostsInStorage() {
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    executor.execute(
+        () -> {
+          // Background work here
+          if (postsToStore != null && getContext() != null) {
+            // check if file exits, if true, delete file
+            if (StorageHelper.checkIfFileExists(StorageHelper.FILENAME_POSTS, requireContext())) {
+              StorageHelper.deleteSpecificFile(requireContext(), StorageHelper.FILENAME_POSTS);
             }
-        });
-    }
 
-    /**
-     * Get the amount of columns of the gridView from SharedPreferences
-     */
-    private void setAmountOfColumnsGridView() {
-        // get the amount of columns from settings
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
-        if (preferences != null) {
-            String amountColumns = preferences.getString("key_feed_list_columns", "2");
+            try {
+              // store posts in storage in proper storage representation
+              StorageHelper.storePostListInInternalStorage(
+                  postsToStore, requireContext(), StorageHelper.FILENAME_POSTS);
 
-            // set columns in gridView
-            assert amountColumns != null;
-            gridView.setNumColumns(Integer.parseInt(amountColumns));
-        }
-    }
-
-    /**
-     * Sets up the toolbar
-     *
-     * @param toolbar toolbar
-     */
-    private void setUpToolbar(Toolbar toolbar) {
-        toolbar.setTitle(getResources().getString(R.string.toolbar_title_feed));
-        toolbar.inflateMenu(R.menu.menu_main);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.menu_action_followed_accounts) {
-                    FragmentHelper.loadAndShowFragment(requireActivity().getSupportFragmentManager().findFragmentByTag(FollowingFragment.class.getSimpleName()),
-                            requireActivity().getSupportFragmentManager());
-                } else if (item.getItemId() == R.id.menu_action_statistics_dialog) {
-                    FragmentHelper.showStatisticsDialog(FeedFragment.this);
-                } else if (item.getItemId() == R.id.menu_settings) {
-                    FragmentHelper.loadAndShowFragment(requireActivity().getSupportFragmentManager().findFragmentByTag(SettingsHolderFragment.class.getSimpleName()),
-                            requireActivity().getSupportFragmentManager());
-                } else if (item.getItemId() == R.id.menu_info) {
-                    FragmentHelper.loadAndShowFragment(requireActivity().getSupportFragmentManager().findFragmentByTag(AboutFragment.class.getSimpleName()),
-                            requireActivity().getSupportFragmentManager());
-                } else if (item.getItemId() == R.id.menu_exit) {
-                    requireActivity().finish();
-                }
-                return false;
+            } catch (Exception e) {
+              Log.d("FeedFragment", Log.getStackTraceString(e));
             }
+          }
         });
+
+    executor.shutdown();
+  }
+
+  private void removeDuplicatePosts(ArrayList<Post> oldListPostsWithDuplicates) {
+    ArrayList<Post> newListPosts = new ArrayList<>();
+    Set<String> shortCodes = new HashSet<>();
+
+    // try to add shortCode to set, if successful add post to newListPosts
+    // (-> no duplicate)
+    for (Post post : oldListPostsWithDuplicates) {
+      if (shortCodes.add(post.getShortcode())) {
+        newListPosts.add(post);
+      }
     }
 
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        // set highlighted item on nav bar to "feed" and refresh followed accounts
-        if (!hidden) {
-            FragmentHelper.setBottomNavViewSelectElem(getActivity(), R.id.navigation_feed);
-            setAmountOfColumnsGridView();
-        } else {
-            // stop all async tasks and their network handlers
-            stopAllAsyncTasks();
-        }
-    }
+    // newListPosts is new fragments.posts list
+    posts.clear();
+    posts.addAll(newListPosts);
+  }
 
-    /**
-     * Sets text when there are no followed accounts
-     */
-    private void setTextNoFollowedAccounts() {
-        TextView textNoAccountsToFollow = v.findViewById(R.id.textNoAccountsToFollow);
-        textNoAccountsToFollow.setVisibility(View.VISIBLE);
-        gridView.setVisibility(GONE);
-    }
+  /** Show or hide warning "no accounts" (show only when there are no stored posts) */
+  private void showOrHideNoAccountsHint() {
+    if (accounts != null) {
+      // in case there were no accounts on last fetch hide warning now
+      requireActivity().runOnUiThread(() -> textFeedHint.setVisibility(GONE));
+    } else {
+      // only show message when there are no stored posts and no followed accounts
+      setTextFeedHint(getResources().getString(R.string.no_followed_accounts));
 
-    /**
-     * Notifies the user that something went wrong and shows toast
-     */
-    private void hideProgressBarAndTextLoading() {
-        try {
-            // hide progressBar and textView
-            requireActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    progressBar.setVisibility(GONE);
-                    if (swipe.isRefreshing()) {
-                        swipe.setRefreshing(false);
-                    }
-                }
+      recyclerViewFeed.invalidate();
+      swipeRefreshLayout.setRefreshing(false);
+    }
+  }
+
+  /** Gets followed accounts from storage */
+  private void getAccountDataFromStorage() {
+    if (getContext() != null) {
+      // get stored accounts
+      accounts = StorageHelper.readAccountsFromInternalStorage(requireContext());
+    }
+  }
+
+  /**
+   * Sets up the toolbar with menu and title
+   *
+   * @param view View
+   */
+  private void setupToolbar(@NonNull final View view) {
+    Toolbar toolbar = view.findViewById(R.id.toolbar);
+    toolbar.setTitle(getResources().getString(R.string.toolbar_title_feed));
+    toolbar.inflateMenu(R.menu.menu_main);
+    toolbar.setOnMenuItemClickListener(
+        item -> {
+          if (item.getItemId() == R.id.menu_action_followed_accounts) {
+            FragmentHelper.loadAndShowFragment(
+                requireActivity()
+                    .getSupportFragmentManager()
+                    .findFragmentByTag(FollowingFragment.class.getSimpleName()),
+                requireActivity().getSupportFragmentManager());
+          } else if (item.getItemId() == R.id.menu_action_statistics_dialog) {
+            FragmentHelper.showStatisticsDialog(FeedFragment.this);
+          } else if (item.getItemId() == R.id.menu_settings) {
+            FragmentHelper.loadAndShowFragment(
+                requireActivity()
+                    .getSupportFragmentManager()
+                    .findFragmentByTag(SettingsHolderFragment.class.getSimpleName()),
+                requireActivity().getSupportFragmentManager());
+          } else if (item.getItemId() == R.id.menu_info) {
+            FragmentHelper.loadAndShowFragment(
+                requireActivity()
+                    .getSupportFragmentManager()
+                    .findFragmentByTag(AboutFragment.class.getSimpleName()),
+                requireActivity().getSupportFragmentManager());
+          } else if (item.getItemId() == R.id.menu_exit) {
+            requireActivity().finish();
+          }
+          return false;
+        });
+  }
+
+  @Override
+  public void onHiddenChanged(boolean hidden) {
+    super.onHiddenChanged(hidden);
+    // set highlighted item on nav bar to "feed"
+    if (!hidden) {
+      FragmentHelper.setBottomNavViewSelectElem(getActivity(), R.id.navigation_feed);
+
+      // check if posts were bookmarked (data changes might have happened)
+      if (posts != null && !posts.isEmpty()) {
+        recViewAdapterFeed.notifyItemRangeChanged(0, posts.size() - 1);
+      }
+    } else {
+      // stop all async tasks and their network handlers when fragment is hidden
+      stopAllAsyncTasks();
+
+      // stop videos when fragment is hidden
+      recViewAdapterFeed.releaseAllExoPlayers();
+    }
+  }
+
+  /**
+   * Sets text in center of fragment and makes it visible by set gridView visibility to gone
+   *
+   * @param text CharSequence
+   */
+  private void setTextFeedHint(CharSequence text) {
+    requireActivity()
+        .runOnUiThread(
+            () -> {
+              textFeedHint.setText(text);
+              textFeedHint.setVisibility(View.VISIBLE);
+              recyclerViewFeed.setVisibility(GONE);
             });
-        } catch (IllegalStateException e) {
-            Log.d("FeedFragment", Log.getStackTraceString(e));
-        }
+  }
+
+  /** Stops all running async tasks, their network handlers and resets swipe */
+  private void stopAllAsyncTasks() {
+    try {
+      // cancel all GetPostsFromAccount threads
+      if (loadFeedExecutor != null && !loadFeedExecutor.isTerminated()) {
+        loadFeedExecutor.shutdownNow();
+      }
+    } catch (Exception e) {
+      Log.d("FeedFragment", Log.getStackTraceString(e));
     }
 
-    /**
-     * Stops all running async tasks and their network handlers and resets swipe
-     */
-    private void stopAllAsyncTasks() {
-        try {
-            if (GetPostsFromAccountList != null && !GetPostsFromAccountList.isEmpty()) {
-                for (GetPostsFromAccount thread : GetPostsFromAccountList) {
-                    if (thread != null) {
-                        thread.cancel(true);
-                    }
-                }
-                GetPostsFromAccountList.clear();
-            }
+    if (swipeRefreshLayout != null) {
+      swipeRefreshLayout.setRefreshing(false);
+    }
+  }
 
-            if (networkHandlersList != null && !networkHandlersList.isEmpty()) {
-                for (NetworkHandler sh : networkHandlersList) {
-                    if (sh != null) {
-                        sh.closeConnectionsAndBuffers();
-                    }
-                }
-                networkHandlersList.clear();
-            }
-        } catch (Exception e) {
-            Log.d("FeedFragment", Log.getStackTraceString(e));
-        }
+  @Override
+  public void onDestroy() {
+    // destroy all viewholder items and stop video player if necessary
+    recyclerViewFeed.setAdapter(null);
+    super.onDestroy();
+  }
 
-        if (swipe != null) {
-            swipe.setRefreshing(false);
-        }
+  /** Sets the RecViewFeed adapter and make changes visible via invalidating the view */
+  private void setRecViewAdapterFeedWithPosts() {
+    if (getContext() != null) {
+      if (posts == null) posts = new ArrayList<>();
+
+      recViewAdapterFeed = new RecViewAdapterFeed(requireContext(), posts, this);
+      recyclerViewFeed.setAdapter(recViewAdapterFeed);
+      recyclerViewFeed.setVisibility(View.VISIBLE);
+      recViewAdapterFeed.notifyItemRangeChanged(0, posts.size());
+      recyclerViewFeed.invalidate();
+    }
+  }
+
+  private void putAccountNameInFetchedAccountsMap(String accountName) {
+    fetchedAccountsMap.put(accountName, true);
+  }
+
+  private void markFetchingOfPostsAsFailed(String accountName) {
+    bSomethingWentWrong = true;
+    fetchedAccountsMap.remove(accountName);
+  }
+
+  public static class FeedRunnable implements Runnable {
+
+    private final Account account;
+    private final WeakReference<FeedFragment> fragmentReference;
+    private final NetworkHandler networkHandler = new NetworkHandler();
+
+    public FeedRunnable(final Account account, final FeedFragment feedFragment) {
+      this.fragmentReference = new WeakReference<>(feedFragment);
+      this.account = account;
     }
 
-    /**
-     * Checks internet connection and notifies user if there is no connection.
-     * Starts the fetching at the end
-     */
-    @SuppressWarnings({"CanBeFinal", "deprecation"})
-    private static class CheckConnectionAndFetchPosts extends AsyncTask<Void, Void, Void> {
-
-        private final WeakReference<FeedFragment> fragmentReference;
-        boolean isInternetAvailable = false;
-
-        // constructor
-        CheckConnectionAndFetchPosts(FeedFragment context) {
-            fragmentReference = new WeakReference<>(context);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (!isCancelled()) {
-                isInternetAvailable = NetworkHandler.isInternetAvailable();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (!isCancelled()) {
-
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-
-                    if (isInternetAvailable) {
-                        try {
-                            // start fetching posts
-                            new GetPosts(fragment).execute();
-                        } catch (RejectedExecutionException e) {
-                            Log.d("FeedFragment", Log.getStackTraceString(e));
-                        }
-                    } else {
-                        FragmentHelper.notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
-                        fragment.hideProgressBarAndTextLoading();
-
-                        // show posts from storage if there are any
-                        if (fragment.getContext() != null) {
-
-                            fragment.posts = StorageHelper.readPostsFromInternalStorage(fragment.requireContext(), StorageHelper.filename_posts);
-
-                            if (fragment.posts != null && !fragment.posts.isEmpty()) {
-
-                                // set adapter
-                                GridViewAdapterFeed adapter = new GridViewAdapterFeed(fragment.getContext(), R.layout.gridview_item_image, fragment.posts);
-                                fragment.gridView.setAdapter(adapter);
-                                fragment.gridView.setVisibility(View.VISIBLE);
-
-                                // invalidate view
-                                adapter.notifyDataSetChanged();
-                                fragment.gridView.invalidateViews();
-                            }
-                        }
-
-                        // set boolean bFirstLoad
-                        fragment.bFirstLoad = false;
-
-                        // set refreshing false
-                        fragment.swipe.setRefreshing(false);
-                    }
-                }
-            }
-
-        }
+    @Override
+    public void run() {
+      getAccountPosts();
     }
 
-    @SuppressWarnings({"CanBeFinal", "deprecation"})
-    private static class GetPosts extends AsyncTask<Void, Integer, Void> {
+    private void getAccountPosts() {
+      final FeedFragment feedFragment = fragmentReference.get();
+      if (feedFragment == null) return;
+      try {
+        feedFragment.putAccountNameInFetchedAccountsMap(account.getUsername());
 
-        private final WeakReference<FeedFragment> fragmentReference;
+        final String url = "https://www.instagram.com/" + account.getUsername() + "/?__a=1&__d=dis";
 
-        // constructor
-        GetPosts(FeedFragment context) {
-            fragmentReference = new WeakReference<>(context);
-        }
+        JSONObject userData = fetchUserDataFromInstagram(url, feedFragment);
+        if (userData == null) return;
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            if (!isCancelled()) {
+        enhanceAccountDataWithUserData(account, userData);
 
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null) {
+        JSONArray postsAsEdges = extractPostsAsEdges(userData);
 
-                    // get accounts from storage
-                    getAccountDataFromStorage();
-
-                    // get stored posts from storage only on first load
-                    if (fragment.bFirstLoad) {
-                        getStoredPostsFromStorage();
-
-                        // in case there are no accounts
-                        fragment.textNoAccountsToFollow.setVisibility(GONE);
-                    }
-
-                    // show warning "no accounts" or hide warning
-                    // (show only when there are no stored posts)
-                    if (fragment.accounts != null) {
-
-                        // in case there were no accounts last time
-                        fragment.textNoAccountsToFollow.setVisibility(GONE);
-                    } else {
-
-                        // only show message when there are no stored posts
-                        if (!fragment.bStoredPosts) {
-
-                            // set text "no followed accounts"
-                            fragment.setTextNoFollowedAccounts();
-
-                            if (fragment.posts != null && !fragment.posts.isEmpty()) {
-                                fragment.posts.clear();
-                            }
-
-                            // invalidate view
-                            fragment.gridView.invalidateViews();
-                            fragment.swipe.setRefreshing(false);
-                        }
-                    }
-                }
-            }
-        }
-
-        @SuppressLint("WrongThread")
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            // start many new async tasks
-            if (!isCancelled()) {
-
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-
-                    // if there are stored posts, display them and end method
-                    if (fragment.bStoredPosts && fragment.bFirstLoad) {
-                        // end method
-                        return null;
-                    } else if (fragment.accounts != null) {
-
-                        fragment.GetPostsFromAccountList = new ArrayList<>();
-
-                        // initialize posts for fetching
-                        if (fragment.fetchedPosts == null) {
-                            fragment.fetchedPosts = new ArrayList<>();
-                        }
-
-                        try {
-                            // only if swipe is not refreshing show textView and progressbar
-                            if (!fragment.swipe.isRefreshing()) {
-                                fragment.requireActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        // make progressbar and textView visible
-                                        fragment.progressBar.setVisibility(View.VISIBLE);
-                                    }
-                                });
-                            }
-                        } catch (Exception e) {
-                            Log.d("FeedFragment", Log.getStackTraceString(e));
-                        }
-
-                        // start new threads for all accounts parallel with THREAD_POOL_EXECUTOR
-                        for (Account account : fragment.accounts) {
-                            GetPostsFromAccount getPostsFromAccount = new GetPostsFromAccount(fragment, account);
-                            getPostsFromAccount.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                            fragment.GetPostsFromAccountList.add(getPostsFromAccount);
-                        }
-
-                        // let all threads finish execution before finishing main thread
-                        do {
-                            try {
-                                Thread.sleep(50);
-                            } catch (InterruptedException | IllegalStateException e) {
-                                Log.d("FeedFragment", Log.getStackTraceString(e));
-                                fragment.bSomethingWentWrong = true;
-                            }
-                        } while (fragment.finishedThreadsList.size() < fragment.GetPostsFromAccountList.size());
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            if (!isCancelled()) {
-
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-
-                    try {
-                        // setup gridView, if there are stored posts display them, else show new posts
-                        if (fragment.bStoredPosts && fragment.bFirstLoad) {
-
-                            // set bFirstLoad to false
-                            fragment.bFirstLoad = false;
-
-                            // set adapter of view with fragment.posts
-                            setAdapter();
-
-                            // set boolean bStoredPosts to false, because new ones where fetched
-                            fragment.bStoredPosts = false;
-
-                            fragment.swipe.setRefreshing(false);
-
-                        } else if (fragment.finishedThreadsList.size() == fragment.GetPostsFromAccountList.size()) {
-
-                            // hide progressbar and textView
-                            fragment.progressBar.setVisibility(GONE);
-
-                            // only show new posts if fetchedPosts is not empty
-                            if (fragment.fetchedPosts != null) {
-
-                                if (fragment.posts == null) {
-                                    // in case there are no stored posts but accounts
-                                    fragment.posts = new ArrayList<>();
-                                }
-
-                                // set posts to fetchedPosts and reset fetchedPosts list
-                                if (!fragment.fetchedPosts.isEmpty()) {
-                                    fragment.posts.clear();
-                                    fragment.posts.addAll(fragment.fetchedPosts);
-                                    fragment.fetchedPosts.clear();
-                                    fragment.fetchedPosts = null;
-
-                                    // sort posts and display
-                                    Collections.sort(fragment.posts, new CustomComparatorNewestFirst());
-                                    Collections.reverse(fragment.posts);
-
-                                    // remove duplicates from list
-                                    removeDuplicatePosts(fragment.posts);
-
-                                    // resize list to improve performance
-                                    if (fragment.posts.size() > FeedHelper.counterFeedBorder) {
-                                        fragment.posts.subList(FeedHelper.counterFeedBorder, fragment.posts.size()).clear();
-                                    }
-
-                                    // list to store posts in storage for next startup
-                                    fragment.postsToStore = new ArrayList<>(fragment.posts);
-
-                                    // store posts in storage for next startup
-                                    new StorePostsInStorage(fragment).execute();
-
-                                    // show snackbar alert when not all but some accounts could be queried
-                                    if (fragment.bSomethingWentWrong) {
-                                        FragmentHelper.notifyUserOfProblem(fragment, Error.NOT_ALL_ACCOUNTS_COULD_BE_QUERIED);
-                                    }
-                                } else {
-                                    // show alert that nothing could be queried and something went wrong
-                                    if (fragment.bSomethingWentWrong) {
-                                        FragmentHelper.notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
-                                    }
-                                }
-
-                                // reset boolean for next iteration
-                                fragment.bSomethingWentWrong = false;
-
-                                // set adapter of view with fetchedPosts
-                                setAdapter();
-
-                                // set refreshing false
-                                fragment.swipe.setRefreshing(false);
-
-                                // set boolean bStoredPosts to false, because new ones where fetched
-                                fragment.bStoredPosts = false;
-                            } else {
-                                if (fragment.accounts == null) {
-                                    // delete stored posts
-                                    if (fragment.getContext() != null && StorageHelper.checkIfFileExists(StorageHelper.filename_posts, fragment.getContext())) {
-                                        StorageHelper.deleteSpecificFile(fragment.requireContext(), StorageHelper.filename_posts);
-                                    }
-
-                                    // set bFirstLoad to false
-                                    fragment.bFirstLoad = false;
-                                } else {
-                                    // notify user
-                                    FragmentHelper.notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
-                                }
-                                // set refreshing false
-                                fragment.swipe.setRefreshing(false);
-
-                                // reset boolean for next iteration
-                                fragment.bSomethingWentWrong = false;
-                            }
-                        }
-                    } catch (Exception e) {
-                        if (!NetworkHandler.isInternetAvailable()) {
-                            Log.d("FeedFragment", Log.getStackTraceString(e));
-
-                            FragmentHelper.notifyUserOfProblem(fragment, Error.NO_INTERNET_CONNECTION);
-                        } else {
-                            // notify user, something else is problem
-                            FragmentHelper.notifyUserOfProblem(fragment, Error.SOMETHINGS_WRONG);
-                        }
-
-                        // set refreshing false
-                        fragment.swipe.setRefreshing(false);
-                    }
-                }
-            }
-        }
-
-        /**
-         * Sets the CustomGridViewAdapterFeed Adapter and invalidates the view
-         */
-        private void setAdapter() {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-
-                if (fragment != null) {
-                    GridViewAdapterFeed adapter = new GridViewAdapterFeed(fragment.getContext(), R.layout.gridview_item_image, fragment.posts);
-                    fragment.gridView.setAdapter(adapter);
-                    fragment.gridView.setVisibility(View.VISIBLE);
-
-                    // invalidate view
-                    adapter.notifyDataSetChanged();
-                    fragment.gridView.invalidateViews();
-                }
-            }
-        }
-
-        /**
-         * Returns a list without duplicate posts
-         *
-         * @param oldListPosts list of posts with duplicates
-         */
-        private void removeDuplicatePosts(ArrayList<Post> oldListPosts) {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    ArrayList<Post> newListPosts = new ArrayList<>();
-                    Set<String> shortCodes = new HashSet<>();
-
-                    // try to add shortCode to set, if successful add post to newListPosts (-> no duplicate)
-                    for (Post post : oldListPosts) {
-                        if (shortCodes.add(post.getShortcode())) {
-                            newListPosts.add(post);
-                        }
-                    }
-
-                    // newListPosts is new fragments.posts list
-                    fragment.posts.clear();
-                    fragment.posts.addAll(newListPosts);
-                }
-            }
-        }
-
-        /**
-         * Gets followed accounts from storage
-         */
-        private void getAccountDataFromStorage() {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null && fragment.getContext() != null) {
-                    // get accounts
-                    fragment.accounts = StorageHelper.readAccountsFromInternalStorage(fragment.requireContext());
-                }
-            }
-        }
-
-        /**
-         * Gets stored posts from storage
-         */
-        private void getStoredPostsFromStorage() {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null && fragment.getContext() != null) {
-                    // get stored posts
-                    fragment.posts = StorageHelper.readPostsFromInternalStorage(fragment.requireContext(), StorageHelper.filename_posts);
-
-                    // set boolean bStoredPosts if list is not empty
-                    if (fragment.posts != null && !fragment.posts.isEmpty()) {
-                        fragment.bStoredPosts = true;
-                    }
-                }
-            }
-        }
+        createPostsFromEdgeData(postsAsEdges, feedFragment);
+      } catch (Exception e) {
+        Log.d("FeedRunnable", Log.getStackTraceString(e));
+        feedFragment.markFetchingOfPostsAsFailed(account.getUsername());
+        networkHandler.closeConnectionsAndBuffers();
+      }
     }
 
-    /**
-     * Gets posts from a single account
-     */
-    @SuppressWarnings({"CanBeFinal", "deprecation"})
-    private static class GetPostsFromAccount extends AsyncTask<Void, Void, Void> {
-
-        private final WeakReference<FeedFragment> fragmentReference;
-        private final Account account;
-        boolean bFirstFetch = true;
-        NetworkHandler sh;
-        private URL url;
-        private int counterPost = 0;
-
-        // constructor
-        GetPostsFromAccount(FeedFragment context, Account account) {
-            fragmentReference = new WeakReference<>(context);
-            this.account = account;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (!isCancelled()) {
-                final FeedFragment fragment = fragmentReference.get();
-
-                // new HttpHandler
-                sh = new NetworkHandler();
-
-                // create handlerList if it not exists already
-                if (fragment != null && fragment.networkHandlersList == null) {
-                    fragment.networkHandlersList = new ArrayList<>();
-                }
-
-                try {
-                    // add handler to handlersList
-                    if (fragment != null) {
-                        fragment.networkHandlersList.add(sh);
-                    }
-                } catch (Exception e) {
-                    Log.d("FeedFragment", Log.getStackTraceString(e));
-                }
-
-                do {
-                    // make valid urls from accounts
-                    makeValidURLS();
-
-                    // fetch data of url
-                    fetchDataOfUrl(url);
-
-                    // set start- and endIndex
-                    int startIndex = 0;
-                    int endIndex = url.edgesTotalOfPage;
-
-                    // fetch edge data with start- and endIndex
-                    fetchEdgeData(url.jsonArrayEdges, startIndex, endIndex);
-
-                    // prevent url.hasNextPage is null
-                } while (url.hasNextPage != null && url.hasNextPage && counterPost < counterPostBorder);
-            } else {
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    fragment.bSomethingWentWrong = true;
-                }
-            }
-            return null;
-        }
-
-        /**
-         * Makes valid URLs for account posts
-         */
-        private void makeValidURLS() {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    if (account != null) {
-                        String urlAddress = null;
-
-                        // make url for account posts (hint: url.endCursor is null at first page fetch)
-                        if (url == null || (url.endCursor == null && bFirstFetch)) {
-                            urlAddress = "https://instagram.com/graphql/query/?query_id=" + query_id + "&id=" + account.getId() + "&first=" + fetchBorderPerPage + "&after=";
-                            bFirstFetch = false;
-                        } else if (url.hasNextPage != null && url.hasNextPage) {
-                            urlAddress = "https://instagram.com/graphql/query/?query_id=" + query_id + "&id=" + account.getId() + "&first=" + fetchBorderPerPage + "&after=" + url.endCursor;
-                        }
-                        url = new URL(urlAddress, account.getUsername(), FeedObject.ACCOUNT);
-                    } else {
-                        fragment.bSomethingWentWrong = true;
-                    }
-                }
-            }
-        }
-
-        /**
-         * Fetches data from URL
-         *
-         * @param url url to fetch from
-         */
-        private void fetchDataOfUrl(URL url) {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-
-                    // fetch data for accounts
-                    assert url.FeedObject != null;
-                    if (url.FeedObject.equals(FeedObject.ACCOUNT)) {
-                        String jsonStr;
-
-                        if (url.url != null) {
-                            // get json string from url
-                            jsonStr = sh.makeServiceCall(url.url, FeedFragment.class.getSimpleName());
-                        } else {
-                            fragment.bSomethingWentWrong = true;
-                            return;
-                        }
-
-                        if (jsonStr != null) {
-                            try {
-                                // if rate limit or unknown error notify user
-                                if (!FragmentHelper.checkIfJsonStrIsValid(jsonStr, fragment)) {
-                                    // stop fetching at this point
-                                    fragment.bSomethingWentWrong = true;
-                                    return;
-                                }
-                                // file overall as json object
-                                JSONObject jsonObj = new JSONObject(jsonStr);
-
-                                // get only relevant data (so save followers etc. later when need => when account site should be visited)
-                                // save page_info and has_next_page
-                                JSONObject page_info = jsonObj
-                                        .getJSONObject("data")
-                                        .getJSONObject("user")
-                                        .getJSONObject("edge_owner_to_timeline_media").getJSONObject("page_info");
-                                if (page_info.getBoolean("has_next_page")) {
-                                    url.hasNextPage = true;
-                                    url.endCursor = page_info.getString("end_cursor");
-                                } else {
-                                    url.hasNextPage = false;
-                                }
-
-                                JSONArray edges = jsonObj
-                                        .getJSONObject("data")
-                                        .getJSONObject("user")
-                                        .getJSONObject("edge_owner_to_timeline_media").getJSONArray("edges");
-
-                                url.jsonArrayEdges = edges;
-                                if (edges != null && !edges.isNull(0)) {
-                                    url.edgesTotalOfPage = edges.length();
-                                } else {
-                                    url.edgesTotalOfPage = 0;
-                                }
-
-                            } catch (JSONException | IllegalStateException e) {
-                                fragment.bSomethingWentWrong = true;
-                                Log.d("FeedFragment", Log.getStackTraceString(e));
-                            }
-                        } else {
-                            fragment.bSomethingWentWrong = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * Fetch data of a single edge (JSONObject)
-         *
-         * @param edges      JSONArray
-         * @param startIndex int
-         * @param endIndex   int
-         */
-        private void fetchEdgeData(JSONArray edges, int startIndex, int endIndex) {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    try {
-                        for (int i = startIndex; i < endIndex; i++) {
-                            // get edge object
-                            JSONObject edge = edges.getJSONObject(i);
-
-                            // check if post is sidecar
-                            boolean is_sidecar = false;
-                            if (edge.getJSONObject("node").getString("__typename").equals("GraphSidecar")) {
-                                is_sidecar = true;
-                            }
-
-                            // create post with minimal information (initialize post)
-                            Post post = new Post(
-                                    edge.getJSONObject("node").getString("id"),
-                                    edge.getJSONObject("node").getString("shortcode"),
-                                    new Date(Long.parseLong(edge.getJSONObject("node").getString("taken_at_timestamp")) * 1000),
-                                    edge.getJSONObject("node").getBoolean("is_video"),
-                                    edge.getJSONObject("node").getString("thumbnail_src"),
-                                    is_sidecar,
-                                    null);
-
-                            if (fragment.fetchedPosts == null) {
-                                fragment.fetchedPosts = new ArrayList<>();
-                            }
-
-                            // add post to posts-list
-                            fragment.fetchedPosts.add(post);
-
-                            // fetch border total
-                            counterPost += 1;
-                        }
-                    } catch (JSONException | IllegalStateException | ArrayIndexOutOfBoundsException e) {
-                        fragment.bSomethingWentWrong = true;
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null) {
-                    // add finished thread to list
-                    fragment.finishedThreadsList.add(this);
-                }
-            }
-            super.onPostExecute(aVoid);
-        }
+    private void enhanceAccountDataWithUserData(
+        @NonNull Account account, @NonNull JSONObject userData) throws JSONException {
+      final String imageProfilePicUrl = userData.getString("profile_pic_url_hd");
+      account.setImageProfilePicUrl(imageProfilePicUrl);
     }
 
-    /**
-     * Stores fetched posts in internal storage
-     */
-    @SuppressWarnings("deprecation")
-    private static class StorePostsInStorage extends AsyncTask<Void, Void, Void> {
+    private JSONObject fetchUserDataFromInstagram(
+        @NonNull final String url, @NonNull FeedFragment feedFragment) throws Exception {
+      JSONObject userData;
 
-        private final WeakReference<FeedFragment> fragmentReference;
+      // get json string from url
+      String jsonStr = networkHandler.makeServiceCall(url, FeedFragment.class.getSimpleName());
 
-        StorePostsInStorage(FeedFragment context) {
-            fragmentReference = new WeakReference<>(context);
-        }
+      // if rate limit or unknown error notify user (e.g. if jsonStr is null)
+      if (!FragmentHelper.checkIfJsonStrIsValid(jsonStr, feedFragment)) {
+        feedFragment.markFetchingOfPostsAsFailed(account.getUsername());
+        // stop fetching at this point
+        return null;
+      }
 
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (!isCancelled()) {
-                // get reference from fragment
-                final FeedFragment fragment = fragmentReference.get();
-                if (fragment != null && fragment.postsToStore != null && fragment.getContext() != null) {
-                    // check if file exits, if true, delete file
-                    if (StorageHelper.checkIfFileExists(StorageHelper.filename_posts, fragment.requireContext())) {
-                        StorageHelper.deleteSpecificFile(fragment.requireContext(), StorageHelper.filename_posts);
-                    }
-                    try {
-                        // store posts in storage in proper storage representation
-                        StorageHelper.storePostListInInternalStorage(fragment.postsToStore, fragment.requireContext(), StorageHelper.filename_posts);
+      JSONObject jsonObj = new JSONObject(jsonStr);
+      userData = jsonObj.getJSONObject("graphql").getJSONObject("user");
 
-                    } catch (IllegalStateException | IOException e) {
-                        Log.d("FeedFragment", Log.getStackTraceString(e));
-                    }
-                }
-            }
-            return null;
-        }
+      return userData;
     }
+
+    /** Fetches posts from account as edges */
+    private JSONArray extractPostsAsEdges(@NonNull JSONObject userData) throws Exception {
+      return userData.getJSONObject("edge_owner_to_timeline_media").getJSONArray("edges");
+    }
+
+    private void createPostsFromEdgeData(
+        @NonNull JSONArray edges, @NonNull FeedFragment feedFragment) throws Exception {
+      final int startIndex = 0;
+      final int endIndex = edges.length();
+
+      for (int i = startIndex; i < endIndex; i++) {
+        JSONObject node = edges.getJSONObject(i).getJSONObject("node");
+
+        boolean isSidecar = node.getString("__typename").equals("GraphSidecar");
+        boolean isVideo = node.getBoolean("is_video");
+
+        Post post =
+            Post.builder()
+                .id(node.getString("id"))
+                .imageUrl(node.getString("display_url"))
+                .likes(node.getJSONObject("edge_media_preview_like").getInt("count"))
+                .ownerId(node.getJSONObject("owner").getString("id"))
+                .comments(node.getJSONObject("edge_media_to_comment").getInt("count"))
+                .caption(getCaption(node))
+                .shortcode(node.getString("shortcode"))
+                .takenAtDate(new Date(Long.parseLong(node.getString("taken_at_timestamp")) * 1000))
+                .is_video(isVideo)
+                .username(account.getUsername())
+                .imageUrlProfilePicOwner(account.getImageProfilePicUrl())
+                .imageUrlThumbnail(
+                    node.getJSONArray("thumbnail_resources").getJSONObject(2).getString("src"))
+                .is_sideCar(isSidecar)
+                .height(node.getJSONObject("dimensions").getInt("height"))
+                .ownerId(node.getJSONObject("owner").getString("id"))
+                .sidecar(isSidecar ? getSidecar(node) : null)
+                .videoUrl(isVideo ? node.getString("video_url") : null)
+                .build();
+
+        feedFragment.addPostToFetchedPosts(post);
+      }
+    }
+
+    @NonNull
+    private Sidecar getSidecar(JSONObject node) throws JSONException {
+      JSONObject edge_sidecar_to_children = node.getJSONObject("edge_sidecar_to_children");
+      JSONArray edgesSidecar = edge_sidecar_to_children.getJSONArray("edges");
+      return getSidecarFromEdge(edgesSidecar);
+    }
+
+    @Nullable
+    private String getCaption(JSONObject node) throws JSONException {
+      JSONArray edgesCaption = node.getJSONObject("edge_media_to_caption").getJSONArray("edges");
+
+      String caption = null;
+      if (edgesCaption.length() != 0 && !edgesCaption.isNull(0)) {
+        caption = edgesCaption.getJSONObject(0).getJSONObject("node").getString("text");
+      }
+
+      return caption;
+    }
+
+    /** Fetches all urls and types of all sidecar entries */
+    private Sidecar getSidecarFromEdge(JSONArray edges) throws JSONException {
+      ArrayList<SidecarEntry> sidecarEntries = new ArrayList<>();
+
+      for (int i = 0; i < edges.length(); i++) {
+        // get edge from edges
+        JSONObject edge = edges.getJSONObject(i);
+
+        // get node of selected edge
+        JSONObject node = edge.getJSONObject("node");
+
+        if (node.getBoolean("is_video")) {
+          // node is video -> get video_url
+          String video_url = node.getString("video_url");
+          int height = node.getJSONObject("dimensions").getInt("height");
+
+          SidecarEntry sidecarEntry = new SidecarEntry(SidecarEntryType.video, i, video_url);
+          sidecarEntry.setHeight(height);
+
+          sidecarEntries.add(sidecarEntry);
+        } else { // node is image -> get image_url
+          String image_url = node.getString("display_url");
+          int height = node.getJSONObject("dimensions").getInt("height");
+
+          SidecarEntry sidecarEntry = new SidecarEntry(SidecarEntryType.image, i, image_url);
+          sidecarEntry.setHeight(height);
+
+          sidecarEntries.add(sidecarEntry);
+        }
+      }
+      return new Sidecar(sidecarEntries);
+    }
+  }
+
+  private void addPostToFetchedPosts(Post post) {
+    if (fetchedPosts == null) {
+      fetchedPosts = new ArrayList<>();
+    }
+    fetchedPosts.add(post);
+  }
 }

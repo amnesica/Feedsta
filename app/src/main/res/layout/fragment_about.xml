@@ -1,93 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <com.google.android.material.appbar.AppBarLayout
+    android:id="@+id/AppBarLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    tools:ignore="MissingConstraints">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/AppBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:ignore="MissingConstraints">
+    <com.google.android.material.appbar.MaterialToolbar
+      android:id="@+id/toolbar"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize" />
+  </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:theme="@style/MyToolbar"/>
-    </com.google.android.material.appbar.AppBarLayout>
+  <RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/AppBarLayout">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/AppBarLayout">
+    <com.google.android.material.card.MaterialCardView
+      android:id="@+id/cardViewProfilePic"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:paddingTop="20dp"
+      android:layout_centerHorizontal="true"
+      app:cardCornerRadius="25dp"
+      app:cardElevation="0dp"
+      app:cardPreventCornerOverlap="false"
+      app:strokeWidth="0dp">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/imageAppInfo"
-            android:paddingTop="20dp"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_centerHorizontal="true">
-        </de.hdodenhof.circleimageview.CircleImageView>
+      <ImageView
+        android:id="@+id/imageAppInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp" />
+    </com.google.android.material.card.MaterialCardView>
 
-        <TextView
-            android:id="@+id/textAppName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="30sp"
-            android:textColor="?attr/black"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@+id/imageAppInfo">
-        </TextView>
+    <com.google.android.material.textview.MaterialTextView
+      android:id="@+id/textAppName"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textStyle="bold"
+      android:textSize="30sp"
+      android:layout_centerHorizontal="true"
+      android:layout_below="@+id/cardViewProfilePic" />
 
-        <TextView
-            android:id="@+id/textAppVersion"
-            android:paddingTop="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textAppName"
-            android:textSize="12sp"
-            style="@style/TextAppearance.MaterialComponents.Subtitle2"
-            android:textColor="?attr/black"
-            android:layout_centerHorizontal="true" />
+    <com.google.android.material.textview.MaterialTextView
+      android:id="@+id/textAppVersion"
+      android:paddingTop="10dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/textAppName"
+      android:textSize="12sp"
+      style="@style/TextAppearance.MaterialComponents.Subtitle2"
+      android:layout_centerHorizontal="true" />
 
-        <TextView
-            android:id="@+id/textAppInfo"
-            android:layout_centerHorizontal="true"
-            android:paddingTop="25dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textAppVersion"
-            android:textStyle="normal"
-            android:textColor="?attr/black"
-            android:textSize="15sp"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp" />
+    <com.google.android.material.textview.MaterialTextView
+      android:id="@+id/textAppInfo"
+      android:layout_centerHorizontal="true"
+      android:paddingTop="25dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/textAppVersion"
+      android:textStyle="normal"
+      android:textSize="15sp"
+      android:paddingStart="10dp"
+      android:paddingEnd="10dp" />
 
-        <TextView
-            android:id="@+id/textAppInfoRating"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textAppInfo"
-            android:linksClickable="true"
-            android:paddingStart="10dp"
-            android:paddingTop="15dp"
-            android:paddingEnd="10dp"
-            android:textColor="?attr/black"
-            android:textSize="15sp"
-            android:textStyle="normal" />
+    <com.google.android.material.textview.MaterialTextView
+      android:id="@+id/textAppGoToGithub"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/textAppInfo"
+      android:linksClickable="true"
+      android:paddingStart="10dp"
+      android:paddingTop="15dp"
+      android:paddingEnd="10dp"
+      android:textSize="15sp"
+      android:textStyle="normal" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/textMadeWithLove"
-            android:gravity="center"
-            style="@style/TextAppearance.MaterialComponents.Subtitle2"
-            android:textColor="?attr/black"
-            android:textSize="12sp"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"
-            android:paddingBottom="10dp" />
-    </RelativeLayout>
+    <com.google.android.material.textview.MaterialTextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:id="@+id/textMadeWithLove"
+      android:gravity="center"
+      style="@style/TextAppearance.MaterialComponents.Subtitle2"
+      android:textSize="12sp"
+      android:layout_centerHorizontal="true"
+      android:layout_alignParentBottom="true"
+      android:paddingBottom="10dp" />
+  </RelativeLayout>
 </RelativeLayout>

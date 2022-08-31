@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical">
+
+  <com.google.android.material.textview.MaterialTextView
+    android:id="@+id/bottom_sheet_title"
+    style="?attr/textAppearanceHeadline5"
+    android:textSize="20sp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="60dp"
+    android:gravity="center"
+    android:text="@string/bottom_sheet_title_new_collection" />
 
-    <TextView
-        android:id="@+id/bottom_sheet_title"
-        style="?attr/textAppearanceHeadline5"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:gravity="center"
-        android:text="@string/bottom_sheet_title_new_collection" />
+  <EditText
+    android:id="@+id/bottom_sheet_editText"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_marginTop="30dp"
+    android:layout_marginBottom="55dp"
+    android:autofillHints="NameOfCollection"
+    android:hint="@string/bottom_sheet_hint_editText"
+    android:imeOptions="actionDone"
+    android:inputType="text"
+    android:paddingTop="0dp"
+    android:textSize="20sp" />
 
-    <EditText
-        android:id="@+id/bottom_sheet_editText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="55dp"
-        android:autofillHints="NameOfCollection"
-        android:hint="@string/bottom_sheet_hint_editText"
-        android:imeOptions="actionDone"
-        android:inputType="text"
-        android:paddingTop="0dp"
-        android:textSize="24sp" />
-
-    <Button
-        android:id="@+id/bottom_sheet_cancel_button"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        android:minWidth="0dp"
-        android:minHeight="0dp"
-        android:text="@string/CANCEL" />
+  <com.google.android.material.button.MaterialButton
+    android:id="@+id/bottom_sheet_cancel_button"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:insetTop="0dp"
+    android:insetBottom="0dp"
+    android:minWidth="0dp"
+    android:minHeight="0dp"
+    android:text="@string/CANCEL" />
 </LinearLayout> 
