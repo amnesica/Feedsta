@@ -41,6 +41,8 @@ import com.amnesica.feedsta.R;
 import com.amnesica.feedsta.fragments.FeedFragment;
 import com.amnesica.feedsta.fragments.HashtagFragment;
 import com.amnesica.feedsta.fragments.ProfileFragment;
+import com.amnesica.feedsta.fragments.fullscreenimages.FullscreenImagePostFragment;
+import com.amnesica.feedsta.fragments.fullscreenimages.FullscreenProfileImageFragment;
 import com.amnesica.feedsta.models.Collection;
 import com.amnesica.feedsta.models.Post;
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior;
@@ -175,8 +177,14 @@ public class FragmentHelper {
       // add fragment to container with animation
       try {
         // use animation for nav elements also for fullscreen fragments
-        if (fragmentToAdd.getClass().getSimpleName().equals("FullscreenImagePostFragment")
-            || fragmentToAdd.getClass().getSimpleName().equals("FullscreenProfileImageFragment")) {
+        if (fragmentToAdd
+                .getClass()
+                .getSimpleName()
+                .equals(FullscreenImagePostFragment.class.getSimpleName())
+            || fragmentToAdd
+                .getClass()
+                .getSimpleName()
+                .equals(FullscreenProfileImageFragment.class.getSimpleName())) {
           fm.beginTransaction()
               .setCustomAnimations(
                   R.anim.nav_enter, R.anim.nav_exit,
