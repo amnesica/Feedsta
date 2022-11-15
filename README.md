@@ -57,6 +57,9 @@ registered there.
 - Data about followed accounts and saved posts remain on the device and are not sent over the Internet. The
   app does not use a special API provided by Instagram for developers
 
+## Download
+<a href='https://github.com/amnesica/Feedsta/releases'><img alt='Get it on Github' src='https://github.com/amnesica/Feedsta/blob/b90acd81ed6cfd12e5fa2b17577f4544c5fbca27/static/github/get-it-on-github.png' height='60'/></a>
+
 ## Special
 
 - No advertising
